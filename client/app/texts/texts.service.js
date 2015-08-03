@@ -126,11 +126,11 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
   // Public API here
     return {
       'query': query,
-    'post': post,
-    'addClasses': addClasses,
-    'removeClasses': removeClasses,
-    'remove': remove,
-    'update': update
+      'post': post,
+      'addClasses': addClasses,
+      'removeClasses': removeClasses,
+      'remove': remove,
+      'update': update
     };
 
   }]);

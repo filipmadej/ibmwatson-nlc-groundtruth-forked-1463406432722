@@ -14,19 +14,22 @@ describe('Controller: ClustersListCtrl', function() {
             edit: false,
             checked: false,
             selected: true,
-            $$hashKey: 'ID'
+            $$hashKey: 'ID',
+            id: '0'
         }, {
             label: 'object2',
             edit: false,
             checked: true,
             selected: false,
-            $$hashKey: 'ID'
+            $$hashKey: 'ID',
+            id: '1'
         }, {
             label: 'object3',
             edit: true,
             checked: false,
             selected: false,
-            $$hashKey: 'ID'
+            $$hashKey: 'ID',
+            id: '2'
         }];
     }
 
@@ -78,7 +81,15 @@ describe('Controller: ClustersListCtrl', function() {
                     resolve();
                 });
             },
-            post: function() {
+            post: function(params, callback) {
+                callback(null, { id : '5' });
+            },
+            remove: function() {
+                return $q(function(resolve) {
+                    resolve();
+                });
+            },
+            update: function() {
                 return $q(function(resolve) {
                     resolve();
                 });
@@ -91,7 +102,25 @@ describe('Controller: ClustersListCtrl', function() {
                     resolve();
                 });
             },
-            post: function() {
+            post: function(params, callback) {
+                callback(null, { id : '5' });
+            },
+            addClasses: function() {
+                return $q(function(resolve) {
+                    resolve();
+                });
+            },
+            removeClasses: function() {
+                return $q(function(resolve) {
+                    resolve();
+                });
+            },
+            remove: function() {
+                return $q(function(resolve) {
+                    resolve();
+                });
+            },
+            update: function() {
                 return $q(function(resolve) {
                     resolve();
                 });
@@ -207,7 +236,8 @@ describe('Controller: ClustersListCtrl', function() {
     it('should propogate a new class name to all utterances', function() {
         scope.utterances = UTTERANCES;
 
-        scope.classLabelChanged(OLD_CLASS, NEW_CLASS);
+        var clazz = scope.getFromLabel(CLASSES, OLD_CLASS);
+        scope.classLabelChanged(clazz, OLD_CLASS, NEW_CLASS);
 
         expect(scope.utterances[0].classes[0]).toBe(NEW_CLASS);
         expect(scope.utterances[1].classes[0]).toBe(NEW_CLASS);
@@ -326,6 +356,8 @@ describe('Controller: ClustersListCtrl', function() {
         var fileContent = 'text,class';
         scope.importFile(fileContent);
         $rootScope.$digest();
+        console.log('classes: ' + JSON.stringify(scope.classes));
+        console.log('texts: ' + JSON.stringify(scope.utterances));
         expect(scope.classes[0].label).toEqual('class');
         expect(scope.utterances[0].label).toEqual('text');
         expect(scope.utterances[0].classes).toEqual(['class']);

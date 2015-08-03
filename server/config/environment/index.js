@@ -46,7 +46,7 @@ var all = {
       bluemix : 'https://console.ng.bluemix.net'
   },
 
-  classifierServiceName: 'ibmwatson-nlc-classifier'
+  classifierServiceName: 'natural-language-classifier'
 
 };
 
