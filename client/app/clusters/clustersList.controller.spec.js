@@ -234,10 +234,10 @@ describe('Controller: ClustersListCtrl', function() {
     });
 
     it('should propogate a new class name to all utterances', function() {
+
         scope.utterances = UTTERANCES;
 
-        var clazz = scope.getFromLabel(CLASSES, OLD_CLASS);
-        scope.classLabelChanged(clazz, OLD_CLASS, NEW_CLASS);
+        scope.classLabelChanged(CLASSES[0], OLD_CLASS, NEW_CLASS);
 
         expect(scope.utterances[0].classes[0]).toBe(NEW_CLASS);
         expect(scope.utterances[1].classes[0]).toBe(NEW_CLASS);
@@ -356,14 +356,9 @@ describe('Controller: ClustersListCtrl', function() {
         var fileContent = 'text,class';
         scope.importFile(fileContent);
         $rootScope.$digest();
-        console.log('classes: ' + JSON.stringify(scope.classes));
-        console.log('texts: ' + JSON.stringify(scope.utterances));
         expect(scope.classes[0].label).toEqual('class');
         expect(scope.utterances[0].label).toEqual('text');
         expect(scope.utterances[0].classes).toEqual(['class']);
     }));
-
-
-
 
 });
