@@ -1,49 +1,14 @@
 'use strict';
 
 /**
- * Set a metadata field on the cluster to store the etag
- * @param {object} cluster - The cluster to set the tag on
- * @param {function} headers - The header function returned by Angular
- * @returns {object} - a reference to the cluster
- */
-function setMetadataEtag( /*Object*/ cluster, /*function*/ headers) {
-    var etag = null;
-
-    if (!cluster || typeof headers !== 'function') {
-        return cluster;
-    }
-
-    etag = headers('etag');
-
-    if (_.isString(etag) && etag.length > 0) {
-        _.set(cluster, 'metadata.etag', etag);
-    }
-
-    return cluster;
-}
-
-/**
  * Retrieve the etag metadata in the form of an 'If-Match' Header
  * @prarm {object} cluster - The cluster to get the tag from
  * @returns {object} The If-Match header from the cluster
  */
-function getMetadataEtag( /*Object*/ cluster) {
-    /*var etag = null;
-
-    if (!cluster) {
-        return;
-    }
-
-    etag = _.get(cluster, 'metadata.etag', '*');
-
-    return {
-        'If-Match': etag
-    }; */
-
+function getMetadataEtag() {
     return {
         'If-Match': '*'
     };
-
 }
 
 angular.module('ibmwatsonQaGroundtruthUiApp')
@@ -75,9 +40,10 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
         //         });
         // }
 
-        function post ( /*Object*/ params, /*Object*/ config, /*function*/ callback) {
+        function post ( /*Object*/ params, /*function*/ callback) {
             // retrieve etag header
-            _.set(config, 'headers', getMetadataEtag(null));
+            var config = {};
+            _.set(config, 'headers', getMetadataEtag());
             $http.post(classesEndpoint() + '/', params, config)
                 .success(function (data, status, headers, config) {
                     callback(null, data, status, headers, config);
@@ -90,7 +56,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
         function remove ( /*String*/ id, /*function*/ callback) {
             // retrieve etag header
             var config = {};
-            _.set(config, 'headers', getMetadataEtag(null));
+            _.set(config, 'headers', getMetadataEtag());
             $http.delete(classesEndpoint() + '/' + id, config)
                 .success(function (data, status, headers, config) {
                     callback(null, data, status, headers, config);
@@ -104,7 +70,13 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
         function update (/*String*/ id, /*Object*/ params, /*function*/ callback) {
             var config = {};
             _.set(config, 'headers', getMetadataEtag());
-            $http.patch(classesEndpoint() + '/' + id, [{
+            $http.put(classesEndpoint() + '/' + id, params, config
+            ).success(function(data, status, headers, config) {
+                callback(null, data, status, headers, config);
+            }).error(function(data, status, headers, config) {
+                callback(data, null, status, headers, config);
+            });
+            /*$http.patch(classesEndpoint() + '/' + id, [{
                     op : 'replace',
                     path : '/metadata',
                     value : params
@@ -113,10 +85,10 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                 callback(null, data, status, headers, config);
             }).error(function(data, status, headers, config) {
                 callback(data, null, status, headers, config);
-            });
+            });*/
         }
 
-                // Public API here
+        // Public API here
         return {
             //'get' : get,
             'query' : query,

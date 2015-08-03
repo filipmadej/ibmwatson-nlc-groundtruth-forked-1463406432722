@@ -9,7 +9,7 @@ var service = appenv.getService(env.classifierServiceName);
 
 var classifier = {}
 
-if(service){
+if (service) {
   classifier.id = service.name;
   classifier.url = service.credentials.url;
   classifier.username = service.credentials.username;
