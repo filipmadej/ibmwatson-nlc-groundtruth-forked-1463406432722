@@ -1,0 +1,232 @@
+.inline {
+    display: inline-block;
+    vertical-align: middle;
+}
+.right {
+    float: right;
+}
+.ibm-nlc-data-row {
+    min-height: 44px;
+    background-color: rgb(221, 221, 221);
+    margin-bottom: 3px;
+    .check {
+        border-left: 4px solid transparent;
+    }
+    .ibm-nlc-class-label {
+        max-width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .ibm-nlc-row-options {
+        padding: 0px 8px 0px 0px;
+        line-height: 44px;
+    }
+    .ibm-nlc-row-options-padded {
+        padding: 8px;
+    }
+    .ibm-icon-delete {
+        visibility: hidden;
+    }
+    .ibm-icon-edit {
+        visibility: hidden;
+    }
+    .ibm-icon-filter {
+        visibility: hidden;
+    }
+}
+.ibm-nlc-data-row > div {
+    vertical-align: middle;
+    padding: 10px 8px 8px;
+    height: 100%;
+}
+.ibm-icon-delete {
+    height: 16px;
+    width: 16px;
+    background-image: url(../assets/images/remove-trash_32.png) !important;
+    cursor: pointer;
+}
+.ibm-icon-edit {
+    height: 16px;
+    width: 16px;
+    background-image: url(../assets/images/edit_32.png) !important;
+    cursor: pointer;
+}
+.ibm-icon-filter {
+    height: 16px;
+    width: 16px;
+    background-image: url(../assets/images/filter_32.svg) !important;
+    cursor: pointer;
+}
+.ibm-nlc-data-row:hover {
+    background-color: #ccc;
+}
+.ibm-nlc-data-row:hover .ibm-icon-delete,
+.ibm-nlc-data-row:hover .ibm-icon-edit,
+.ibm-nlc-data-row:hover .ibm-icon-filter {
+    visibility: visible;
+}
+.ibm-nlc-class-selected {
+    background-color: #FFF !important;
+    font-family: HelvNeueBoldForIBM;
+    .check {
+        border-color: #396A9F;
+    }
+}
+.ibm-nlc-list-controls {
+    margin: 20px 0px 10px 0px;
+    height: 24px;
+}
+.ibm-nlc-navbar {
+    background-color: #396A9F !important;
+    border-bottom: 0px !important;
+}
+.ibm-nlc-column-header {
+    font-size: 1.5em;
+}
+.ibm-nlc-toggle-add-button {
+    position: relative;
+}
+.ibm-nlc-filter-field {
+    position: relative;
+    font-size: 0.8em;
+    width: 100%;
+    display: inline-block;
+    padding-bottom: 0px;
+    /*border-width: 0px 0px 2px 0px !important;
+    border-color: rgb(57, 106, 159) !important;
+    border-radius: 0px;
+    padding-left: 0px;
+    background-color: transparent;
+    box-shadow: none !important;*/
+}
+.ibm-nlc-entry-field {
+    position: relative;
+    //top: 10px;
+    font-size: 0.8em;
+}
+.ibm-nlc-scrolling-table {
+    width: 100%;
+    overflow: auto;
+    /* div height is set in setTableHeights() and is based on integral number of class rows that fit in window's current innerHeight */
+}
+.ibm-nlc-table tr {
+    border-bottom: 2px solid white;
+    .ibm-icon-delete {
+        height: 16px;
+        width: 16px;
+        background-image: url(../assets/images/remove-trash_32.png) !important;
+        visibility: hidden;
+        cursor: pointer;
+    }
+    .ibm-icon-edit {
+        height: 16px;
+        width: 16px;
+        background-image: url(../assets/images/edit_32.png) !important;
+        visibility: hidden;
+        cursor: pointer;
+    }
+}
+.ibm-nlc-class-row {
+    height: 44px;
+    /* keep this the same as classRowHeight in controller to keep class table dynamically sized without clipping */
+}
+.ibm-nlc-class-selected td {
+    background-color: #FFF !important;
+    font-family: HelvNeueBoldForIBM;
+}
+.ibm-nlc-label-edit-field {
+    width: 100%;
+}
+.ibm-nlc-table tr:hover td {
+    color: black;
+    background-color: #ccc;
+}
+.ibm-nlc-table tr:hover .ibm-icon-delete {
+    visibility: visible;
+}
+.ibm-nlc-table tr:hover .ibm-icon-edit {
+    visibility: visible;
+}
+.ibm-nlc-table td {
+    background-color: #ddd;
+    padding-top: 10px;
+    cursor: default;
+}
+.ibm-nlc-tag {
+    font-size: small;
+    background-color: #dff2ff;
+    position: relative;
+    margin-bottom: 5px;
+    padding-top: 4px;
+    padding-left: 4px;
+    border-radius: 5px;
+    cursor: default;
+}
+.ibm-nlc-tag a:hover {
+    color: orange;
+    text-decoration: none;
+}
+.ibm-nlc-add-class-button {
+    position: relative;
+    top: -0.22em;
+    left: 0.5em;
+    height: 20px;
+    font-size: small;
+}
+.ibm-nlc-add-tag-field {
+    position: relative;
+    top: -0.2em;
+    left: 0.4em;
+    font-size: 0.7em;
+}
+.ibm-nlc-add-field {
+    background: url(add-new_32.png) scroll 6px 3px;
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+    padding-left: 30px;
+}
+.ibm-nlc-search-field {
+    background: url(search_32.png) scroll 6px 2px;
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+    padding-left: 30px;
+}
+.ibm-nlc-classes-label {
+    font-size: small;
+}
+.ibm-nlc-showing-results {
+    font-size: 0.9em;
+    margin-left: 10px;
+}
+.ibm-nlc-showing-tagged-results {
+    float: left;
+    font-size: 0.9em;
+    padding-right: 0.3em;
+}
+.ibm-nlc-filter-tag {
+    position: relative;
+    top: -2px;
+}
+.ibm-nlc-tag-x {
+    padding-left: .2em;
+    padding-right: .4em;
+}
+.ibm-nlc-sortbydropdown {
+    float: right;
+}
+.ibm-nlc-checkall {
+    position: relative;
+    padding: 10px;
+}
+.ibm-nlc-icon-header {
+    position: relative;
+    margin-left: 10px;
+}
+.ibm-nlc-nodata-message {
+    text-align: center;
+    background-color: white;
+    border: 1px solid silver;
+    padding: 30px 0px;
+    color: #6B6B6B;
+    font-family: HelvNeueLightForIBM;
+}

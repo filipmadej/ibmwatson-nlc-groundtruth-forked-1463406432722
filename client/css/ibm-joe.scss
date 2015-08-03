@@ -1,0 +1,64 @@
+b {
+    font-family: "HelvNeueMediumforIBM";
+    color: rgb(215, 65, 8);
+}
+.ibm-footer {
+    margin-top: 0px !important;
+}
+/*.ibm-panel-group-cluster-answer .ibm-panel-answer:hover {
+    border-color: #e0e0e0;
+    cursor: default;
+}
+.ibm-panel-group-cluster-answer .ibm-panel-group:hover {
+    background-color: white;
+    border: 0 !important;
+    cursor: default !important;
+}*/
+/* Class that (assuming default line-height of 1.43) limits a div's height to 4 lines of text.*/
+
+.ibm-panel .limit-lines {
+    font-size: 1em;
+    /* line-height: 1em; */
+    min-height: 11.44em;
+    max-height: 11.44em;
+    overflow: hidden;
+    transition: max-height 2s;
+}
+/*.ibm-panel-group-cluster-answer .limit-lines,*/
+.ibm-panel-expanded .limit-lines {
+    max-height: 600px;
+    overflow-y: auto;
+}
+/*.ibm-panel-group-cluster-answer .ibm-panel-footer-toggle {
+    display: none;
+}*/
+.ibm-panel-answer h1 {
+    font-size: 1.4em;
+    margin-top: 0px;
+    font-family: HelvNeueMediumForIBM;
+}
+.ibm-progress-bar {
+    min-width: 0px !important;
+}
+.ibm-col-sidebar {
+    padding-left: 0px;
+}
+.ibm-col-sidebar h4 {
+    margin-left: 8px;
+    padding-left: 20px;
+}
+.ibm-list-group-item .ibm-icon-success {
+    display: block;
+}
+.ibm-collapse .ibm-arrow-up1 {
+    left: 25%;
+}
+.ibm-collapse .ibm-arrow-up2 {
+    left: 75%;
+}
+.ibm-collapse .ibm-arrow-up3 {
+    left: 85%;
+}
+/*.ibm-list-group-item-disabled {
+  opacity: 0.5;
+}*/

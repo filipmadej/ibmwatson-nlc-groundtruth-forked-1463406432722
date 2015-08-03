@@ -1,0 +1,14 @@
+---
+applications:
+- name: @appBaseName@-@environment.name@-@BUILD_NUMBER@
+  command: @STARTUP_COMMAND@
+  memory: @CF_MEMORY@M
+  disk_quota: @CF_DISK_QUOTA@M
+  timeout: 180
+  instances: 1
+  host: @appBaseName@-@environment.name@-@BUILD_NUMBER@
+  domain: @appStagedDomain@
+  services:
+  - @SERVICE_NAME1@
+  - @SERVICE_NAME2@
+  - @SERVICE_NAME3@

@@ -1,0 +1,13 @@
+#
+# Ignore everything...
+#
+/*
+
+#
+# ...Except server and built code
+#
+!/server
+/server/config/local.env.js
+!/dist
+!/manifest.yml
+!/package.json

@@ -1,0 +1,57 @@
+.conversation {
+    border: 1px solid grey;
+    padding: 10px 5px;
+    background-color: white;
+    margin-top: 10px;
+    border-radius: 5px;
+    height: 600px;
+    max-height: 600px;
+    overflow-y: scroll;
+}
+.conversation>div>p {
+    border-radius: 5px;
+    color: white;
+    font-family: HelvNeueLightForIBM;
+    padding: 5px 10px;
+    width:85%;
+}
+.question {
+    float:left;
+    background-color: rgb(50, 92, 128);
+}
+.response {
+    float: right;
+    text-align:right;
+    background-color: #5596E6;
+
+    span {
+        display:block;
+    }
+}
+
+.gridStyle {
+    border: 1px solid rgb(212, 212, 212);
+    width: 400px;
+    height: 300px;
+}
+
+.questionlogs {
+    height: 600px;
+    max-height: 600px;
+    overflow: scroll;
+    border: 1px solid grey;
+    background-color: rgb(232, 232, 232);
+
+    .entry {
+        margin: 5px 10px;
+        border-bottom: 1px solid grey;
+
+        .datetime {
+            color: grey;
+        }
+
+        .answer {
+            font-family: HelvNeueLightForIBM;
+        }
+    }
+}

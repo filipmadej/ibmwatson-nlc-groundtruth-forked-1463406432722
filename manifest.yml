@@ -1,0 +1,16 @@
+---
+# manifest.yml for ibmwatson-nlc-groundtruth-ui
+# edit for your needs
+applications:
+- services:
+  - ibmwatson-nlc-cloudant
+  - ibmwatson-nlc-classifier
+  name: ibmwatson-nlc-groundtruth-ui
+  instances: 2
+  framework: node
+  description: User interface for nlc
+  memory: 256M
+  disk_quota: 256M
+  command: NODE_ENV=production node server/app.js
+  domain: mybluemix.net
+  host: ibmwatson-nlc-groundtruth-ui

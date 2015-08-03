@@ -1,0 +1,22 @@
+<div class="row ibm-login">
+	<div class="col-sm-4 col-sm-offset-4">
+		<form class="ibm-form" ng-submit="login(credentials)">
+			<h1>Login</h1>
+			<div class="form-group ibm-form-group">
+				<label class="ibm-form-control-required">Username:</label>
+				<input type="text" class="form-control ibm-form-control" placeholder="Enter Username" required="" ng-model="credentials.username">
+			</div>
+			<div class="form-group ibm-form-group">
+				<label class="ibm-form-control-required">Password:</label>
+				<input type="password" class="form-control ibm-form-control" placeholder="Password" required="" ng-model="credentials.password">
+			</div>
+			<div class="form-group ibm-form-group">
+				<label ng-show="message" style="color:red">{{ message }}</label>
+			</div>
+			<div class="form-group text-center">
+				<button type="submit" class="btn btn-primary btn-lg ibm-btn ibm-btn-primary ibm-btn-lg">Submit</button>
+			</div>
+		</form>
+	</div>
+	<div class="col-sm-4"></div>
+</div>
