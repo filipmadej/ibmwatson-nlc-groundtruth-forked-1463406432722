@@ -35,10 +35,10 @@ function getMetadataEtag() {
 
 angular.module('ibmwatsonQaGroundtruthUiApp')
   .factory('texts', ['$http', 'endpoints', 'session', function($http, endpoints, session) {
-    var tenant = session.tenant();
+    var tenant = session.tenant;
 
     function textsEndpoint () {
-      return endpoints.nlcstore + '/' + tenant + '/texts';
+      return endpoints.texts + '/' + tenant + '/texts';
     }
 
     function query (/*Object*/ params, /*function*/ callback) {
