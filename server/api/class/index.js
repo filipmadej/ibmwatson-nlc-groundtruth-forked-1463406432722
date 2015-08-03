@@ -23,8 +23,9 @@ var ENDPOINTS = {
     'class': '/:tenantid/classes/:classid'
 };
 
+router.use(ENDPOINTS.classes, rest.ensureAuthenticated);
 
-
+router.use(ENDPOINTS.class, rest.ensureAuthenticated);
 
 router.get(ENDPOINTS.classes, function handleGetClasses(req, res) {
     log.debug({

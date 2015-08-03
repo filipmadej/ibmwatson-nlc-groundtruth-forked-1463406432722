@@ -8,6 +8,7 @@ var restutils = require('ibmwatson-common-restapi');
 // local dependencies
 var db = require('../../config/cloudant');
 var log = require('../../config/log');
+var rest = require('../../config/rest');
 
 var responses = restutils.res;
 
@@ -16,6 +17,8 @@ var router = express.Router();
 var ENDPOINTS = {
     tenant : '/:tenantid'
 };
+
+router.use(ENDPOINTS.tenant, rest.ensureAuthenticated);
 
 router.delete(ENDPOINTS.tenant, function deleteTenant (req, res) {
         log.info({ params : req.params }, 'Deleting entire tenant');

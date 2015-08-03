@@ -39,7 +39,7 @@ $ tail -f bunyan.log | bunyan
 * Fix UI Unit Tests (inherited from ibmwatson-qa-groundtruth-ui)
 * Port Database Tests
 * Remove Profiles from Database
-* Secure Rest API
+* ~~Secure Rest API~~
 * Complete Securing UI States
 * Check that app is bound to classifier on startup
 * Replace ibmwatson- shared library code

@@ -5,6 +5,8 @@ var app = require('../../app');
 var request = require('supertest');
 var fs = require('fs');
 
+var nlc = require('../../config/nlc');
+
 describe('POST /api/import/csv', function() {
 	var file;
 
@@ -19,6 +21,7 @@ describe('POST /api/import/csv', function() {
     it('should respond with the CSV parsed file', function(done) {
         request(app)
             .post('/api/import/csv')
+            .auth(nlc.username, nlc.password)
 			.set("Content-Type", "text/plain")
             .send(file)
             .expect(200)
