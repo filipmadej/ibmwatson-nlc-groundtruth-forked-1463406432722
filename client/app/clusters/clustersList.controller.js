@@ -322,11 +322,9 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                         field.value = newLabel;
                         switch (type) {
                             case 'class':
-                                $scope.classLabelChanged(oldLabel, newLabel);
                                 $scope.classLabelChanged(object, oldLabel, newLabel);
                                 break;
                             case 'utterance':
-                                $scope.textLabelChanged(oldLabel, newLabel);
                                 $scope.textLabelChanged(object, oldLabel, newLabel);
                                 break;
                         }
