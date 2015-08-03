@@ -344,7 +344,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                     }
                 }
                 // TODO: PUT - change class name
-                classes.update(object.id, { value: newLabel }, function (err, data) {
+                classes.update(object.id, { name: newLabel }, function (err, data) {
                     if (err) {
                         console.log('error changing class label');
                     } else {
