@@ -31,24 +31,74 @@
 // add sorting of classes and utterances
 
 angular.module('ibmwatsonQaGroundtruthUiApp')
-    .controller('ClustersListCtrl', ['$scope', '$http', 'ngDialog', 'classes', 'texts', 'nlc',
-        function ($scope, $http, ngDialog, classes, texts, nlc) {
+    .controller('ClustersListCtrl', ['$scope', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc',
+        function ($scope, $http, $q, ngDialog, classes, texts, nlc) {
+
+            // -------------------------------------------------------------------------
+            // Load functions
+            // -------------------------------------------------------------------------
+
+            $scope.loadClasses = function loadClasses () {
+              var deferred = $q.defer();
+              classes.query({}, function query (err, data) {
+                  if (err) {
+                      console.log('error getting classes: ' + JSON.stringify(err));
+                      deferred.reject(err);
+                      return deferred.promise;
+                  }
+                  data.forEach( function forEach (element) {
+                      element.$$hashKey = data.id;
+                      element.seq = $scope.sequenceNumber++;
+                      element.label = element.name;
+                      element.edit = false;
+                      element.checked = false;
+                      element.selected = false;
+                  });
+                  deferred.resolve(data);
+                  $scope.classes = data;
+              });
+              return deferred.promise;
+            };
+
+            $scope.loadTexts = function loadTexts () {
+              var deferred = $q.defer();
+              texts.query({}, function (err, data) {
+                  if (err) {
+                      console.log('error loading texts: ' + JSON.stringify(err));
+                      deferred.reject(err);
+                      return deferred.promise;
+                  }
+                  data.forEach( function forEach (element) {
+                      element.$$hashKey = data.id;
+                      element.seq = $scope.sequenceNumber++;
+                      element.label = element.value;
+                      if (element.classes !== undefined) {
+                          for (var i = 0, len = element.classes.length; i < len; i++) {
+                              var classObj = $scope.getFromId($scope.classes, element.classes[i]);
+                              //if (classObj !== null) {
+                                  element.classes[i] = classObj.label;
+                              //}
+                          }
+                      } else {
+                          element.classes = [];
+                      }
+                      element.classes = element.classes || [];
+                      element.edit = false;
+                      element.checked = false;
+                      element.selected = false;
+                  });
+                  deferred.resolve(data);
+                  $scope.utterances = data;
+              });
+              return deferred.promise;
+            };
+
+            // -----------------------------------------------------------------------------------
+
             $scope.sequenceNumber = 0;
 
             // class related elements
             $scope.classes = [];
-            // TODO: GET all current classes for tenant
-            classes.query({}, function query (err, data) {
-                data.forEach( function forEach (element) {
-                    element.$$hashKey = data.id;
-                    element.seq = $scope.sequenceNumber++;
-                    element.label = element.name;
-                    element.edit = false;
-                    element.checked = false;
-                    element.selected = false;
-                });
-                $scope.classes = data;
-            });
             $scope.newClassString = '';
             $scope.selectedClass = [];
             $scope.classOrderOptions = [
@@ -62,34 +112,6 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
 
             // utterance related elements
             $scope.utterances = [];
-
-            texts.query({}, function (err, data) {
-                if (err) {
-                    console.log('error getting texts: ' + err);
-                    return;
-                }
-                data.forEach( function forEach (element) {
-                    element.$$hashKey = data.id;
-                    element.seq = $scope.sequenceNumber++;
-                    element.label = element.value;
-                    if (element.classes !== undefined) {
-                        for (var i = 0, len = element.classes.length; i < len; i++) {
-                            var classObject = $scope.getFromId($scope.classes, element.classes[i]);
-                            if (classObject !== undefined) {
-                                element.classes[i] = classObject.label;
-                            }
-                        }
-                    } else {
-                        element.classes = [];
-                    }
-                    element.classes = element.classes || [];
-                    element.edit = false;
-                    element.checked = false;
-                    element.selected = false;
-                });
-                $scope.utterances = data;
-            });
-
             $scope.newUtteranceString = '';
             $scope.newTagStrings = [];
             $scope.utteranceOrderOptions = [
@@ -106,6 +128,17 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
             $scope.promptDialog = {response: ''};
 
             $scope.showDebugInfo = false;
+
+            $scope.loadClasses().then($scope.loadTexts());
+            /*$scope.loadClasses().then(function () {
+                return $scope.loadTexts();
+            }, function (err) {
+                console.log('error loading classes: ' + JSON.stringify(err));
+            }).then(function () {
+                console.log('success loading classes and texts');
+            }, function (err) {
+                console.log('error loading texts: ' + JSON.stringify(err));
+            });*/
 
             $scope.$on('appAction', function (event, args) {
                 var name = args.name, data = args.data;
@@ -336,31 +369,29 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
 
             // propagate label <newLabel> to all utterances tagged with label <oldLabel>
             $scope.classLabelChanged = function (object, oldLabel, newLabel) {
-                var i, index;
-                for (i = 0; i < $scope.utterances.length; i++) {
-                    index = $scope.utterances[i].classes.indexOf(oldLabel);
+                $scope.utterances.forEach(function forEach (text) {
+                    var index = text.classes.indexOf(oldLabel);
                     if (index >= 0) {
-                        $scope.utterances[i].classes[index] = newLabel;
+                        text.classes[index] = newLabel;
                     }
-                }
-                // TODO: PUT - change class name
-                classes.update(object.id, { name: newLabel }, function (err, data) {
+                });
+
+                classes.update(object.id, { name: newLabel }, function (err) {
                     if (err) {
-                        console.log('error changing class label');
+                        console.log('error changing class label from ' + oldLabel + ' to ' + newLabel);
                     } else {
-                        console.log('success changing class label: ' + data);
+                        console.log('success changing class label from ' + oldLabel + ' to ' + newLabel);
                     }
                 });
             };
 
             // persist the change to the text label
             $scope.textLabelChanged = function (object, oldLabel, newLabel) {
-                // TODO: PUT - change text
-                texts.update(object.id, { value: newLabel }, function (err, data) {
+                texts.update(object.id, { value: newLabel }, function (err) {
                     if (err) {
-                        console.log('error changing text label');
+                        console.log('error changing text label from ' + oldLabel + ' to ' + newLabel);
                     } else {
-                        console.log('success changing text label: ' + data);
+                        console.log('success changing text label from ' + oldLabel + ' to ' + newLabel);
                     }
                 });
             };
@@ -391,46 +422,51 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
 
             // ---------------------------------------------------------------------------------------------
 
-            $scope.add = function (type, label, callback) {
-                var existingObject, msg;
+            $scope.add = function (type, label) {
+                var deferred = $q.defer();
                 if (!label) {
-                    return;
+                    deferred.resolve();
+                    return deferred.promise;
                 }
                 // if an object already exists with this label
-                existingObject = $scope.getFromLabel($scope.getScopeArray(type), label);
+                var existingObject = $scope.getFromLabel($scope.getScopeArray(type), label);
                 if (existingObject) {
                     $scope.newClassString = '';
                     $scope.newUtteranceString = '';
-                    msg = $scope.inform('The ' + type + ' "' + existingObject.label + '" already exists.');
+                    var msg = $scope.inform('The ' + type + ' "' + existingObject.label + '" already exists.');
                     ngDialog.open({template: msg, plain: true});
+                    deferred.resolve();
+                    return deferred.promise();
                 } else {
                     var id = '';
                     switch (type) {
                         case 'class' :
-                            return classes.post({ name : label }, function post (err, data) {
+                            classes.post({ name : label }, function post (err, data) {
                                 if (err) {
-                                    callback(err, null);
+                                    deferred.reject(err);
                                 } else {
                                     id = data.id;
                                     var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
                                     $scope.classes.push(newClass);
                                     $scope.newClassString = '';
-                                    callback(null, newClass);
+                                    deferred.resolve(newClass);
                                 }
                             });
+                            return deferred.promise;
                         case 'utterance' :
-                            return texts.post({ value : label }, function post (err, data) {
+                            texts.post({ value : label }, function post (err, data) {
                                 if (err) {
-                                    callback(err, null);
+                                    deferred.reject(err);
                                 } else {
                                     id = data.id;
                                     var newUtterance = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
                                     $scope.tagUtterances([newUtterance], $scope.getSelected());
                                     $scope.utterances.push(newUtterance);
                                     $scope.newUtteranceString = '';
-                                    callback(null, newUtterance);
+                                    deferred.resolve(newUtterance);
                                 }
                             });
+                            return deferred.promise;
                     }
                 }
 
@@ -511,11 +547,11 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
 
             // removes a class from the database with the given id
             $scope.removeClass = function (id) {
-                classes.remove(id, function remove (err, data) {
+                classes.remove(id, function remove (err) {
                     if (err) {
-                        console.log('failed delete: ' + err);
+                        console.log('error removing class ' + id + ': ' + JSON.stringify(err));
                     } else {
-                        console.log('successful delete: ' + data);
+                        console.log('success removing class ' + id);
                     }
                 });
             };
@@ -532,12 +568,11 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
             };
 
             $scope.removeText = function (id) {
-                // TODO: DELETE - text
-                texts.remove(id, function remove (err, data) {
+                texts.remove(id, function remove (err) {
                     if (err) {
-                        console.log('failed delete: ' + err);
+                        console.log('error removing text ' + id + ': ' + JSON.stringify(err));
                     } else {
-                        console.log('successful delete: ' + data);
+                        console.log('success removing text ' + id);
                     }
                 });
             };
@@ -615,15 +650,14 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                 if (anUtterance.classes.indexOf(label) >= 0) {
                     msg = $scope.question('Remove class "' + label + '" from this text?');
                     ngDialog.openConfirm({template: msg, plain: true
-                    }).then(function() {  // ok
+                    }).then(function() {
                         anUtterance.classes = anUtterance.classes.filter($scope.doesNotMatch(label));
                         var clazz = $scope.getFromLabel($scope.classes, label);
-                        // TODO: remove class from text
-                        texts.removeClasses(anUtterance.id, [{id: clazz.id}], function (err, data) {
+                        texts.removeClasses(anUtterance.id, [{id: clazz.id}], function (err) {
                             if (err) {
-                                console.log('failed delete of class from text');
+                                console.log('error removing class ' + label + ' from text ' + anUtterance.label + ': ' + JSON.stringify(err));
                             } else {
-                                console.log('successful delete of class from text: ' + data);
+                                console.log('success removing class ' + label + ' from text ' + anUtterance.label);
                             }
                         });
                     });
@@ -684,14 +718,11 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                     if (!classObj) {
                         msg = $scope.question('The class "' + classLabel + '" has not been created. Create it now?');
                         ngDialog.openConfirm({template: msg, plain: true
-                        }).then(function() {  // ok
-                            $scope.add('class', classLabel, function (err, classObj) {
-                                if (err) {
-                                    console.log(err);
-                                    return;
-                                } else if (classObj !== undefined) {
-                                    $scope.tagUtterances([anUtterance], [classObj]);
-                                }
+                        }).then(function() {
+                            $scope.add('class', classLabel).then(function (classObj) {
+                                return $scope.tagUtterances([anUtterance], [classObj]);
+                            }, function (err) {
+                                console.log('error creating new class: ' + JSON.stringify(err));
                             });
                         });
                     }
@@ -739,12 +770,11 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
             };
 
             $scope.addClassesToText = function (id, classIds) {
-                // TODO PATCH - adding class to text
-                texts.addClasses(id, classIds, function (err, data) {
+                return texts.addClasses(id, classIds, function (err) {
                     if (err) {
-                        console.log('error while adding classes');
+                        console.log('error adding classes: ' + JSON.stringify(err));
                     } else {
-                        console.log('successful add class ' + data);
+                        console.log('success adding classes');
                     }
                 });
             };
@@ -839,45 +869,54 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
             };
 
             $scope.addClass = function addClass (label) {
-                $scope.add('class', label, function (err, data) {
-                    if (err) {
-                        console.log('error: ' + err);
-                        return null;
-                    } else {
-                        return data;
-                    }
-                });
+                return $scope.add('class', label).then(function (data) {
+                      return data;
+                  }, function (err) {
+                      console.log('error adding class: ' + JSON.stringify(err));
+                      return null;
+                  });
             };
 
             $scope.addUtterance = function addUtterance (label, classes) {
-                $scope.add('utterance', label, function (err, data) {
-                    if (err) {
-                        console.log('error: ' + err);
-                        return null;
-                    } else {
-                        $scope.tagUtteranceByLabels(data, classes);
-                        return data;
-                    }
+                return $scope.add('utterance', label).then(function (data) {
+                    $scope.tagUtteranceByLabels(data, classes);
+                    return data;
+                }, function (err) {
+                    console.log('error adding text: ' + JSON.stringify(err));
+                    return null;
                 });
             };
 
-            $scope.importFile = function (fileContent) {
-                nlc.upload(fileContent).then(function(data) {
-                    console.log('import: ' + JSON.stringify(data));
-                    for (var i = 0, len = data.classes.length; i < len; i++) {
-                        if (!$scope.containsLabel($scope.classes, data.classes[i])) {
-                            $scope.addClass(data.classes[i]);
-                        }
+            $scope.importClasses = function importClasses (classes) {
+                var promises = [];
+                for (var i = 0, len = classes.length; i < len; i++) {
+                    if (!$scope.containsLabel($scope.classes, classes[i])) {
+                        promises.push($scope.addClass(classes[i]));
                     }
+                }
+                return $q.all(promises);
+            };
 
-                    for (i = 0, len = data.text.length; i < len; i++) {
-                        var text = $scope.getFromLabel($scope.utterances, data.text[i].text);
-                        if (text === null) {
-                            $scope.addUtterance(data.text[i].text, data.text[i].classes);
-                        } else {
-                            $scope.tagUtteranceByLabels(text, data.text[i].classes);
-                        }
+            $scope.importTexts = function importTexts (texts) {
+                var promises = [];
+                for (var i = 0, len = texts.length; i < len; i++) {
+                    var text = $scope.getFromLabel($scope.utterances, texts[i].text);
+                    if (text === null) {
+                        promises.push($scope.addUtterance(texts[i].text, texts[i].classes));
+                    } else {
+                        $scope.tagUtteranceByLabels(text, texts[i].classes);
                     }
+                }
+                return $q.all(promises);
+            };
+
+            $scope.importFile = function (fileContent) {
+                var uploadResult = {};
+                nlc.upload(fileContent).then(function (data) {
+                    uploadResult = data;
+                    return $scope.importClasses(uploadResult.classes);
+                }).then(function () {
+                    return $scope.importTexts(uploadResult.text);
                 });
             };
         }
