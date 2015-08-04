@@ -20,6 +20,7 @@ var server = require('http').createServer(app);
 var db = require('./config/cloudant');
 require('./config/express')(app);
 require('./config/passport')(app);
+require('./config/csrf')(app);
 require('./routes')(app);
 
 
