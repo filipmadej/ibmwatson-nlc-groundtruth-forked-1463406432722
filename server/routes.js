@@ -4,10 +4,10 @@
 
 'use strict';
 
-var errors = require('./components/errors');
 var path = require('path');
+var errors = require('./components/errors');
 
-module.exports = function(app) {
+module.exports = function configure (app) {
 
   // Insert routes below
   app.use('/api/authenticate', require('./api/authenticate'));
@@ -25,7 +25,7 @@ module.exports = function(app) {
 
   // All other routes should redirect to the index.html
   app.route('/*')
-    .get(function(req, res) {
+    .get(function defaultGET (req, res) {
       res.sendFile(path.resolve(app.get('appPath') + '/index.html'));
     });
 };
