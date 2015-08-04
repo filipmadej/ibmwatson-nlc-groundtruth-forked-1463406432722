@@ -662,6 +662,20 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                 }
             };
 
+            $scope.tagUtteranceByLabels = function tagUtteranceByLabels (utterance, classes) {
+                var classObjects = [];
+                for (var i = 0, len = classes.length; i < len; i++) {
+                    var classObj = $scope.getFromLabel($scope.classes, classes[i]);
+                    if (classObj) {
+                        classObjects.push(classObj);
+                    }
+                }
+
+                if (classObjects.length > 0) {
+                    $scope.tagUtterances([utterance], classObjects);
+                }
+            };
+
             // add a class tag with label <classLabel> to utterance <anUtterance>
             $scope.tagUtterance = function (classLabel, anUtterance) {
                 var i, msg, classObj;
@@ -719,12 +733,12 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                         }
                     }
                     if (classIds.length > 0) {
-                        $scope.addClassToText(utterancesArray[i].id, classIds);
+                        $scope.addClassesToText(utterancesArray[i].id, classIds);
                     }
                 }
             };
 
-            $scope.addClassToText = function (id, classIds) {
+            $scope.addClassesToText = function (id, classIds) {
                 // TODO PATCH - adding class to text
                 texts.addClasses(id, classIds, function (err, data) {
                     if (err) {
@@ -841,8 +855,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                         console.log('error: ' + err);
                         return null;
                     } else {
-                        data.classes = classes;
-                        // TODO: make tagUtterance
+                        $scope.tagUtteranceByLabels(data, classes);
                         return data;
                     }
                 });
@@ -862,8 +875,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                         if (text === null) {
                             $scope.addUtterance(data.text[i].text, data.text[i].classes);
                         } else {
-                            text.classes = data.text[i].classes;
-                            // TODO: tagUtterance
+                            $scope.tagUtteranceByLabels(text, data.text[i].classes);
                         }
                     }
                 });
