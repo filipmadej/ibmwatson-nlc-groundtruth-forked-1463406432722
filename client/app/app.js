@@ -8,7 +8,7 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'ui.bootstrap',
     'xeditable',
     'ngDialog',
-    'ngFileUpload',
+    'ng-file-upload',
     'config'
 ])
     .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider',
