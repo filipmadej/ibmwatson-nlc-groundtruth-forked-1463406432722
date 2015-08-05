@@ -1,17 +1,11 @@
 ---
-declared-services: 
-  ibmwatson-nlc-cloudant: 
-    label: cloudantNoSQLDB 
-    plan: Shared
-  ibmwatson-nlc-classifier:
-    label: natural_language_classifier
-    plan: beta
 applications:
 - services:
   - ibmwatson-nlc-cloudant
   - ibmwatson-nlc-classifier
   name: @appBaseName@-@environment.name@-@BUILD_NUMBER@
   instances: 1
+  buildpack: sdk-for-nodejs_v1-18-20150519-1759
   framework: node
   description: An application to configure and train a Watson Natural Language Classifier
   memory: 256M
