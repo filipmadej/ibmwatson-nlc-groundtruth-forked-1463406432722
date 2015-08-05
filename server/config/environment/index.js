@@ -44,7 +44,8 @@ var all = {
         'credentials': {
           'url': 'https://gateway.watsonplatform.net/natural-language-classifier-beta/api',
           'username': 'fd323271-b313-440e-9ac5-29f5ed8adf91',
-          'password': 'c62de7383b79'
+          'password': 'c62de7383b79',
+          'version': 'v1'
         }
       }]
     }
@@ -58,7 +59,7 @@ var all = {
       bluemix : 'https://console.ng.bluemix.net'
   },
 
-  classifierServiceName : 'ibmwatson-nlc-classifier'
+  classifierServiceName : 'natural_language_classifier'
 
 };
 
