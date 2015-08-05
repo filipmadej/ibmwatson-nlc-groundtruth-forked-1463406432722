@@ -1,6 +1,7 @@
 'use strict';
 
 var passport = require('passport'),
+    BasicStrategy = require('passport-http').BasicStrategy,
     LocalStrategy = require('passport-local').Strategy;
 
 // local dependencies
@@ -54,6 +55,18 @@ module.exports = function (app) {
         //     });
         // });
     }));
+
+    passport.use(new BasicStrategy(
+        function(username, password, done) {
+            if(username === nlc.username && password === nlc.password){
+                return done(null,nlc);
+            }
+
+            return done(null, false, {
+                'message' : 'Username and password not recognised.'
+            });
+        }
+    ));
 
     app.use(passport.initialize());
     app.use(passport.session());

@@ -23,6 +23,9 @@ var ENDPOINTS = {
     text: '/:tenantid/texts/:textid'
 };
 
+router.use(ENDPOINTS.texts, rest.ensureAuthenticated);
+router.use(ENDPOINTS.text, rest.ensureAuthenticated);
+
 function getClassesToPatch(values) {
     return values.map(function getIds(cls) {
         if (cls && (typeof cls.id === 'string' || cls.id instanceof String)) {

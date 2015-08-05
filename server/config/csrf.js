@@ -15,12 +15,16 @@ var appEnv = require('./environment');
 
 module.exports = function configure (app) {
 
-  app.use(cookieParser(appEnv.secrets.cookie));
-  app.use(csrf());
+  var env = app.get('env');
 
-  app.use(function generateSyncToken (req, res, next) {
-    res.cookie('XSRF-TOKEN', req.csrfToken());
-    return next();
-  });
+  if(env === 'production'){
+    app.use(cookieParser(appEnv.secrets.cookie));
+    app.use(csrf());
+
+    app.use(function generateSyncToken (req, res, next) {
+      res.cookie('XSRF-TOKEN', req.csrfToken());
+      return next();
+    });
+  }
 
 };

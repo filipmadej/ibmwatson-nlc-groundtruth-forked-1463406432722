@@ -1,5 +1,7 @@
 'use strict';
 
+var passport = require('passport');
+
 function hideImplementationDetails (object) {
     if (object._id) {
         object.id = object._id;
@@ -26,8 +28,18 @@ function sanitizeMetadata (value) {
     return null;
 }
 
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    } else
+        return passport.authenticate('basic', {
+            session: false
+        })(req, res, next);
+}
+
 
 module.exports = {
   hideImplementationDetails: hideImplementationDetails,
-  sanitizeMetadata: sanitizeMetadata
+  sanitizeMetadata: sanitizeMetadata,
+  ensureAuthenticated: ensureAuthenticated
 };
