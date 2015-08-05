@@ -37,6 +37,20 @@ var all = {
   vcap : {
     application : null,
     services : {
+      'cloudantNoSQLDB': [
+      {
+         'name': 'ibmwatson-qa-cloudant',
+         'label': 'cloudantNoSQLDB',
+         'plan': 'Shared',
+         'credentials': {
+            'username': '1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix',
+            'password': '6308ed8eab66bb0591ad847fea145ceaf9e3761e3663b8c93838939309f3b700',
+            'host': '1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com',
+            'port': 443,
+            'url': 'https://1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix:6308ed8eab66bb0591ad847fea145ceaf9e3761e3663b8c93838939309f3b700@1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com'
+          }
+      }
+   ],
       'natural_language_classifier': [{
         'name': 'ibmwatson-nlc-classifier',
         'label': 'natural_language_classifier',

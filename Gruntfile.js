@@ -458,7 +458,8 @@ module.exports = function(grunt) {
                 options: {
                     mask: '*.spec.js',
                     reportFormats: ['html', 'lcov'],
-                    coverageFolder: 'coverage/server'
+                    coverageFolder: 'coverage/server',
+                    excludes: ['**/test/**/*js']
                 }
             }
         },

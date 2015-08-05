@@ -1,14 +1,19 @@
 ---
 applications:
-- name: @appBaseName@-@environment.name@-@BUILD_NUMBER@
-  command: @STARTUP_COMMAND@
-  memory: @CF_MEMORY@M
-  disk_quota: @CF_DISK_QUOTA@M
-  timeout: 180
+- services:
+  - ibmwatson-nlc-cloudant
+  - ibmwatson-nlc-classifier
+  name: @appBaseName@-@environment.name@-@BUILD_NUMBER@
   instances: 1
+  buildpack: sdk-for-nodejs
+  framework: node
+  description: An application to configure and train a Watson Natural Language Classifier
+  memory: 256M
+  disk_quota: 256M
+  command: NODE_ENV=production node server/app.js
+  domain: mybluemix.net
   host: @appBaseName@-@environment.name@-@BUILD_NUMBER@
-  domain: @appStagedDomain@
-  services:
-  - @SERVICE_NAME1@
-  - @SERVICE_NAME2@
-  - @SERVICE_NAME3@
+  timeout: 180
+  env:
+    SESSION_SECRET: ibmwatson-nlc-groundtruth-session
+    COOKIE_SECRET: ibmwatson-nlc-groundtruth-cookie

@@ -127,8 +127,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
             $scope.showDebugInfo = false;
 
-            $scope.loadClasses().then($scope.loadTexts());
-            /*$scope.loadClasses().then(function () {
+            $scope.loadClasses().then(function () {
                 return $scope.loadTexts();
             }, function (err) {
                 console.log('error loading classes: ' + JSON.stringify(err));
@@ -136,7 +135,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                 console.log('success loading classes and texts');
             }, function (err) {
                 console.log('error loading texts: ' + JSON.stringify(err));
-            });*/
+            });
 
             $scope.$on('appAction', function (event, args) {
                 var name = args.name, data = args.data;

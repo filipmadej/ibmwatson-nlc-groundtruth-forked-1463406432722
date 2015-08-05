@@ -7,6 +7,7 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 
 var should = chai.should();
+chai.use(sinonChai);
 
 function getStoreMock () {
     var storeMock = {

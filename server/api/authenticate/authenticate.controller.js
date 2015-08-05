@@ -36,7 +36,7 @@ exports.check = function check (req, res) {
         res.status(httpstatus.OK).json(prepareUserForResponse(req.user));
     }
     else {
-        res.status(httpstatus.UNAUTHORIZED).send();
+        res.status(httpstatus.UNAUTHORIZED).end();
     }
 };
 

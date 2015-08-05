@@ -19,21 +19,11 @@ var mocks = require('../../test/mocks');
 
 var should = chai.should();
 
-var app;
+var app = proxyquire('../../app', {
+    './config/db/store' : mocks.storeMock
+});
 
 describe('/server/api/authenticate', function () {
-
-    before(function () {
-
-        this.timeout(15000);
-
-        // This is synchronous but takes awhile to load!
-        app = proxyquire('../../app', {
-            './config/db/store' : mocks.storeMock
-        });
-
-    });
-
 
     describe('GET /api/authenticate', function () {
 
