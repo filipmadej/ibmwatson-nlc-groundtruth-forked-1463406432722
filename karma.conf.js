@@ -25,6 +25,8 @@ module.exports = function(config) {
       'client/bower_components/d3/d3.js',
       'client/bower_components/content-range/index.js',
       'client/bower_components/ngDialog/js/ngDialog.js',
+      'client/bower_components/ng-file-upload-shim/ng-file-upload-shim.js',
+      'client/bower_components/ng-file-upload/ng-file-upload.js',
       'client/app/app.js',
       'client/app/app.coffee',
       'client/app/**/*.js',
