@@ -52,14 +52,12 @@ var all = {
   },
 
   endpoints : {
-      questionstore : 'https://ibmwatson-nlc-tools.mybluemix.net/api/questions',
-      classifierstore : 'https://ibmwatson-nlc-tools.mybluemix.net/api/classes',
       auth : 'https://ibmwatson-nlc-tools.mybluemix.net/auth',
       cloudfoundry : 'https://api.ng.bluemix.net',
       bluemix : 'https://console.ng.bluemix.net'
   },
 
-  classifierServiceName : 'natural_language_classifier'
+  classifierServiceName : 'ibmwatson-nlc-classifier'
 
 };
 
