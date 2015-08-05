@@ -58,15 +58,14 @@ var all = {
         'credentials': {
           'url': 'https://gateway.watsonplatform.net/natural-language-classifier-beta/api',
           'username': 'fd323271-b313-440e-9ac5-29f5ed8adf91',
-          'password': 'c62de7383b79'
+          'password': 'c62de7383b79',
+          'version': 'v1'
         }
       }]
     }
   },
 
   endpoints : {
-      questionstore : 'https://ibmwatson-nlc-tools.mybluemix.net/api/questions',
-      classifierstore : 'https://ibmwatson-nlc-tools.mybluemix.net/api/classes',
       auth : 'https://ibmwatson-nlc-tools.mybluemix.net/auth',
       cloudfoundry : 'https://api.ng.bluemix.net',
       bluemix : 'https://console.ng.bluemix.net'

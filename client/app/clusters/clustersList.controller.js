@@ -30,7 +30,7 @@
 // support in-place label editing
 // add sorting of classes and utterances
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
     .controller('ClustersListCtrl', ['$scope', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc',
         function ($scope, $http, $q, ngDialog, classes, texts, nlc) {
 
@@ -75,9 +75,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                       if (element.classes !== undefined) {
                           for (var i = 0, len = element.classes.length; i < len; i++) {
                               var classObj = $scope.getFromId($scope.classes, element.classes[i]);
-                              //if (classObj !== null) {
-                                  element.classes[i] = classObj.label;
-                              //}
+                              element.classes[i] = classObj.label;
                           }
                       } else {
                           element.classes = [];
@@ -129,8 +127,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
 
             $scope.showDebugInfo = false;
 
-            $scope.loadClasses().then($scope.loadTexts());
-            /*$scope.loadClasses().then(function () {
+            $scope.loadClasses().then(function () {
                 return $scope.loadTexts();
             }, function (err) {
                 console.log('error loading classes: ' + JSON.stringify(err));
@@ -138,7 +135,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                 console.log('success loading classes and texts');
             }, function (err) {
                 console.log('error loading texts: ' + JSON.stringify(err));
-            });*/
+            });
 
             $scope.$on('appAction', function (event, args) {
                 var name = args.name, data = args.data;

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .factory('Modal', function ($rootScope, $modal) {
     /**
      * Opens a modal

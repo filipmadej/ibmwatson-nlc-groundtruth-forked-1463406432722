@@ -3,7 +3,7 @@
 describe('Controller: ClustersCtrl', function () {
 
   // load the controller's module
-  beforeEach(module('ibmwatsonQaGroundtruthUiApp'));
+  beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
   var ClustersCtrl, scope;
 

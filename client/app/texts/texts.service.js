@@ -11,7 +11,7 @@ function getMetadataEtag() {
   };
 }
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .factory('texts', ['$http', 'endpoints', 'session', function($http, endpoints, session) {
 
   function textsEndpoint () {

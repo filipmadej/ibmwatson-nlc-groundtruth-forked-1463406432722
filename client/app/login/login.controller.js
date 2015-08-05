@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .controller('LoginCtrl', ['$scope', '$rootScope', '$state', 'authentication', function($scope, $rootScope, $state, authentication) {
 
     // Error Message displayed in the event of login error
@@ -19,7 +19,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
         // Broadcast login event?
         console.log('login');
         $state.go('classifiers');
-        
+
       }, function(err) {
         console.log(err);
         $state.go('login',{message:err.message});

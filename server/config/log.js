@@ -2,30 +2,24 @@
 
 var bunyan = require('bunyan');
 
-module.exports = exports = bunyan.createLogger({
-    name : 'ibmwatson-nlc-groundtruth-ui',
+var config = {
+    name : 'ibmwatson-nlc-groundtruth',
+    serializers : bunyan.stdSerializers,
     src : true,
     streams : [
-
-        // detailed debug goes to a file which can be
-        //  better processed and viewed using the
-        //  bunyan CLI tool
         {
-            level : 'trace',
-            path : 'bunyan.log',
+            level : 'debug',
+            path : 'bunyan.log'
+        }
+    ]
+};
 
-            // limit size of file so we don't
-            //  indefinitely append
-            type : 'rotating-file',
-            period : '1d',
-            count : 2
-        },
-
-        // info and above goes to stdout
-        {
+if (process.env.NODE_ENV === 'production') {
+    config.streams.push({
             level : 'info',
             stream : process.stdout
         }
+    );
+}
 
-    ]
-});
+module.exports = exports = bunyan.createLogger(config);

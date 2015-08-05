@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .service('session', function() {
     this.create = function(username, tenant) {
       this.username = username;

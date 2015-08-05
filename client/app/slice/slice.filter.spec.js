@@ -3,7 +3,7 @@
 describe('Filter: slice', function () {
 
   // load the filter's module
-  beforeEach(module('ibmwatsonQaGroundtruthUiApp'));
+  beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
   // initialize a new instance of the filter before each test
   var slice;

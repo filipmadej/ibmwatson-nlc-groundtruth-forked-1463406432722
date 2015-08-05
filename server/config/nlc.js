@@ -14,7 +14,7 @@ if (service) {
   classifier.url = service.credentials.url;
   classifier.username = service.credentials.username;
   classifier.password = service.credentials.password;
-  classifier.version = 'v1';
+  classifier.version = service.credentials.version;
 }
 
 module.exports = classifier;

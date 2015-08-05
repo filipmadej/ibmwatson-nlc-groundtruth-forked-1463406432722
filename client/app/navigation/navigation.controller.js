@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .controller('NavigationCtrl', ['$scope', '$state', '$log', 'authentication',
     function ($scope, $state, $log, authentication) {
 
@@ -19,7 +19,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
         authentication.logout().then(function () {
 
           $scope.isLoggedIn = false;
-          
+
           $state.go('login',{message : {level : 'success', text : 'Logged out'}});
         });
       };

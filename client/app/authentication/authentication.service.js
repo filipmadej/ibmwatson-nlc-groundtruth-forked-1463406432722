@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
   .factory('authentication', ['$http', '$q', '$log', 'session','endpoints', function init($http, $q, $log, session, endpoints) {
 
     function createSession(user) {

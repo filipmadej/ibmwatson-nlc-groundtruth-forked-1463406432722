@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('ibmwatsonQaGroundtruthUiApp', [
+var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'ngCookies',
     'ngResource',
     'ngSanitize',
@@ -75,8 +75,8 @@ var app = angular.module('ibmwatsonQaGroundtruthUiApp', [
         }
     ]);
 
-app.controller('AppController', ['$rootScope', '$scope', '$location', '$log',
-    function($rootScope, $scope, $location, $log) {
+app.controller('AppController', ['$rootScope', '$scope',
+    function($rootScope, $scope) {
 
         // Currently logged in user
         $scope.currentUser = null;
@@ -89,32 +89,21 @@ app.controller('AppController', ['$rootScope', '$scope', '$location', '$log',
         };
 
         $scope.setCurrentTenant = function setCurrentTenant(tenant){
-            $scope.currentTenant = null;
+            $scope.currentTenant = tenant;
         };
 
-        $rootScope.undo = function() {
-            $rootScope.$broadcast('appAction', {
-                name: 'undo'
-            });
-        };
-        $rootScope.redo = function() {
-            $rootScope.$broadcast('appAction', {
-                name: 'redo'
-            });
-        };
         $rootScope.export = function() {
             $rootScope.$broadcast('appAction', {
                 name: 'export'
             });
         };
+
         $rootScope.train = function() {
             $rootScope.$broadcast('appAction', {
                 name: 'train'
             });
         };
-        /*$rootScope.getFileContent = function($fileContent){
-            $rootScope.$broadcast('appAction', {name: 'import', data: $fileContent});
-        };*/
+
         $rootScope.getFileContent = function() {
             var files = $scope.files;
             if (files && files.length>0) {
