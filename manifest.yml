@@ -1,16 +1,24 @@
 ---
-# manifest.yml for ibmwatson-nlc-groundtruth-ui
-# edit for your needs
+declared-services: 
+  ibmwatson-nlc-cloudant: 
+    label: cloudantNoSQLDB 
+    plan: Shared
+  ibmwatson-nlc-classifier:
+    label: natural_language_classifier
+    plan: beta
 applications:
 - services:
   - ibmwatson-nlc-cloudant
   - ibmwatson-nlc-classifier
-  name: ibmwatson-nlc-groundtruth-ui
-  instances: 2
+  name: ibmwatson-nlc-groundtruth
+  instances: 1
   framework: node
-  description: User interface for nlc
+  description: An application to configure and train a Watson Natural Language Classifier
   memory: 256M
   disk_quota: 256M
   command: NODE_ENV=production node server/app.js
   domain: mybluemix.net
-  host: ibmwatson-nlc-groundtruth-ui
+  host: ibmwatson-nlc-groundtruth
+  env:
+    SESSION_SECRET: ibmwatson-nlc-groundtruth-session
+    COOKIE_SECRET: ibmwatson-nlc-groundtruth-cookie
