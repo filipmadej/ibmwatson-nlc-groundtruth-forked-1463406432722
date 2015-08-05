@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
     .factory('nlc', ['$http', '$q', '$interval', 'authentication',
         function($http, $q, $interval, authentication) {
 

@@ -15,7 +15,7 @@ describe('Controller: NavigationCtrl', function() {
 
   // load the controller's module and mock dependencies
   beforeEach(function() {
-    module('ibmwatsonQaGroundtruthUiApp', function($provide) {
+    module('ibmwatson-nlc-groundtruth-app', function($provide) {
       $provide.factory('authentication', function($q) {
         return {
           checkStatus: jasmine.createSpy('checkStatus').andCallFake(function() {

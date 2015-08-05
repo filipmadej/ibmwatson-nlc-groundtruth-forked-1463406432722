@@ -3,7 +3,7 @@
 describe('Service: authentication', function () {
 
     // load the service's module and mock $cookies
-    beforeEach(module('ibmwatsonQaGroundtruthUiApp'));
+    beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
     // instantiate service
     var authentication, endpoints, $httpBackend;

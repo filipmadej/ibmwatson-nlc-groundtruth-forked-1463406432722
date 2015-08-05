@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
     .controller('LiveSystemCtrl', ['$scope', 'nlc',
         function($scope, nlc) {
 

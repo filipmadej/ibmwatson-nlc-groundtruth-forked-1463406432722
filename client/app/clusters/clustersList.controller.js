@@ -30,7 +30,7 @@
 // support in-place label editing
 // add sorting of classes and utterances
 
-angular.module('ibmwatsonQaGroundtruthUiApp')
+angular.module('ibmwatson-nlc-groundtruth-app')
     .controller('ClustersListCtrl', ['$scope', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc',
         function ($scope, $http, $q, ngDialog, classes, texts, nlc) {
 
@@ -75,9 +75,7 @@ angular.module('ibmwatsonQaGroundtruthUiApp')
                       if (element.classes !== undefined) {
                           for (var i = 0, len = element.classes.length; i < len; i++) {
                               var classObj = $scope.getFromId($scope.classes, element.classes[i]);
-                              //if (classObj !== null) {
-                                  element.classes[i] = classObj.label;
-                              //}
+                              element.classes[i] = classObj.label;
                           }
                       } else {
                           element.classes = [];

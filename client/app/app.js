@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('ibmwatsonQaGroundtruthUiApp', [
+var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'ngCookies',
     'ngResource',
     'ngSanitize',

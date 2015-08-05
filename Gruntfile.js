@@ -336,7 +336,7 @@ module.exports = function(grunt) {
         ngtemplates: {
             options: {
                 // This should be the name of your apps angular module
-                module: 'ibmwatsonQaGroundtruthUiApp',
+                module: 'ibmwatson-nlc-groundtruth-app',
                 htmlmin: {
                     collapseBooleanAttributes: true,
                     collapseWhitespace: true,
@@ -596,7 +596,7 @@ module.exports = function(grunt) {
                 }
             }
         }
-        
+
     });
 
 
