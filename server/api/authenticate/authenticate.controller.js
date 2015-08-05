@@ -1,50 +1,50 @@
 'use strict';
 
+var httpstatus = require('http-status');
 var passport = require('passport');
 
-function prepareUserForResponse(user){
+function prepareUserForResponse (user) {
 
     return {
-        username:user.username,
-        tenants:[user.username]
+        username : user.username,
+        tenants : [user.username]
     }
 }
 
-exports.login = function(req, res, next) {
+exports.login = function login (req, res, next) {
 
-    passport.authenticate('local', function(err, user) {
+    passport.authenticate('local', function verify (err, user) {
 
         if (err) {
             return next(err);
         }
         if (!user) {
-            return res.status(400).end();
+            return res.status(httpstatus.BAD_REQUEST).end();
         }
 
-        req.logIn(user, function(err) {
+        req.logIn(user, function prepareResponse (err) {
             if (err) {
                 return next(err);
             }
-            res.status(200).json(prepareUserForResponse(user));
+            res.status(httpstatus.OK).json(prepareUserForResponse(user));
         });
     })(req, res, next);
 };
 
-exports.check = function(req, res) {
-    if(req.user){
-        console.log('user is authenticated',req.user);
-        res.status(200).json(prepareUserForResponse(req.user));
+exports.check = function check (req, res) {
+    if (req.user) {
+        res.status(httpstatus.OK).json(prepareUserForResponse(req.user));
     }
-    else{
-        res.status(401).send();
+    else {
+        res.status(httpstatus.UNAUTHORIZED).send();
     }
 };
 
-exports.logout = function(req, res) {
+exports.logout = function logout (req, res) {
     if (req.user) {
         req.logout();
-        res.status(200).end();
+        res.status(httpstatus.OK).end();
     } else {
-        res.status(400, "Not logged in").end();
+        res.status(httpstatus.BAD_REQUEST, 'Not logged in').end();
     }
 };

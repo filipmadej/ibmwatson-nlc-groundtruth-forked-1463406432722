@@ -6,10 +6,9 @@ var passport = require('passport'),
 
 // local dependencies
 var nlc = require('./nlc');
-var db = require('./cloudant');
 var log = require('./log');
 
-module.exports = function (app) {
+module.exports = function init (app) {
 
     // Serialize sessions
     passport.serializeUser(function serializeUser (user, callback) {
@@ -22,11 +21,8 @@ module.exports = function (app) {
 
     // Deserialize sessions
     passport.deserializeUser(function deserializeUser (username, callback) {
-        // db.getProfileByUsername(username,function(err,profile){
-        //     callback(err, profile);
-        // });
 
-        if(username === nlc.username){
+        if (username === nlc.username) {
             callback(null,nlc);
         }
     });
@@ -34,31 +30,19 @@ module.exports = function (app) {
     // Use local strategy
     passport.use(new LocalStrategy(function authenticate (username, password, done) {
 
-        console.log(nlc);
-
-        if(username === nlc.username && password === nlc.password){
+        if (username === nlc.username && password === nlc.password) {
             return done(null,nlc);
         }
 
         return done(null, false, {
             'message' : 'Username and password not recognised.'
         });
-        
-        // db.getProfileByUsername(username,function(err,profile){
-            
-        //     if (!!profile && profile.password === password) {
-        //         return done(null, profile);
-        //     }
 
-        //     return done(null, false, {
-        //         'message' : 'Username and password not recognised.'
-        //     });
-        // });
     }));
 
     passport.use(new BasicStrategy(
-        function(username, password, done) {
-            if(username === nlc.username && password === nlc.password){
+        function authenticate (username, password, done) {
+            if (username === nlc.username && password === nlc.password) {
                 return done(null,nlc);
             }
 

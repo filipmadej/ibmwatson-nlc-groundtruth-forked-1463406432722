@@ -17,16 +17,16 @@ var async = require('async');
 var makeArray = require('make-array');
 // db module dependencies
 var cloudant = require('ibmwatson-common-cloudant');
-var dbdesigns = require('./db/designs');
-var dberrors = require('./db/errors');
-var dbfetch = require('./db/fetch');
-var dbobjects = require('./db/objects');
-var dbviews = require('./db/views');
-var dbhandlers = require('./db/updatehandlers');
-var deleteall = require('./db/deletes');
+var dbdesigns = require('./designs');
+var dberrors = require('./errors');
+var dbfetch = require('./fetch');
+var dbobjects = require('./objects');
+var dbviews = require('./views');
+var dbhandlers = require('./updatehandlers');
+var deleteall = require('./deletes');
 // local dependencies
-var nlc = require('./nlc');
-var log = require('./log');
+var nlc = require('../nlc');
+var log = require('../log');
 
 var db;
 
@@ -445,7 +445,7 @@ function getProfile (id, callback) {
             next(null,profile);
         }
     ],callback);
-    
+
 }
 
 module.exports.getProfile = getProfile;

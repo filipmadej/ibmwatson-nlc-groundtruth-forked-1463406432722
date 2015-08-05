@@ -28,12 +28,12 @@ function sanitizeMetadata (value) {
     return null;
 }
 
-function ensureAuthenticated(req, res, next) {
+function ensureAuthenticated (req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     } else
         return passport.authenticate('basic', {
-            session: false
+            session : false
         })(req, res, next);
 }
 

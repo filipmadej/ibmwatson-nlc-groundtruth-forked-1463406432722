@@ -8,7 +8,7 @@ var makeArray = require('make-array');
 var restutils = require('ibmwatson-common-restapi');
 
 // local dependencies
-var db = require('../../config/cloudant');
+var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
 var rest = require('../../config/rest');

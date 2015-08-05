@@ -39,6 +39,7 @@
     "ibmwatson-common-restapi" : "http://npmdepends.mybluemix.net/npms/ibmwatson-common-restapi-0.2.15.tgz"
   },
   "devDependencies": {
+    "chai": "^3.0.0",
     "connect-livereload": "~0.4.0",
     "grunt": "~0.4.4",
     "grunt-angular-templates": "^0.5.4",
@@ -93,8 +94,10 @@
     "karma-requirejs": "~0.2.1",
     "karma-script-launcher": "~0.1.0",
     "open": "~0.0.4",
+    "proxyquire": "^1.4.0",
     "requirejs": "~2.1.11",
-    "should": "~3.3.1",
+    "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0",
     "supertest": "~0.11.0",
     "time-grunt": "~0.3.1"
   },

@@ -6,7 +6,7 @@ var express = require('express');
 var restutils = require('ibmwatson-common-restapi');
 
 // local dependencies
-var db = require('../../config/cloudant');
+var db = require('../../config/db/store');
 var log = require('../../config/log');
 var rest = require('../../config/rest');
 

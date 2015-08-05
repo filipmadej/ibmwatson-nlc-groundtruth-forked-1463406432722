@@ -17,12 +17,11 @@ var log = require('./config/log');
 var appEnv = cfenv.getAppEnv();
 var app = express();
 var server = require('http').createServer(app);
-var db = require('./config/cloudant');
+var db = require('./config/db/store');
 require('./config/express')(app);
 require('./config/passport')(app);
 require('./config/csrf')(app);
 require('./routes')(app);
-
 
 // start db then start the server
 async.series([
