@@ -4,7 +4,6 @@
 // =================================
 var cfenv = require('cfenv');
 var appEnv = cfenv.getAppEnv();
-var bluemix = require('../bluemix');
 module.exports = {
     // Server IP
     ip: appEnv.bind ||
@@ -16,8 +15,5 @@ module.exports = {
     port:   appEnv.port ||
             process.env.OPENSHIFT_NODEJS_PORT ||
             process.env.PORT ||
-            8080,
-
-    nlc_credentials: bluemix.getServiceCreds('natural_language_classifier')
-    
+            8080
 };

@@ -36,7 +36,7 @@ exports.check = function(req, res) {
         res.status(200).json(prepareUserForResponse(req.user));
     }
     else{
-        res.status(401).send();
+        res.status(401).end();
     }
 };
 
