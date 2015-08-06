@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-    .filter('slice', function() {
-        return function(arr, start, end) {
-            return (arr || []).slice(start, end);
-        };
-    });
+  .filter('slice', function() {
+    return function(arr, start, end) {
+      return (arr || []).slice(start, end);
+    };
+  });

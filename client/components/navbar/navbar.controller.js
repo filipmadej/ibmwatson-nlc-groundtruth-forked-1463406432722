@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('NavbarCtrl', function ($scope, $location) {
+  .controller('NavbarCtrl', function init ($scope, $location) {
     $scope.menu = [{
       'title': 'Home',
       'link': '/'
@@ -9,7 +9,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
     $scope.isCollapsed = true;
 
-    $scope.isActive = function(route) {
+    $scope.isActive = function isActive (route) {
       return route === $location.path();
     };
   });

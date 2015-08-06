@@ -6,7 +6,7 @@
 <html class="no-js">
 <!--<![endif]-->
 
-<head>
+  <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <base href="/">
@@ -32,44 +32,38 @@
     <!-- injector:css -->
     <!-- endinjector -->
     <!-- endbuild -->
+  </head>
 
-    <!-- IBM Custom Styles -->
-    <!--<link href="css/ibm-fonts.css" rel="stylesheet">
-    <link href="css/ibm-colors.css" rel="stylesheet">
-    <link href="css/ibm-custom.css" rel="stylesheet">
-    <link href="css/ibm-joe.css" rel="stylesheet">-->
-</head>
-
-<body ng-app="ibmwatson-nlc-groundtruth-app" ng-controller="AppController">
+  <body ng-app="ibmwatson-nlc-groundtruth-app" ng-controller="AppController">
 
     <!--[if lt IE 7]>
-<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-<![endif]-->
+    <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
 
     <!-- Navigation -->
     <nav ng-controller="NavigationCtrl" class="navbar navbar-default ibm-navbar">
-        <div class="container ibm-container">
-            <div id="navbar" class="navbar-collapse collapse">
-                <div class="navbar-header">
-                    <a class="navbar-brand ibm-navbar-brand" href="index.html">IBM <strong>Watson Toolkit</strong></a>
-                </div>
-                <ul class="nav navbar-nav navbar-right ibm-nav">
-                    <li ui-sref-active="active ibm-active">
-                        <a ui-sref="classifiers">Classifiers</a>
-                    </li>
-                    <li ui-sref-active="active ibm-active">
-                        <a ui-sref="clusters.list">Training</a>
-                    </li>
-                    <li class="dropdown ibm-dropdown">
-                      <a href="#" class="dropdown-toggle ibm-nav-icon" role="button" aria-expanded="false"><span class="ibm-icon ibm-icon-user"></span></a>
-                      <ul class="dropdown-menu ibm-dropdown-menu" role="menu">
-                        <li><a ng-click="logout()">Logout</a></li>
-                    </ul>
-                </li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
+      <div class="container ibm-container">
+        <div id="navbar" class="navbar-collapse collapse">
+          <div class="navbar-header">
+            <a class="navbar-brand ibm-navbar-brand" href="index.html">IBM <strong>Watson Toolkit</strong></a>
+          </div>
+          <ul class="nav navbar-nav navbar-right ibm-nav">
+            <li ui-sref-active="active ibm-active">
+              <a ui-sref="classifiers">Classifiers</a>
+            </li>
+            <li ui-sref-active="active ibm-active">
+              <a ui-sref="clusters">Training</a>
+            </li>
+            <li class="dropdown ibm-dropdown">
+              <a href="#" class="dropdown-toggle ibm-nav-icon" role="button" aria-expanded="false"><span class="ibm-icon ibm-icon-user"></span></a>
+              <ul class="dropdown-menu ibm-dropdown-menu" role="menu">
+                <li><a ng-click="logout()">Logout</a></li>
+              </ul>
+            </li>
+          </ul>
         </div>
+        <!--/.nav-collapse -->
+      </div>
     </nav>
 
     <!-- Add your site or application content here -->
@@ -77,17 +71,16 @@
 
     <!-- Footer -->
     <footer class="footer ibm-footer">
-        <ul class="list-inline ibm-list-inline">
-            <li>&#169; 2015 International Business Machines</li>
-        </ul>
+      <ul class="list-inline ibm-list-inline">
+        <li>&#169; 2015 International Business Machines</li>
+      </ul>
     </footer>
 
-
-
     <!--[if lt IE 9]>
-<script src="bower_components/es5-shim/es5-shim.js"></script>
-<script src="bower_components/json3/lib/json3.min.js"></script>
-<![endif]-->
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.min.js"></script>
+    <script src="bower_components/ng-file-upload-shim/ng-file-upload-shim.js"></script>
+    <![endif]-->
     <!-- build:js({client,node_modules}) app/vendor.js -->
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -105,7 +98,6 @@
     <script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
     <script src="bower_components/ngDialog/js/ngDialog.js"></script>
     <script src="bower_components/ng-file-upload/ng-file-upload.js"></script>
-    <script src="bower_components/ng-file-upload-shim/ng-file-upload-shim.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -116,13 +108,10 @@
     <script src="app/classes/classes.service.js"></script>
     <script src="app/classifiers/classifiers.controller.js"></script>
     <script src="app/classifiers/classifiers.js"></script>
-    <script src="app/clusters/clusters.controller.js"></script>
     <script src="app/clusters/clusters.js"></script>
     <script src="app/clusters/clustersList.controller.js"></script>
     <script src="app/config/config.service.js"></script>
     <script src="app/focusOnShow/focusOnShow.directive.js"></script>
-    <script src="app/livesystem/livesystem.controller.js"></script>
-    <script src="app/livesystem/livesystem.js"></script>
     <script src="app/login/login.controller.js"></script>
     <script src="app/login/login.js"></script>
     <script src="app/navigation/navigation.controller.js"></script>
@@ -135,6 +124,6 @@
     <script src="components/navbar/navbar.controller.js"></script>
     <!-- endinjector -->
     <!-- endbuild -->
-</body>
+  </body>
 
 </html>
