@@ -2,10 +2,8 @@
 
 var express = require('express');
 
-// ibmwatson dependencies
-var restutils = require('ibmwatson-common-restapi');
-
 // local dependencies
+var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var log = require('../../config/log');
 var rest = require('../../config/rest');

@@ -4,14 +4,14 @@ var express = require('express');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
-// ibmwatson dependencies
-var restutils = require('ibmwatson-common-restapi');
 
 // local dependencies
+var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
 var rest = require('../../config/rest');
+
 
 var responses = restutils.res;
 var requests = restutils.req;

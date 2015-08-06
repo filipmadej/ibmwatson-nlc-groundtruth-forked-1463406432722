@@ -7,6 +7,7 @@
 var httpstatus = require('http-status');
 var path = require('path');
 var errors = require('./components/errors');
+var responses = require('./components/restutils').res;
 var log = require('./config/log');
 
 module.exports = function configure (app) {
@@ -34,31 +35,6 @@ module.exports = function configure (app) {
   // error handling
   app.use(function returnError (err, req, res, next) { // eslint-disable-line no-unused-vars
     log.error({ err : err}, 'Uncaught exception');
-    if (err.statusCode) {
-        switch (err.statusCode) {
-            case httpstatus.NOT_FOUND:
-                return res.status(httpstatus.NOT_FOUND)
-                        .json({ error : 'Not found' });
-            case httpstatus.CONFLICT:
-                return res.status(httpstatus.PRECONDITION_FAILED)
-                        .json({ error : 'Incorrect If-Match header' })
-            case httpstatus.FORBIDDEN:
-                if (err.code === 'EBADCSRFTOKEN') {
-                    return res.status(httpstatus.FORBIDDEN)
-                        .json({ error : 'Invalid CSRF Token' })
-                }
-
-                return res.status(httpstatus.FORBIDDEN)
-                        .json({ error : 'Insufficient Privileges' })
-            default:
-                res.status(err.statusCode)
-                    .json({ error : err.error || err.message });
-        }
-    }
-    else {
-        // unknown error - assume server error
-        res.status(httpstatus.INTERNAL_SERVER_ERROR)
-            .json({ error : err.message });
-    }
+    responses.error(res, err);
   });
 };
