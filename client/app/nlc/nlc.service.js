@@ -27,7 +27,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                 }
                 for (var i = 0; i < processedContent.text.length; i++) {
                     if (processedContent.text[i].text === text) {
-                        updateUtterance(processedContent.utterances[i], classes);
+                        updateUtterance(processedContent.text[i], classes);
                         return;
                     }
                 }
@@ -52,6 +52,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                     text : []
                 };
                 for (var i = 0, len = data.length; i < len; i++) {
+                    console.log('processing record',data[i]);
                     //processRecord(data[i]);
                     processUtterance(processedContent, data[i].text, data[i].classes);
                     processTaggedClasses(processedContent, data[i].classes);
