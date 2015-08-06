@@ -33,9 +33,7 @@
     "request": "^2.55.0",
     "serve-favicon": "~2.0.1",
     "watson-developer-cloud": "~0.9.11",
-    "ibmwatson-common-auth": "http://npmdepends.mybluemix.net/npms/ibmwatson-common-auth-0.1.8.tgz",
     "ibmwatson-qa-config": "http://npmdepends.mybluemix.net/npms/ibmwatson-qa-config-0.4.2.tgz",
-    "ibmwatson-common-redis": "http://npmdepends.mybluemix.net/npms/ibmwatson-common-redis-0.1.1.tgz",
     "ibmwatson-common-restapi": "http://npmdepends.mybluemix.net/npms/ibmwatson-common-restapi-0.2.15.tgz"
   },
   "devDependencies": {
