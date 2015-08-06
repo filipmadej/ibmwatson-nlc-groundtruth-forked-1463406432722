@@ -22,3 +22,4 @@ applications:
   env:
     SESSION_SECRET: ibmwatson-nlc-groundtruth-session
     COOKIE_SECRET: ibmwatson-nlc-groundtruth-cookie
+    CLASSIFIER_SERVICE_NAME: ibmwatson-nlc-classifier

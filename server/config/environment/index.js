@@ -72,7 +72,7 @@ var all = {
       bluemix : 'https://console.ng.bluemix.net'
   },
 
-  classifierServiceName : 'ibmwatson-nlc-classifier'
+  classifierServiceName : process.env.CLASSIFIER_SERVICE_NAME || 'ibmwatson-nlc-classifier'
 
 };
 
