@@ -1,5 +1,7 @@
 {
   "extends": ".jshintrc",
+  "expr": true,
+  "validthis": true,
   "globals": {
     "describe": true,
     "it": true,

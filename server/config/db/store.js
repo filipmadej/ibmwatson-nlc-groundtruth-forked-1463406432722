@@ -16,7 +16,7 @@ var util = require('util');
 var async = require('async');
 var makeArray = require('make-array');
 // db module dependencies
-var cloudant = require('ibmwatson-common-cloudant');
+var cloudant = require('../../components/cloudant');
 var dbdesigns = require('./designs');
 var dberrors = require('./errors');
 var dbfetch = require('./fetch');
