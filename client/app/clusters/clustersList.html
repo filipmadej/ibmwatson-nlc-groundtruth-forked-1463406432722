@@ -21,11 +21,6 @@
   </div>
 </nav>
 
-<div class="ibm-container-wrapper">
-  <div ui-view></div>
-</div>
-
-
 <div class="container ibm-container" ng-init="setTableHeights()">
   <div class="row ibm-row" style="margin-top: 20px;">
 
@@ -168,9 +163,10 @@
                   </span>
                 </form>
                 <span class="ibm-nlc-classes-label">Classes:</span>
-                <span ng-repeat="answer in anUtterance.classes" class="ibm-nlc-tag">
-                  <span> {{ answer }} <a ng-click="removeTag(anUtterance, answer)"><span class="ibm-nlc-tag-x">x</span></a></span>
-                </span>
+                <div ng-repeat="answer in anUtterance.classes" class="ibm-nlc-tag">
+                  <span>{{ answer }}</span>
+                  <a ng-click="removeTag(anUtterance, answer)"><span class="ibm-nlc-tag-x">x</span></a>
+                </div>
                 <input type="text" id="newTagField{{ anUtterance.$$hashKey }}" class="ibm-nlc-add-tag-field" placeholder="class name..." ng-model="newTagStrings[anUtterance.$$hashKey]" ng-keyup="newTagFieldKeyUp($event, anUtterance)" list="classList" ng-show="anUtterance.beingTagged" show-focus="anUtterance.beingTagged">
                 <input type="button" value="+" class="ibm-nlc-add-class-button" ng-click="beginTaggingUtterance(anUtterance)" />
               </td>
