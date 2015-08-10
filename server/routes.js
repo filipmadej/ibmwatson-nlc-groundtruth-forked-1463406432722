@@ -16,7 +16,6 @@ module.exports = function configure (app) {
   app.use('/api/authenticate', require('./api/authenticate'));
   app.use('/api/import', require('./api/import'));
   app.use('/api/classifier', require('./api/classifier'));
-  app.use('/api/cluster', require('./api/cluster'));
 
   app.use('/api', require('./api/text'));
   app.use('/api', require('./api/class'));

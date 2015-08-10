@@ -1,6 +1,0 @@
-{
-    "eclassifier" : {
-        "apihost" : "http://ibmwatson-qa-eclassifier.mybluemix.net",
-        "apiport" : 80
-    }
-}
