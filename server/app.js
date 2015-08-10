@@ -25,16 +25,17 @@ require('./routes')(app);
 
 // start db then start the server
 async.series([
-  function startDb(next) {
+  function startDb (next) {
     db.start(next);
   },
-  function startServer(next) {
+  function startServer (next) {
     server.listen(config.port, config.ip, next);
   }
-], function handleStarupSeries(err, results) {
+], function handleStarupSeries (err, results) {
   if (err) {
-    log.error('Error during startup', err);
-    throw err;
+    var message = 'Error during startup';
+    log.error({err : err}, message);
+    throw new Error(message);
   } else {
     log.info('Express server listening on %d, in %s mode', config.port, app.get('env'));
   }
