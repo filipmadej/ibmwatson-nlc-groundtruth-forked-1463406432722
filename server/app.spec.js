@@ -17,12 +17,39 @@ var app;
 
 describe('server/app', function () {
 
+  beforeEach(function () {
+    this.httpMock = new mocks.HttpMock();
+    this.storeMock = new mocks.StoreMock();
+  });
+
+  it('should default to development environment', function (done) {
+    this.timeout(5000);
+
+    if (process.env.NODE_ENV) {
+      this.originalEnv = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+    }
+
+    app = proxyquire('./app', {
+      'http' : this.httpMock,
+      './config/db/store' : this.storeMock
+    });
+
+    // Need to pause momentarily to let the async function complete
+    setTimeout( function () {
+      process.env.NODE_ENV.should.equal('development');
+      if (this.originalEnv) {
+        process.env.NODE_ENV = this.originalEnv;
+      }
+      done();
+    }.bind(this), 500);
+
+
+  });
+
   describe('#success', function () {
     beforeEach(function (done) {
       this.timeout(5000);
-
-      this.httpMock = new mocks.HttpMock();
-      this.storeMock = new mocks.StoreMock();
 
       app = proxyquire('./app', {
         'http' : this.httpMock,
@@ -32,7 +59,7 @@ describe('server/app', function () {
       // Need to pause momentarily to let the async function complete
       setTimeout( function () {
         done();
-      }.bind(this), 500);
+      }, 500);
     });
 
     it('should start successfully', function () {
@@ -51,8 +78,6 @@ describe('server/app', function () {
 
       this.error = 'test-generated';
 
-      this.httpMock = new mocks.HttpMock();
-      this.storeMock = new mocks.StoreMock();
       this.logMock = new mocks.LogMock();
 
       this.originalException = process.listeners('uncaughtException').pop()
