@@ -159,7 +159,7 @@ describe('/server/api/class', function () {
 
   });
 
-  describe.only('/classes/:classid', function () {
+  describe('/classes/:classid', function () {
 
     var VALID_ID = 'abc-123';
 
