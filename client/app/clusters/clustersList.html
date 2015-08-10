@@ -152,9 +152,9 @@
                   <input type="checkbox" ng-model="anUtterance.checked"/>
                 </span>
               </td>
-              <td width="100%">
+              <td width="100%" style="padding: 10px 8px 5px;">
                 <!-- to force this cell to maximum available space -->
-                <div ng-show="!anUtterance.edit" style="margin-bottom: 5px;">
+                <div ng-show="!anUtterance.edit">
                   {{ anUtterance.label || 'empty' }}
                 </div>
                 <form ng-show="anUtterance.edit" ng-submit="changeLabel('utterance', anUtterance);">
