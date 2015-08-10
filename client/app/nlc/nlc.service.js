@@ -62,13 +62,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         },
 
         /* Upload a JSON to NLC service and returns a trained classifier */
-        train: function train (trainingData) {
+        train: function train (trainingData, language) {
           /*jshint camelcase: false */
           $http({
             method: 'POST',
             url: '/api/classifier/train',
             data: {
-              language: 'en',
+              language: language,
               name: 'classifier',
               training_data: trainingData
             }
@@ -165,6 +165,39 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               });
             }
           });
+        },
+
+        /* export the classes & texts from the UI into a JSON file */
+        download: function download (text, classes) {
+          var i, index;
+          var mappedClasses = [];
+          var unmappedClasses = [];
+          var csvString = '';
+          for (i = 0; i < text.length; i += 1) {
+            if (text[i].classes.length > 0) {
+              csvString += text[i].label;
+              for (var j = 0; j < text[i].classes.length; j += 1) {
+                index = mappedClasses.indexOf(text[i].classes[j]);
+                if (index < 0) {
+                  mappedClasses.push(text[i].classes[j]);
+                }
+                csvString += ',' + text[i].classes[j];
+              }
+              csvString += '<br>';
+            }
+          }
+          for (i = 0; i < classes.length; i += 1) {
+            index = mappedClasses.indexOf(classes[i].label);
+            if (index < 0) {
+              unmappedClasses.push(classes[i].label);
+            }
+
+          }
+          for (i = 0; i < unmappedClasses.length; i += 1) {
+            csvString += ',' + unmappedClasses[i];
+          }
+          var w = window.open('');
+          w.document.write(csvString);
         }
       };
 
