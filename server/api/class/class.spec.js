@@ -40,7 +40,7 @@ describe('/server/api/class', function () {
 
   var error = {
     error : 'test-generated',
-    code : 400
+    statusCode : httpstatus.NOT_FOUND
   };
 
   this.timeout(5000);
@@ -72,7 +72,7 @@ describe('/server/api/class', function () {
       });
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.createClass.callsArgWith(2, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+        storeMock.createClass.callsArgWith(2, error);
 
         request(app)
           .post(ENDPOINTBASE)
@@ -140,7 +140,7 @@ describe('/server/api/class', function () {
     describe('GET', function () {
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.countClasses.callsArgWith(1, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+        storeMock.countClasses.callsArgWith(1, error);
 
         request(app)
           .get(ENDPOINTBASE)
@@ -202,7 +202,7 @@ describe('/server/api/class', function () {
 
       it('should fail to return non-existent class', function (done) {
 
-        storeMock.getClass.callsArgWith(2, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+        storeMock.getClass.callsArgWith(2, error);
 
         request(app)
           .get(INVALID_LOCATION)
@@ -218,6 +218,7 @@ describe('/server/api/class', function () {
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
+            storeMock.getClass.should.have.been.calledWith(TENANT, VALID_ID, sinon.match.func);
             done(err);
           });
       });
@@ -235,7 +236,7 @@ describe('/server/api/class', function () {
       });
 
       it('should fail to replace unknown class', function (done) {
-        storeMock.replaceClass.callsArgWith(3, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+        storeMock.replaceClass.callsArgWith(3, error);
 
         request(app)
           .put(INVALID_LOCATION)
@@ -333,7 +334,7 @@ describe('/server/api/class', function () {
     describe('DELETE', function () {
 
       it('should fail to delete unknown class', function (done) {
-        storeMock.deleteClass.callsArgWith(3, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+        storeMock.deleteClass.callsArgWith(3, error);
 
         request(app)
           .del(INVALID_LOCATION)
@@ -355,13 +356,14 @@ describe('/server/api/class', function () {
       });
 
       it('should successfully delete class', function (done) {
+        var etag = uuid.v1();
         request(app)
           .del(VALID_LOCATION)
           .set('Cookie', [this.sessionCookie])
-          .set('If-Match', uuid.v1())
+          .set('If-Match', etag)
           .expect(httpstatus.NO_CONTENT)
           .end(function (err) {
-            storeMock.deleteClass.should.have.been.called;
+            storeMock.deleteClass.should.have.been.calledWith(TENANT, VALID_ID, etag, sinon.match.func);
             done(err);
           });
       });

@@ -149,7 +149,7 @@ module.exports.createText = function createText (req, res) {
   var tenantid = req.params.tenantid;
   var textattrs = req.body;
 
-  if (!textattrs) {
+  if (!textattrs || !Object.keys(textattrs).length) {
     return responses.badrequest('Missing request body', res);
   }
 
