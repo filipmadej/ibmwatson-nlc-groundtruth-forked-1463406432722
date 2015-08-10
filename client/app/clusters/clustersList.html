@@ -1,5 +1,5 @@
 <div class="container ibm-container" ng-init="setTableHeights()">
-  <div class="row ibm-row">
+  <div class="row ibm-row" style="margin-top: 20px;">
 
     <!-- --------------------------------- classes header and filter --------------------------------- -->
     <div class="col-sm-5 col-lg-4">
@@ -131,18 +131,17 @@
               </td>
               <td width="100%">
                 <!-- to force this cell to maximum available space -->
-                <span ng-show="!anUtterance.edit">
+                <div ng-show="!anUtterance.edit" style="margin-bottom: 5px;">
                   {{ anUtterance.label || 'empty' }}
-                </span>
+                </div>
                 <form ng-show="anUtterance.edit" ng-submit="changeLabel('utterance', anUtterance);">
                   <span>
                     <input id="{{ anUtterance.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ anUtterance.label }}" ng-keyup="keyUpCancelEditing(anUtterance, $event)" ng-blur="changeLabel('utterance', anUtterance)" show-focus="anUtterance.edit">
                   </span>
                 </form>
-                <br>
-                <span class="ibm-nlc-classes-label">classes:</span>
-                <span ng-repeat="answer in anUtterance.classes">
-                  <span class="ibm-nlc-tag"> {{ answer }} <a ng-click="removeTag(anUtterance, answer)"><span class="ibm-nlc-tag-x">x</span></a></span>
+                <span class="ibm-nlc-classes-label">Classes:</span>
+                <span ng-repeat="answer in anUtterance.classes" class="ibm-nlc-tag">
+                  <span> {{ answer }} <a ng-click="removeTag(anUtterance, answer)"><span class="ibm-nlc-tag-x">x</span></a></span>
                 </span>
                 <input type="text" id="newTagField{{ anUtterance.$$hashKey }}" class="ibm-nlc-add-tag-field" placeholder="class name..." ng-model="newTagStrings[anUtterance.$$hashKey]" ng-keyup="newTagFieldKeyUp($event, anUtterance)" list="classList" ng-show="anUtterance.beingTagged" show-focus="anUtterance.beingTagged">
                 <input type="button" value="+" class="ibm-nlc-add-class-button" ng-click="beginTaggingUtterance(anUtterance)" />
