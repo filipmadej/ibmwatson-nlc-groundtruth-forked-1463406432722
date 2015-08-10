@@ -1,13 +1,15 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-    .directive('showFocus', function($timeout) {
-        return function(scope, element, attrs) {
-            scope.$watch(attrs.showFocus,
-                function(newValue) {
-                    $timeout(function() {
-                        newValue && element.focus();
-                    });
-                }, true);
-        };
-    });
+  .directive('showFocus', function init ($timeout) {
+    return function focus (scope, element, attrs) {
+      scope.$watch(attrs.showFocus,
+        function watch (newValue) {
+          $timeout(function focus () {
+            if (newValue) {
+              element.focus();
+            }
+          });
+        }, true);
+    };
+  });

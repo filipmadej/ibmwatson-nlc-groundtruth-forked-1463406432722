@@ -1,66 +1,55 @@
-<!--
-<p ng-repeat="classifier in classifiers" ui-sref="clusters.list({classifierId: classifier.classifier_id})">
-    {{ classifier }} {{ classifier.classifier_id }}
-</p>
-
--->
-
 <div class="ibm-container-wrapper">
-    <div class="container ibm-container">
-        <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
-        <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
-            <div class="col-sm-5 col-md-6">
-                <div class="inline check">
-                    <span>
-                        <input type="checkbox" ng-model="aClass.checked"/>
-                    </span>
-                </div>
-                <div class="inline ibm-nlc-classifier-name">
-                    <span>
-                        {{ classifier.name }} ({{ classifier.status }})
-                    </span>
-                    <!--<div class="inline" style="margin-left:10px">
-                        <span class="ibm-icon ibm-icon-edit" ng-click="editField(aClass)"></span>
-                    </div>-->
-                    <div class="inline" style="margin-left:10px" ng-click="deleteClassifier(classifier.classifier_id)">
-                        <span class="ibm-icon ibm-icon-delete"></span>
-                    </div>
-                    <div class="ibm-nlc-classifier-id">
-                        <label>Classifier ID:</label><span class="ibm-badge">{{ classifier.classifier_id }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-7 col-md-6">
-                <div class="inline pad col-xs-12">
-                    <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
-                        <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this Classifier...' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available'">Classify</button>
-                        </span>
-
-                    </form>
-                </div>
-            </div>
-            <div ng-show="classifier.logs.length" class="col-xs-12" style="border-top:1px solid #CCC"></div>
-            <div ng-show="classifier.logs.length" class="col-xs-12 collapse in" style="background-color: rgb(244, 242, 242);  border-bottom: 1px solid rgb(204, 204, 204);" id="{{ classifier.classifier_id }}">
-                <div class="logs-title">Logs</div>
-                <div class="logs">
-                    <div ng-repeat="entry in classifier.logs">
-                        <div class="utterance" ng-if="entry.text">
-                            {{ entry.text }}
-                        </div>
-                        <div class="classes" ng-if="entry.classes">
-                            <div ng-repeat="class in entry.classes">
-                                {{ class.class_name }} ({{ class.confidence | number: 2}})
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div ng-show="classifier.logs.length" class="col-xs-12 expand-logs" role="button" data-toggle="collapse" data-target="{{ '#' + classifier.classifier_id }}" aria-expanded="true" aria-controls="{{ classifier.classifier_id }}" ng-click="toggleArrowDown(classifier)">
-                <span class="ibm-icon" ng-class="{'ibm-icon-down' : classifier.showArrowDown, 'ibm-icon-up' : !classifier.showArrowDown }"></span>
-            </div>
+  <div class="container ibm-container">
+    <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
+    <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
+      <div class="col-sm-5 col-md-6">
+        <div class="inline check">
+          <span>
+            <input type="checkbox" ng-model="aClass.checked"/>
+          </span>
         </div>
-    </div>
-</div>
+        <div class="inline ibm-nlc-classifier-name">
+          <span>
+            {{ classifier.name }} ({{ classifier.status }})
+          </span>
+          <div class="inline" style="margin-left:10px" ng-click="deleteClassifier(classifier.classifier_id)">
+            <span class="ibm-icon ibm-icon-delete"></span>
+          </div>
+          <div class="ibm-nlc-classifier-id">
+            <label>Classifier ID:</label><span class="ibm-badge">{{ classifier.classifier_id }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-7 col-md-6">
+        <div class="inline pad col-xs-12">
+          <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
+            <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this Classifier...' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available'">Classify</button>
+            </span>
 
+          </form>
+        </div>
+      </div>
+      <div ng-show="classifier.logs.length" class="col-xs-12" style="border-top:1px solid #CCC"></div>
+      <div ng-show="classifier.logs.length" class="col-xs-12 collapse in" style="background-color: rgb(244, 242, 242);  border-bottom: 1px solid rgb(204, 204, 204);" id="{{ classifier.classifier_id }}">
+        <div class="logs-title">Logs</div>
+        <div class="logs">
+          <div ng-repeat="entry in classifier.logs">
+            <div class="utterance" ng-if="entry.text">
+              {{ entry.text }}
+            </div>
+            <div class="classes" ng-if="entry.classes">
+              <div ng-repeat="class in entry.classes">
+                {{ class.class_name }} ({{ class.confidence | number: 2}})
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div ng-show="classifier.logs.length" class="col-xs-12 expand-logs" role="button" data-toggle="collapse" data-target="{{ '#' + classifier.classifier_id }}" aria-expanded="true" aria-controls="{{ classifier.classifier_id }}" ng-click="toggleArrowDown(classifier)">
+        <span class="ibm-icon" ng-class="{'ibm-icon-down' : classifier.showArrowDown, 'ibm-icon-up' : !classifier.showArrowDown }"></span>
+      </div>
+    </div>
+  </div>
+</div>

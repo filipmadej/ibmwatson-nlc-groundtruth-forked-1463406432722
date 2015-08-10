@@ -1,63 +1,60 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-    .controller('ClassifiersCtrl', ['$scope', 'nlc',
-        function($scope, nlc) {
-            $scope.classifiers = [];
+  .controller('ClassifiersCtrl', ['$scope', 'nlc',
+    function init ($scope, nlc) {
+      $scope.classifiers = [];
 
-            $scope.toggleArrowDown = function(classifier) {
-               classifier.showArrowDown = !classifier.showArrowDown;
-            };
+      $scope.toggleArrowDown = function toggleArrowDown (classifier) {
+        classifier.showArrowDown = !classifier.showArrowDown;
+      };
 
-            $scope.loadClassifiers = function() {
-                nlc.getClassifiers().then(function(data) {
-                    console.log(data);
-                    $scope.classifiers = data.classifiers;
-                    $scope.classifiers.forEach(function(d){
-                        // add additional data required for UI interactions
-                        $scope.checkStatus(d); // get an initial status check
-                        //$scope.pollStatus(d, 5000); // set up the poll to update the status every 5 seconds
-                        d.logs = []; // store the texts and consequent classes
-                        d.status = ''; // what is the availibility status of the classifier
-                        d.textToClassify = ''; // store the ng-model variable for a given classifier
-                        d.showArrowDown = false; // show logs for a given classifier
-                    });
-                });
-            };
+      $scope.loadClassifiers = function loadClassifiers () {
+        nlc.getClassifiers().then(function getClassifiers (data) {
+          $scope.classifiers = data.classifiers;
+          $scope.classifiers.forEach(function forEach (classifier) {
+            // add additional data required for UI interactions
+            $scope.checkStatus(classifier); // get an initial status check
+            //$scope.pollStatus(d, 5000); // set up the poll to update the status every 5 seconds
+            classifier.logs = []; // store the texts and consequent classes
+            classifier.status = ''; // what is the availibility status of the classifier
+            classifier.textToClassify = ''; // store the ng-model variable for a given classifier
+            classifier.showArrowDown = false; // show logs for a given classifier
+          });
+        });
+      };
 
-            $scope.loadClassifiers();
+      $scope.loadClassifiers();
 
-            $scope.checkStatus = function(classifier) {
-                /*jshint camelcase: false */
-                nlc.checkStatus(classifier.classifier_id).then(function(data){
-                    classifier.status = data.status;
-                });
-            };
+      $scope.checkStatus = function checkStatus (classifier) {
+        /*jshint camelcase: false */
+        nlc.checkStatus(classifier.classifier_id).then(function setStatus (data) {
+          classifier.status = data.status;
+        });
+      };
 
-            $scope.pollStatus = function (classifier, interval) {
-                /*jshint camelcase: false */
-                nlc.pollStatus(classifier.classifier_id, function(data) {
-                    classifier.status = data.status;
-                }, interval);
-            };
+      $scope.pollStatus = function pollStatus (classifier, interval) {
+        /*jshint camelcase: false */
+        return nlc.pollStatus(classifier.classifier_id, function setStatus (data) {
+          classifier.status = data.status;
+        }, interval);
+      };
 
-            $scope.deleteClassifier = function(id) {
-                nlc.remove(id).then(function() {
-                    $scope.loadClassifiers();
-                });
-            };
+      $scope.deleteClassifier = function deleteClassifier (id) {
+        nlc.remove(id).then(function reload () {
+          $scope.loadClassifiers();
+        });
+      };
 
-            $scope.classify = function (classifier, text) {
-                /*jshint camelcase: false */
-                classifier.textToClassify = '';
-                classifier.logs.push({
-                    text: text
-                });
-                nlc.classify(classifier.classifier_id, text).then(function(data) {
-                    classifier.logs.push({
-                        classes: data.classes
-                    });
-                });
-            };
-        }
-    ]);
+      $scope.classify = function classify (classifier, text) {
+        /*jshint camelcase: false */
+        classifier.textToClassify = '';
+        classifier.logs.push({
+          text: text
+        });
+        nlc.classify(classifier.classifier_id, text).then(function logResults (data) {
+          classifier.logs.push({ classes: data.classes });
+        });
+      };
+    }
+  ]);

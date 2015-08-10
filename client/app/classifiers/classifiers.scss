@@ -1,69 +1,69 @@
 .ibm-nlc-classifier-row {
-    background-color: #FFFFFF;
-    border: 1px solid #CCCCCC;
-    .ibm-nlc-classifier-name {
-        font-family: HelvNeueBoldForIBM;
-        padding: 15px;
-        font-size: 1.1em;
-        .ibm-nlc-classifier-id {
-            font-family: HelvNeueLightForIBM;
-            font-size: 0.7em;
-            line-height: 0.9em;
-            margin-top: 10px;
-            .ibm-badge {
-                border-radius: 0px;
-                background-color: white;
-                border: 1px solid #CCC;
-                padding: 7px 10px 4px;
-                margin-left: 8px;
-            }
-        }
+  background-color: #FFFFFF;
+  border: 1px solid #CCCCCC;
+  .ibm-nlc-classifier-name {
+    font-family: HelvNeueBoldForIBM;
+    padding: 15px;
+    font-size: 1.1em;
+    .ibm-nlc-classifier-id {
+      font-family: HelvNeueLightForIBM;
+      font-size: 0.7em;
+      line-height: 0.9em;
+      margin-top: 10px;
+      .ibm-badge {
+        border-radius: 0px;
+        background-color: white;
+        border: 1px solid #CCC;
+        padding: 7px 10px 4px;
+        margin-left: 8px;
+      }
     }
-    .pad {
-        padding: 27px 10px;
-        .ibm-icon {
-            margin: 0px 10px;
-            width: 24px;
-            height: 24px;
-        }
+  }
+  .pad {
+    padding: 27px 10px;
+    .ibm-icon {
+      margin: 0px 10px;
+      width: 24px;
+      height: 24px;
     }
+  }
 }
 .logs-title {
-    margin: 10px 0px 5px;
-    font-size: 1em;
-    border-bottom: 2px solid rgb(205, 202, 202);
-    color: rgb(148, 148, 148);
+  margin: 10px 0px 5px;
+  font-size: 1em;
+  border-bottom: 2px solid rgb(205, 202, 202);
+  color: rgb(148, 148, 148);
 }
 .logs {
-    max-height: 200px;
-    overflow: scroll;
-    margin: 10px 0px;
+  max-height: 200px;
+  overflow: scroll;
+  margin: 10px 0px;
+  border: 1px solid #CCC;
+  background-color: #FDFDFD;
+  padding: 10px;
+  .utterance {
+    background-color: rgb(50, 92, 128);
+    display: inline-block;
+    color: white;
+    padding: 5px 10px 3px;
+    font-family: HelvNeueLightForIBM;
+  }
+  .classes>div {
+    background-color: white;
+    display: inline-block;
     border: 1px solid #CCC;
-    background-color: #FDFDFD;
-    padding: 10px;
-    .utterance {
-        background-color: rgb(50, 92, 128);
-        display: inline-block;
-        color: white;
-        padding: 5px 10px 3px;
-        font-family: HelvNeueLightForIBM;
-    }
-    .classes>div {
-        background-color: white;
-        display: inline-block;
-        border: 1px solid #CCC;
-        font-size: 0.9em;
-        color: #333;
-        margin: 10px 10px 10px 0px;
-        padding: 5px 10px 3px;
-        font-family: HelvNeueLightForIBM;
-    }
+    font-size: 0.9em;
+    color: #333;
+    margin: 10px 10px 10px 0px;
+    padding: 5px 10px 3px;
+    font-family: HelvNeueLightForIBM;
+  }
 }
 .expand-logs {
-    text-align: center;
-    padding-top: 6px;
+  text-align: center;
+  padding-top: 6px;
 }
 .expand-logs:hover {
-    cursor: pointer;
-    background-color: #CCC;
+  cursor: pointer;
+  background-color: #CCC;
 }
