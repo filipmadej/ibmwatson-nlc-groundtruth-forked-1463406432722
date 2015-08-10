@@ -71,6 +71,21 @@ describe('/server/api/class', function () {
           .expect(httpstatus.BAD_REQUEST, done);
       });
 
+      it('should pass back error from cloudant', function (done) {
+        storeMock.createClass.callsArgWith(2, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+
+        request(app)
+          .post(ENDPOINTBASE)
+          .set('Cookie', [this.sessionCookie])
+          .send({ name : 'test-1' })
+          .expect('Content-Type', /json/)
+          .expect(httpstatus.NOT_FOUND)
+          .end(function (err, resp) {
+            storeMock.createClass.should.have.been.called;
+            done(err);
+          });
+      });
+
       it('should create class without error', function (done) {
         request(app)
           .post(ENDPOINTBASE)
@@ -124,6 +139,21 @@ describe('/server/api/class', function () {
 
     describe('GET', function () {
 
+      it('should pass back error from cloudant', function (done) {
+        storeMock.countClasses.callsArgWith(1, {error : 'test-generated', statusCode : httpstatus.NOT_FOUND});
+
+        request(app)
+          .get(ENDPOINTBASE)
+          .set('Cookie', [this.sessionCookie])
+          .expect('Content-Type', /json/)
+          .expect(httpstatus.NOT_FOUND)
+          .end(function (err, resp) {
+            storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
+            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
+            done(err);
+          });
+      });
+
       it('should fetch classes without error', function (done) {
         request(app)
           .get(ENDPOINTBASE)
@@ -133,6 +163,7 @@ describe('/server/api/class', function () {
           .end(function (err, resp) {
             resp.should.have.property('body');
             storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
+            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
           });
       });
@@ -151,6 +182,7 @@ describe('/server/api/class', function () {
             storeMock.getClasses.should.have.been.calledWith(TENANT,
                sinon.match({skip : 2, limit : 6, fields : ['_id', 'name']}),
                sinon.match.func);
+            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
           });
       });
