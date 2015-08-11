@@ -398,6 +398,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       $scope.add = function (type, label) {
+        $scope.newClassString = '';
+        $scope.newUtteranceString = '';
         var deferred = $q.defer();
         if (!label) {
           deferred.resolve();
@@ -406,8 +408,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         // if an object already exists with this label
         var existingObject = $scope.getFromLabel($scope.getScopeArray(type), label);
         if (existingObject) {
-          $scope.newClassString = '';
-          $scope.newUtteranceString = '';
           var msg = $scope.inform('The ' + type + ' "' + existingObject.label + '" already exists.');
           ngDialog.open({template: msg, plain: true});
           deferred.resolve();
@@ -554,22 +554,22 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // return array of classes filtered by label substring match with classFilter field
+      // return array of classes filtered by label substring match with newClassString field
       // (this matches interactive behavior of utterance filter so not just based on leading characters e.g.)
       $scope.filteredClasses = function () {
         var i, results = [];
-        if (!$scope.classFilter) {
+        if (!$scope.newClassString) {
           return $scope.classes;
         }
         for (i = 0; i < $scope.classes.length; i++) {
-          if ($scope.classes[i].label.toLowerCase().indexOf($scope.classFilter.toLowerCase()) >= 0) {
+          if ($scope.classes[i].label.toLowerCase().indexOf($scope.newClassString.toLowerCase()) >= 0) {
             results.push($scope.classes[i]);
           }
         }
         return results;
       };
 
-      // return array of utterances filtered by class inclusion and further filtered by label substring match with utteranceFilter field
+      // return array of utterances filtered by class inclusion and further filtered by label substring match with newUtteranceString field
       $scope.filteredUtterances = function () {
         var i, j, selectedClasses = $scope.getSelected(), firstFilteredResults = [], results = [];
         if (selectedClasses.length === 0) {
@@ -587,10 +587,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             }
           }
         }
-        // filter further by utteranceFilter string if not empty
-        if ($scope.utteranceFilter) {
+        // filter further by newUtteranceString string if not empty
+        if ($scope.newUtteranceString) {
           for (i = 0; i < firstFilteredResults.length; i++) {
-            if (firstFilteredResults[i].label.toLowerCase().indexOf($scope.utteranceFilter.toLowerCase()) >= 0) {
+            if (firstFilteredResults[i].label.toLowerCase().indexOf($scope.newUtteranceString.toLowerCase()) >= 0) {
               results.push(firstFilteredResults[i]);
             }
           }

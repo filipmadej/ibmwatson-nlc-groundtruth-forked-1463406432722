@@ -86,6 +86,11 @@
 .ibm-nlc-toggle-add-button {
   position: relative;
 }
+.ibm-nlc-inline-btn {
+  border: 1px solid #777677;
+  padding-top: 9px;
+  padding-bottom: 7px;
+}
 .ibm-nlc-filter-field {
   position: relative;
   font-size: 0.8em;
@@ -103,6 +108,7 @@
   position: relative;
   //top: 10px;
   font-size: 0.8em;
+  padding-bottom: 2px;
 }
 .ibm-nlc-scrolling-table {
   width: 100%;
@@ -112,15 +118,15 @@
 .ibm-nlc-table tr {
   border-bottom: 2px solid white;
   .ibm-icon-delete {
-    height: 16px;
-    width: 16px;
+    /*height: 16px;
+    width: 16px;*/
     background-image: url(../assets/images/remove-trash_32.png) !important;
     visibility: hidden;
     cursor: pointer;
   }
   .ibm-icon-edit {
-    height: 16px;
-    width: 16px;
+    /*height: 16px;
+    width: 16px;*/
     background-image: url(../assets/images/edit_32.png) !important;
     visibility: hidden;
     cursor: pointer;
@@ -205,6 +211,7 @@
   float: left;
   font-size: 0.9em;
   padding-right: 0.3em;
+  margin-top: 7px;
 }
 .ibm-nlc-filter-tag {
   position: relative;
