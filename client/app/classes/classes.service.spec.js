@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Controller: ClustersListCtrl', function() {
+describe('Service: classes', function() {
 
     var $httpBackend;
     var TENANT = 'myTenant', EP_CLASSES = 'http://classes';
