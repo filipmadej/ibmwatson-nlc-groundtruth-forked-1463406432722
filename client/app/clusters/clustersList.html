@@ -27,19 +27,10 @@
     <!-- --------------------------------- classes header and filter --------------------------------- -->
     <div class="col-sm-5 col-lg-4">
       <span class="ibm-nlc-column-header">Classes</span>
-      <!--<input type="image" id="classTextToggleButton" class="ibm-nlc-icon-header" src="assets/images/add-new_64.png" width="20px" height="20px" ng-click="toggleClassTextField()" />-->
       <span class="ibm-nlc-showing-results">Showing {{ filteredClasses().length }} of {{ classes.length }} Classes</span>
-      <!--<form class="form-group ibm-form-group" ng-submit="add('class', newClassString);" ng-show="classTextFieldVisible">
-        <span>
-          <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
-        </span>
-      </form>-->
 
       <!-- --------------------------------- classes sort --------------------------------- -->
       <div ng-show="classes.length">
-        <!--<form style="margin-bottom:0px" class="form-group ibm-form-group" ng-show="classes.length">
-          <input type="text" class="form-control ibm-form-control ibm-nlc-filter-field" placeholder="Filter Classes..." ng-model="classFilter">
-        </form>-->
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
           <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
@@ -106,11 +97,7 @@
     <!-- --------------------------------- utterances header and filter --------------------------------- -->
     <div class="col-sm-7 col-lg-8">
       <span class="ibm-nlc-column-header">Texts</span>
-      <!--<input type="image" id="utteranceTextToggleButton" class="ibm-nlc-icon-header" src="assets/images/add-new_64.png" width="20px" height="20px" ng-click="toggleUtteranceTextField()" />-->
       <span class="ibm-nlc-showing-results">Showing {{ filteredUtterances().length }} of {{ utterances.length }} Texts</span>
-      <!--<form class="form-group ibm-form-group" ng-submit="add('utterance', newUtteranceString);" ng-show="utteranceTextFieldVisible">
-        <input type="text" id="utteranceTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Text Label..." ng-model="newUtteranceString" show-focus="utteranceTextFieldVisible">
-      </form>-->
 
       <!-- --------------------------------- utterances sort --------------------------------- -->
       <div ng-show="utterances.length">
@@ -120,9 +107,6 @@
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(utterances, newUtteranceString)">Add</button>
           </span>
         </form>
-        <!--<form style="margin-bottom:0px" class="form-group ibm-form-group">
-          <input type="text" class="form-control ibm-form-control ibm-nlc-filter-field" placeholder="Filter Texts..." ng-model="utteranceFilter">
-        </form>-->
         <div ng-show="getSelected().length" style="margin-top: 10px;">
           <span class="ibm-nlc-showing-tagged-results">Tagged with:</span>
           <span ng-repeat="aClass in getSelected()">
