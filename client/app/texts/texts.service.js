@@ -11,8 +11,7 @@ function getMetadataEtag() {
 }
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('texts', ['$http', 'endpoints', 'session',
-    function init ($http, endpoints, session) {
+  .factory('texts', ['$http', 'endpoints', 'session', function init ($http, endpoints, session) {
 
       function textsEndpoint () {
         return endpoints.texts + '/' + session.tenant + '/texts';
