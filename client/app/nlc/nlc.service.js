@@ -62,17 +62,29 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         },
 
         /* Upload a JSON to NLC service and returns a trained classifier */
-        train: function train (trainingData, language) {
+        train: function train (trainingData, language, name) {
           /*jshint camelcase: false */
+          var data;
+          if (Array.isArray(trainingData)) {
+            data = {
+              language: language,
+              name: name,
+              training_data: trainingData
+            };
+          } else {
+            data = {
+              training_metadata: JSON.stringify({ language: language, name: name }),
+              training_data: {
+                value: trainingData,
+                options: { contentType: 'application/octet-stream' }
+              }
+            };
+          }
           return $q(function post (resolve, reject) {
             $http({
               method: 'POST',
               url: '/api/classifier/train',
-              data: {
-                language: language,
-                name: 'classifier',
-                training_data: trainingData
-              }
+              data: data
             }).then(function success (response) {
               $log.debug(response);
               resolve(response.data);

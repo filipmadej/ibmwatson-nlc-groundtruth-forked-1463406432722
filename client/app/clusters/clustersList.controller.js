@@ -803,7 +803,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // -------------------------------------------------------------------------------------------------
 
       $scope.train = function () {
-        var i, j, msg, stringFragment, tokens;
+        var i, msg, stringFragment;
         // validation - should this be server side, or at least a part of the service?
         for (i = 0; i < $scope.utterances.length; i++) {
           if ($scope.utterances[i].classes.length === 0) {
@@ -817,29 +817,31 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             ngDialog.open({template: msg, plain: true});
             return;
           }
-          tokens = $scope.utterances[i].label.split(' ');
-          for (j = 0; j < tokens.length; j += 1) {
-            if (tokens[j].length > 45) {
-              msg = $scope.inform('"' + tokens[j] + '" in text "' + $scope.utterances[i].label + '" is longer than 45 characters. Please change this before starting training.');
-              ngDialog.open({template: msg, plain: true});
-              return;
-            }
+        }
+
+        for (i = 0; i < $scope.classes.length; i++) {
+          if ($scope.numberUtterancesInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
+            msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
+            ngDialog.open({template: msg, plain: true});
+            return;
           }
         }
+
         // create training data
-        var trainingData = [];
-        $scope.utterances.forEach(function forEach (text) {
-          trainingData.push({
-            text: text.label,
-            classes: text.classes
-          });
-        });
+        // var trainingData = [];
+        // $scope.utterances.forEach(function forEach (text) {
+        //   trainingData.push({
+        //     text: text.label,
+        //     classes: text.classes
+        //   });
+        // });
+
+        var trainingData = $scope.toCsv();
 
         // send to NLC service and then navigate to classifiers page
-        nlc.train(trainingData, $scope.languageCode).then(function(){
+        nlc.train(trainingData, $scope.languageCode, 'classifier').then(function(){
           $state.go('classifiers');
         });
-        // nlc.train($scope.toCsv(), $scope.languageCode);
       };
 
       $scope.exportToFile = function () {

@@ -1,11 +1,11 @@
 ---
-declared-services: 
-  ibmwatson-nlc-cloudant: 
-    label: cloudantNoSQLDB 
+declared-services:
+  ibmwatson-nlc-cloudant:
+    label: cloudantNoSQLDB
     plan: Shared
   ibmwatson-nlc-classifier:
     label: natural_language_classifier
-    plan: beta
+    plan: standard
 applications:
 - services:
   - ibmwatson-nlc-cloudant

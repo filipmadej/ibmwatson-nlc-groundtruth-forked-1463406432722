@@ -34,7 +34,7 @@
     "redis": "^0.12.1",
     "request": "^2.55.0",
     "serve-favicon": "~2.0.1",
-    "watson-developer-cloud": "~0.9.11"
+    "watson-developer-cloud": "git://github.com/jpbufe3/nodejs-wrapper.git#dev"
   },
   "devDependencies": {
     "chai": "^3.0.0",
