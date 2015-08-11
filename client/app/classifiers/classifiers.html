@@ -1,6 +1,11 @@
 <div class="ibm-container-wrapper">
   <div class="container ibm-container">
     <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
+    <div ng-if="classifiers.length === 0" class="ibm-nlc-nodata-message">
+      <h2>Watson needs your data.</h2>
+        <p>You have no trained classifiers.</p>
+        <p>Head over the the 'Training' tab to 'Save/Train' a classifier having uploaded/written some texts and classes.</p>
+    </div>
     <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
       <div class="col-sm-5 col-md-6">
         <div class="inline check">

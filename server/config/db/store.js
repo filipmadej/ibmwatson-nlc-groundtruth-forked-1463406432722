@@ -6,7 +6,7 @@
  *
  * @see db/objects for definitions of the objects that will be stored.
  * @author Dale Lane
- * @module ibmwatson-qa-questionstore/lib/db
+ * @module server/api/config/db/store
  */
 
 // core dependencis
@@ -239,10 +239,6 @@ module.exports.countClasses = function countClasses (tenant, callback) {
     dbviews.countClasses(db, tenant, callback);
 };
 module.exports.getClass = getClass;
-
-module.exports.updateClassMetadata = function updateClassMetadata (id, metadata, callback) {
-    dbhandlers.updateClassMetadata(db, id, metadata, callback);
-};
 
 
 /**

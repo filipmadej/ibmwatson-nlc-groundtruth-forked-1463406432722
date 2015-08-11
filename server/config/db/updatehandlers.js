@@ -112,35 +112,3 @@ module.exports.updateTextMetadata = function updateTextMetadata (db, textid, met
     });
 };
 
-
-module.exports.updateClassMetadata = function updateClassMetadata (db, classid, metadata, callback) {
-    log.debug({
-        metadata : metadata,
-        class : classid
-    }, 'Updating metadata on class');
-
-    if (!metadata) {
-        // nothing to do
-        return callback();
-    }
-
-    var parameters = { metadata : metadata };
-
-    db.atomic('class', 'update-metadata', classid, parameters, function checkResponse (err, resp) {
-
-        var errorMsg = function errorMsg () {
-            return util.format('Failed to update metadata on text [%s]', classid)
-        }
-
-        if (err) {
-            log.error({ err : err }, errorMsg());
-            return callback(err);
-        }
-
-        if (resp.error) {
-            log.error({ response : resp }, errorMsg());
-            return callback(dberrors.asError(resp.error, errorMsg(), resp.code));
-        }
-        return callback();
-    });
-};

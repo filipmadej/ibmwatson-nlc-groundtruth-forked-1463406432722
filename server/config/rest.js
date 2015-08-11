@@ -14,20 +14,6 @@ function hideImplementationDetails (object) {
     return object;
 }
 
-function sanitizeMetadata (value) {
-    if (value && (value.value || value.metadata) ) {
-
-        var patch = {
-            value : value.value,
-            metadata : value.metadata
-        };
-
-        return patch;
-    }
-
-    return null;
-}
-
 function ensureAuthenticated (req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -37,9 +23,7 @@ function ensureAuthenticated (req, res, next) {
         })(req, res, next);
 }
 
-
 module.exports = {
-  hideImplementationDetails: hideImplementationDetails,
-  sanitizeMetadata: sanitizeMetadata,
-  ensureAuthenticated: ensureAuthenticated
+  hideImplementationDetails : hideImplementationDetails,
+  ensureAuthenticated : ensureAuthenticated
 };

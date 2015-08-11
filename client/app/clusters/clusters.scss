@@ -154,13 +154,13 @@
 }
 .ibm-nlc-tag {
   font-size: small;
-  background-color: #dff2ff;
+  background-color: #F1F1F1;
   position: relative;
-  margin-bottom: 5px;
-  padding-top: 4px;
-  padding-left: 4px;
-  border-radius: 5px;
+  margin: 3px 0px 3px 5px;
+  padding: 6px 0px 3px 5px;
   cursor: default;
+  border: 1px solid #C7C7C7;
+  display: inline-block;
 }
 .ibm-nlc-tag a:hover {
   color: orange;
@@ -193,6 +193,9 @@
 }
 .ibm-nlc-classes-label {
   font-size: small;
+  color: grey;
+  font-family: HelvNeueLightForIBM;
+  margin-right: -5px;
 }
 .ibm-nlc-showing-results {
   font-size: 0.9em;
@@ -210,6 +213,11 @@
 .ibm-nlc-tag-x {
   padding-left: .2em;
   padding-right: .4em;
+  color: #525151;
+  margin-left: 5px;
+}
+.ibm-nlc-tag-x:hover{
+  color: #525151;
 }
 .ibm-nlc-sortbydropdown {
   float: right;
