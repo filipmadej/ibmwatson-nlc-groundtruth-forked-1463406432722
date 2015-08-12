@@ -1,8 +1,5 @@
-/**
- * Express configuration
- */
-
 'use strict';
+/* eslint max-statements: 0 */
 
 var express = require('express');
 var favicon = require('serve-favicon');
@@ -12,14 +9,13 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var RedisStore = require('connect-redis')(session);
 var errorHandler = require('errorhandler');
 var path = require('path');
 var config = require('./environment');
 var log = require('./log');
 
 
-module.exports = function(app) {
+module.exports = function init (app) {
 
   var env = app.get('env');
 
@@ -27,7 +23,7 @@ module.exports = function(app) {
   app.engine('html', require('ejs').renderFile);
   app.set('view engine', 'html');
   app.use(compression());
-  app.use(bodyParser.urlencoded({ extended: false }));
+  app.use(bodyParser.urlencoded({ extended : false }));
   app.use(bodyParser.json());
   app.use(methodOverride());
   app.use(cookieParser(config.secrets.cookie));
@@ -38,18 +34,16 @@ module.exports = function(app) {
 
   var redisClient = require('./redis')();
 
-  log.debug({secret:config.secrets.session},'Using Session Secret');
-
-
-  if(!!redisClient){
+  if (!!redisClient) {
     // If Redis is available, use as session store
+    var RedisStore = require('connect-redis')(session);
     app.use(session({
-      secret:config.secrets.session,
-      store: new RedisStore({client:redisClient})
+      secret : config.secrets.session,
+      store : new RedisStore({client : redisClient})
     }));
-  }else{
+  } else {
     // Otherwise, use local sessions
-    app.use(session({secret:config.secrets.session}));
+    app.use(session({secret : config.secrets.session}));
   }
 
 
