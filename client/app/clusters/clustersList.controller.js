@@ -76,6 +76,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       ];
       $scope.languageOption = $scope.languageOptions[1];
 
+      // training related elements
+      $scope.showTrainConfirm = false;
+      $scope.newClassifier = {}; // for some reason the ng-model needed to be talking to an object
+      $scope.newClassifier.name = '';
+
       // class related elements
       $scope.classes = [];
       $scope.newClassString = '';
@@ -837,7 +842,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         // var trainingData = $scope.toCsv();
 
         // send to NLC service and then navigate to classifiers page
-        nlc.train(trainingData, $scope.languageOption.value, 'classifier').then(function(){
+        nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
+          $scope.showTrainConfirm = false;
           $state.go('classifiers');
         });
       };

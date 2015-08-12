@@ -12,8 +12,16 @@
         </ul>
         <ul class="nav navbar-nav navbar-right ibm-nav">
           <li style="float: right">
-            <a ng-if="status !== 'Training'" ng-click="train()">Save & Train</a>
-            <a ng-if="status === 'Training'" style="pointer-events: none">Training</a>
+            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm">Save & Train</a>
+            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
+              <div class="form-group ibm-form-group input-group">
+                <input type="text" id="classTextField" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
+              <span class="input-group-btn">
+                <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
+              </span>
+              </div>
+
+            </form>
           </li>
         </ul>
       </div>
