@@ -15,20 +15,19 @@
             <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm">Save & Train</a>
             <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
               <div class="form-group ibm-form-group input-group">
-                  <div class="input-group-btn dropdown">
-                    <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
-                    </button>
-                    <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
-                      <li ng-repeat="option in languageOptions">
-                        <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
-                      </li>
-                    </ul>
-                  </div>
-                  <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
-                  <span class="input-group-btn">
-                    <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
-                  </span>
-
+                <div class="input-group-btn dropdown">
+                  <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
+                  </button>
+                  <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
+                    <li ng-repeat="option in languageOptions">
+                      <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
+                    </li>
+                  </ul>
+                </div>
+                <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
+                <span class="input-group-btn">
+                  <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
+                </span>
               </div>
             </form>
           </li>

@@ -21,6 +21,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             //$scope.pollStatus(d, 5000); // set up the poll to update the status every 5 seconds
             classifier.logs = []; // store the texts and consequent classes
             classifier.status = ''; // what is the availibility status of the classifier
+            classifier.errorMessage = '';
             classifier.textToClassify = ''; // store the ng-model variable for a given classifier
             classifier.showArrowDown = false; // show logs for a given classifier
           });
@@ -33,6 +34,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         /*jshint camelcase: false */
         nlc.checkStatus(classifier.classifier_id).then(function setStatus (data) {
           classifier.status = data.status;
+          if (classifier.status === 'Failed') {
+            classifier.errorMessage = data.status_message;
+          }
         });
       };
 
@@ -52,11 +56,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.classify = function classify (classifier, text) {
         /*jshint camelcase: false */
         classifier.textToClassify = '';
-        classifier.logs.push({
+        classifier.logs.unshift({
           text: text
         });
         nlc.classify(classifier.classifier_id, text).then(function logResults (data) {
-          classifier.logs.push({ classes: data.classes });
+          classifier.logs.splice(1, 0, { classes: data.classes });
         });
       };
     }
