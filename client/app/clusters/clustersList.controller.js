@@ -915,6 +915,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
         return result;
       };
+      
+      // set language by dropdown selection
+      $scope.setLanguageOption = function (option) {
+        $scope.languageOption = option;
+      };
 
     }
   ]);

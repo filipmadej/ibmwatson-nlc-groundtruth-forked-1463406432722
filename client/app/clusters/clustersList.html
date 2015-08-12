@@ -15,12 +15,22 @@
             <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm">Save & Train</a>
             <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
               <div class="form-group ibm-form-group input-group">
-                <input type="text" id="classTextField" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
-              <span class="input-group-btn">
-                <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
-              </span>
+                <div class="form-field">
+                  <input type="text" id="classTextField" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
+                </div>
+                <div class="dropdown form-field">
+                  <button class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">Language: {{ languageOption.label }}<span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
+                    <li ng-repeat="option in languageOptions">
+                      <a ng-click="setLanguageOption(option);">{{ option.label }}</a>
+                    </li>
+                  </ul>
+                </div>
+                <span class="input-group-btn form-field">
+                  <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
+                </span>
               </div>
-
             </form>
           </li>
         </ul>
