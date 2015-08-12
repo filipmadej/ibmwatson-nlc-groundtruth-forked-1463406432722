@@ -1,17 +1,9 @@
 'use strict';
 
+var fs = require('fs');
 var path = require('path');
 var _ = require('lodash');
 var env = process.env.NODE_ENV || 'development';
-
-function requiredProcessEnv (name) {
-  if (!process.env[name]) {
-    throw new Error('You must set the ' + name + ' environment variable');
-  }
-  return process.env[name];
-}
-
-console.error(env);
 
 // All configurations will extend these options
 // ============================================
@@ -30,13 +22,10 @@ var all = {
     session : process.env.SESSION_SECRET || 'ibmwatson-nlc-groundtruth-session-secret'
   },
 
-  // List of user roles
-  userRoles : ['guest', 'user', 'admin'],
-
   // Default values for VCAP, to be used with node cfenv if not present
   vcap : {
     application : null,
-    services : null 
+    services : null
    //  {
    //    'cloudantNoSQLDB': [
    //    {
@@ -76,8 +65,21 @@ var all = {
 
 };
 
+var customEnv = path.resolve(__dirname, env + '.js');
+
+var custom = {};
+try {
+    // Query the entry
+    fs.lstatSync(customEnv);
+
+    custom = require(customEnv);
+}
+catch (e) {
+    custom = {};
+}
+
 // Export the config object based on the NODE_ENV
 // ==============================================
 module.exports = _.merge(
   all,
-  require('./' + env + '.js') || {});
+  custom);

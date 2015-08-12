@@ -82,13 +82,17 @@ describe('server/app', function () {
 
       this.originalException = process.listeners('uncaughtException').pop()
 
-      process.removeListener('uncaughtException', this.originalException);
+      if (this.originalException) {
+        process.removeListener('uncaughtException', this.originalException);
+      }
 
 
     });
 
     afterEach(function () {
-      process.listeners('uncaughtException').push(this.originalException)
+      if (this.originalException) {
+        process.listeners('uncaughtException').push(this.originalException);
+      }
     });
 
     it('should not start on db error', function (done) {

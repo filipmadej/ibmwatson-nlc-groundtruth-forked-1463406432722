@@ -10,6 +10,8 @@ var chai = require('chai');
 var httpstatus = require('http-status');
 var proxyquire = require('proxyquire');
 var request = require('supertest');
+var sinon = require('sinon');
+var sinonChai = require('sinon-chai');
 
 // local dependencies
 var nlc = require('../../config/nlc');
@@ -18,9 +20,14 @@ var nlc = require('../../config/nlc');
 var mocks = require('../../test/mocks');
 
 var should = chai.should();
+chai.use(sinonChai);
+
+var passport = require('passport');
+passport['@global'] = true;
 
 var app = proxyquire('../../app', {
-  './config/db/store' : new mocks.StoreMock()
+  './config/db/store' : new mocks.StoreMock(),
+  'passport' : passport
 });
 
 describe('/server/api/authenticate', function () {
@@ -64,6 +71,7 @@ describe('/server/api/authenticate', function () {
   });
 
   describe('POST /api/authenticate', function () {
+
     it('should respond with a 200 response if the user provides the correct credentials', function (done) {
       request(app)
         .post('/api/authenticate')
@@ -88,6 +96,44 @@ describe('/server/api/authenticate', function () {
         .post('/api/authenticate')
         .auth(nlc.username, nlc.password)
         .expect(httpstatus.BAD_REQUEST, done);
+    });
+
+    it('should return error from passport strategy', function (done) {
+
+      var passportStub = sinon.stub(passport, 'authenticate', function (strategy, callback) {
+        return function (req, res, next) {
+          callback({error : 'test-generated'});
+        }
+      });
+
+      request(app)
+        .post('/api/authenticate')
+        .auth(nlc.username, nlc.password)
+        .expect(httpstatus.INTERNAL_SERVER_ERROR)
+        .end(function (err, resp) {
+          passport.authenticate.restore();
+          done(err);
+        });
+    });
+
+    it('should return error from request login', function (done) {
+
+      var passportStub = sinon.stub(passport, 'authenticate', function (strategy, callback) {
+        return function (req, res, next) {
+          var loginStub = sinon.stub(req, 'logIn');
+          loginStub.callsArgWith(1, {error : 'test-generated'});
+          callback(null, {username : 'test-user'});
+        }
+      });
+
+      request(app)
+        .post('/api/authenticate')
+        .auth(nlc.username, nlc.password)
+        .expect(httpstatus.INTERNAL_SERVER_ERROR)
+        .end(function (err, resp) {
+          passport.authenticate.restore();
+          done(err);
+        });
     });
   });
 
