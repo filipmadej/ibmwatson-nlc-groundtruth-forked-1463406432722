@@ -102,5 +102,81 @@ describe('server/config/environment', function () {
     });
   });
 
+  describe('#production', function () {
+
+    before(function () {
+      process.env.NODE_ENV = 'production';
+      this.originalIP = process.env.IP;
+      this.originalPort = process.env.PORT;
+    });
+
+    after(function () {
+      process.env.IP = this.originalIP;
+      process.env.PORT = this.originalPort;
+    });
+
+    beforeEach(function () {
+      delete process.env.IP;
+      delete process.env.PORT;
+
+      this.cfenvMock = {
+        getAppEnv : sinon.stub()
+      };
+
+      this.cfenvMock.getAppEnv.returns({});
+
+    });
+
+    it('should set production custom variables to cfenv values', function () {
+
+      process.env.IP = '192.168.1.1';
+      process.env.PORT = 9999;
+
+      var values = {
+        bind : 'test-generated',
+        port : -1
+      };
+
+      this.cfenvMock.getAppEnv.returns(values);
+
+      var prodEnv = proxyquire('./production', {
+        'cfenv' : this.cfenvMock
+      });
+
+      prodEnv.should.have.property('ip', values.bind);
+      prodEnv.should.have.property('port', values.port);
+
+    });
+
+    it('should set production custom variables to environment variables', function () {
+      process.env.IP = '192.168.1.1';
+      process.env.PORT = 9999;
+
+      this.cfenvMock.getAppEnv.returns({});
+
+      var prodEnv = proxyquire('./production', {
+        'cfenv' : this.cfenvMock
+      });
+
+      prodEnv.should.have.property('ip', process.env.IP);
+      prodEnv.should.have.property('port', process.env.PORT);
+
+    });
+
+
+    it('should set production custom variables to default values', function () {
+      this.cfenvMock.getAppEnv.returns({});
+
+      var prodEnv = proxyquire('./production', {
+        'cfenv' : this.cfenvMock
+      });
+
+      prodEnv.should.have.property('ip', undefined);
+      prodEnv.should.have.property('port', 8080);
+
+    });
+
+  });
+
 
 });

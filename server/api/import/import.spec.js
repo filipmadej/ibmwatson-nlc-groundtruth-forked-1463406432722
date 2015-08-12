@@ -19,35 +19,131 @@ var app = proxyquire('../../app', {
   './config/db/store' : new mocks.StoreMock()
 });
 
-describe('/server/api/authenticate', function () {
+describe('/server/api/import', function () {
 
   describe('POST /api/import/csv', function () {
-    var file;
 
-    before('load the test csv file', function (done) {
-      fs.readFile('server/api/import/test.csv', 'utf8', function (err, data) {
-        if (err) throw err;
-        file = data;
-        done();
-      });
-    });
-
-    it('should respond with the CSV parsed file', function (done) {
+    it('should parse CSV input', function (done) {
       request(app)
         .post('/api/import/csv')
         .auth(nlc.username, nlc.password)
         .set('Content-Type', 'text/plain')
-        .send(file)
+        .send('Text 1,Class 1')
         .expect(200)
         .end(function (err, res) {
-        res.body.length.should.equal(8);
-        res.body[0].text.should.equal('Example input 1');
-        res.body[0].classes.length.should.equal(0);
-        res.body[4].text.should.equal('Example quote " " input 5');
-        res.body[3].classes.length.should.equal(3);
-        done(err);
-      });
+          res.should.have.property('body').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].text', 'Text 1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].classes[0]', 'Class 1');
+          done(err);
+        });
     });
+
+    it('should parse multi-line CSV input', function (done) {
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text 1,Class 1\nText 2,Class 2')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(2);
+          res.should.have.deep.property('body[1].text', 'Text 2');
+          res.should.have.deep.property('body[1].classes').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[1].classes[0]', 'Class 2');
+          done(err);
+        });
+    });
+
+    it('should not require classes', function (done) {
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text 1')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].text', 'Text 1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(0);
+          done(err);
+        });
+    });
+
+    it('should handle multiple classes', function (done) {
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text 1,Class 1,Class 2,Class 3')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].text', 'Text 1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(3);
+          res.should.have.deep.property('body[0].classes[0]', 'Class 1');
+          res.should.have.deep.property('body[0].classes[1]', 'Class 2');
+          res.should.have.deep.property('body[0].classes[2]', 'Class 3');
+          done(err);
+        });
+    });
+
+    it('should skip empty fields', function (done) {
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text 1,Class 1,,Class 2')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].text', 'Text 1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(2);
+          res.should.have.deep.property('body[0].classes[0]', 'Class 1');
+          res.should.have.deep.property('body[0].classes[1]', 'Class 2');
+          done(err);
+        });
+    });
+
+    it('should handle inline quoting', function (done) {
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('"Te,,xt, 1",Class 1,Class 2\n"Text "" "" 2",Class 1')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(2);
+          res.should.have.deep.property('body[0].text', 'Te,,xt, 1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(2);
+          res.should.have.deep.property('body[0].classes[0]', 'Class 1');
+          res.should.have.deep.property('body[0].classes[1]', 'Class 2');
+          res.should.have.deep.property('body[1].text', 'Text " " 2');
+          res.should.have.deep.property('body[1].classes').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[1].classes[0]', 'Class 1');
+          done(err);
+        });
+    });
+
+    it('should handle inline tabs', function (done) {
+      // Inline line breaks must be escaped right now (\\n) since it breaks CSV parsing
+      // as line breaks are the record delimiter
+      request(app)
+        .post('/api/import/csv')
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text\t1,Class 1,Class\t2\t')
+        .expect(200)
+        .end(function (err, res) {
+          res.should.have.property('body').that.is.an('array').with.length(1);
+          res.should.have.deep.property('body[0].text', 'Text\t1');
+          res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(2);
+          res.should.have.deep.property('body[0].classes[0]', 'Class 1');
+          res.should.have.deep.property('body[0].classes[1]', 'Class\t2\t');
+          done(err);
+        });
+    });
+
   });
 
 });
