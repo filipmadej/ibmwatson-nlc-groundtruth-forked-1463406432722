@@ -24,10 +24,18 @@ describe('server/config/environment', function () {
   });
 
   after(function () {
-    process.env.NODE_ENV = this.originalNodeEnv;
-    process.env.COOKIE_SECRET = this.originalCookieSecret;
-    process.env.SESSION_SECRET = this.originalSessionSecret;
-    process.env.CLASSIFIER_SERVICE_NAME = this.originalServiceName;
+    if (this.originalNodeEnv) {
+      process.env.NODE_ENV = this.originalNodeEnv;
+    }
+    if (this.originalCookieSecret) {
+      process.env.COOKIE_SECRET = this.originalCookieSecret;
+    }
+    if (this.originalSessionSecret) {
+      process.env.SESSION_SECRET = this.originalSessionSecret;
+    }
+    if (this.originalServiceName) {
+      process.env.CLASSIFIER_SERVICE_NAME = this.originalServiceName;
+    }
   });
 
   beforeEach(function () {
@@ -36,10 +44,21 @@ describe('server/config/environment', function () {
       'test-generated' : true
     };
 
+    process.env.COOKIE_SECRET = 'cookie-secret';
+    process.env.SESSION_SECRET = 'session-secret';
+    process.env.CLASSIFIER_SERVICE_NAME = 'classifier-service-name';
+
     this.runTest = function runTest (verifyFn) {
       env = proxyquire('./index', {});
       verifyFn.call(this);
     };
+  });
+
+  afterEach(function () {
+    delete process.env.NODE_ENV;
+    delete process.env.COOKIE_SECRET;
+    delete process.env.SESSION_SECRET;
+    delete process.env.CLASSIFIER_SERVICE_NAME;
   });
 
   it('should load development environment file when NODE_ENV unspecified', function () {
@@ -111,8 +130,13 @@ describe('server/config/environment', function () {
     });
 
     after(function () {
-      process.env.IP = this.originalIP;
-      process.env.PORT = this.originalPort;
+      if (this.originalIP) {
+        process.env.IP = this.originalIP;
+      }
+
+      if (this.originalPort) {
+        process.env.PORT = this.originalPort;
+      }
     });
 
     beforeEach(function () {
@@ -125,6 +149,11 @@ describe('server/config/environment', function () {
 
       this.cfenvMock.getAppEnv.returns({});
 
+    });
+
+    afterEach(function () {
+      delete process.env.IP;
+      delete process.env.PORT;
     });
 
     it('should set production custom variables to cfenv values', function () {
