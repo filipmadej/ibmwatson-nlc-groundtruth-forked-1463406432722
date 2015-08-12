@@ -74,7 +74,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         { label: 'Japanese', value: 'ja' },
         { label: 'Spanish', value: 'es' }
       ];
-      $scope.languageOption = $scope.languageOptions[0];
+      $scope.languageOption = $scope.languageOptions[1];
 
       // class related elements
       $scope.classes = [];
