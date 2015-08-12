@@ -11,7 +11,6 @@ var cookieParser = require('cookie-parser');
 var express = require('express');
 var session = require('express-session');
 var httpstatus = require('http-status');
-var passport = require('passport');
 var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
 var sinon = require('sinon');
