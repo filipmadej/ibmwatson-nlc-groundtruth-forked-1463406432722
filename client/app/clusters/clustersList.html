@@ -16,7 +16,7 @@
             <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
               <div class="form-group ibm-form-group input-group">
                   <div class="input-group-btn dropdown">
-                    <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">lang: {{ languageOption.value }}<span style="margin-left:5px" class="caret"></span>
+                    <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
                     </button>
                     <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
                       <li ng-repeat="option in languageOptions">
@@ -47,7 +47,7 @@
       <span class="ibm-nlc-showing-results">Showing {{ filteredClasses().length }} of {{ classes.length }} Classes</span>
 
       <!-- --------------------------------- classes sort --------------------------------- -->
-      <div ng-show="classes.length">
+      <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
           <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
@@ -117,7 +117,7 @@
       <span class="ibm-nlc-showing-results">Showing {{ filteredUtterances().length }} of {{ utterances.length }} Texts</span>
 
       <!-- --------------------------------- utterances sort --------------------------------- -->
-      <div ng-show="utterances.length">
+      <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('utterance', newUtteranceString);">
           <input type="text" id="utteranceTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Utterance Label..." ng-model="newUtteranceString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
