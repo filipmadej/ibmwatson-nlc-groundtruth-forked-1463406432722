@@ -30,7 +30,7 @@ module.exports = function(app) {
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
   app.use(methodOverride());
-  app.use(cookieParser());
+  app.use(cookieParser(config.secrets.cookie));
 
 
   // Configure Sessions
@@ -51,8 +51,8 @@ module.exports = function(app) {
     // Otherwise, use local sessions
     app.use(session({secret:config.secrets.session}));
   }
-  
-  
+
+
   if ('production' === env) {
     app.use(favicon(path.join(config.root, 'dist', 'public', 'favicon.ico')));
     app.use(express.static(path.join(config.root, 'dist', 'public')));

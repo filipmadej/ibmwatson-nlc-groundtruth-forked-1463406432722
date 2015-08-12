@@ -78,10 +78,10 @@ describe('/server/api/authenticate', function () {
         .send({username : nlc.username, password : nlc.password})
         .expect(httpstatus.OK)
         .end(function (err, res) {
-        should.exist(res.headers['set-cookie'][0]);
-        res.headers['set-cookie'][0].should.match(/^connect\.sid/);
-        done(err);
-      });
+          should.exist(res.headers['set-cookie'][0]);
+          res.headers['set-cookie'][0].should.match(/^connect\.sid/);
+          done(err);
+        });
     });
 
     it('should respond with a 400 response if the user provides the incorrect credentials', function (done) {
