@@ -11,6 +11,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
   .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc',
     function ($scope, $state, $http, $q, ngDialog, classes, texts, nlc) {
 
+      // Page Loading Variables
+      $scope.loading = {
+        classes : true,
+        texts: true,
+        savingClassifier: false
+      };
+
       // -------------------------------------------------------------------------
       // Load functions
       // -------------------------------------------------------------------------
@@ -32,6 +39,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             element.selected = false;
           });
           deferred.resolve(data);
+          $scope.loading.classes = false;
           $scope.classes = data;
         });
         return deferred.promise;
@@ -57,6 +65,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             element.checked = false;
           });
           deferred.resolve(data);
+          $scope.loading.texts = false;
           $scope.utterances = data;
         });
         return deferred.promise;
@@ -840,7 +849,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
 
         // var trainingData = $scope.toCsv();
-
+        $scope.loading.savingClassifier = true;
         // send to NLC service and then navigate to classifiers page
         nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
           $scope.showTrainConfirm = false;

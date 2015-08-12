@@ -3,6 +3,8 @@
 angular.module('ibmwatson-nlc-groundtruth-app')
   .controller('ClassifiersCtrl', ['$scope', 'nlc',
     function init ($scope, nlc) {
+      $scope.loading = true;
+
       $scope.classifiers = [];
 
       $scope.toggleArrowDown = function toggleArrowDown (classifier) {
@@ -11,6 +13,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.loadClassifiers = function loadClassifiers () {
         nlc.getClassifiers().then(function getClassifiers (data) {
+          $scope.loading = false;
           $scope.classifiers = data.classifiers;
           $scope.classifiers.forEach(function forEach (classifier) {
             // add additional data required for UI interactions

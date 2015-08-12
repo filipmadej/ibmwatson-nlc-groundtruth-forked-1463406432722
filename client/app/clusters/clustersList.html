@@ -39,7 +39,7 @@
 </nav>
 
 <div class="container ibm-container" ng-init="setTableHeights()">
-  <div class="row ibm-row" style="margin-top: 20px;">
+  <div class="row ibm-row" style="margin-top: 20px;" ng-show="!loading.savingClassifier">
 
     <!-- --------------------------------- classes header and filter --------------------------------- -->
     <div class="col-sm-5 col-lg-4">
@@ -75,8 +75,9 @@
       <datalist id="classList">
         <option ng-repeat="c in classes" value="{{ c.label }}" />
       </datalist>
-      <div class="ibm-nlc-table" ng-show="classes.length">
-        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''">
+      <div class="ibm-nlc-table">
+        <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
+        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
           <div class="inline check">
             <span>
               <input type="checkbox" ng-model="aClass.checked"/>
@@ -156,8 +157,9 @@
       </div>
 
       <!-- --------------------------------- utterances list --------------------------------- -->
-      <div id="utterancesTable" class="ibm-nlc-scrolling-table" ng-show="utterances.length">
-        <table class="table ibm-nlc-table" width="100%">
+      <div id="utterancesTable" class="ibm-nlc-scrolling-table">
+        <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
+        <table class="table ibm-nlc-table" width="100%" ng-show="utterances.length">
           <tbody>
             <tr class="ibm-nlc-table-row" ng-repeat="anUtterance in filteredUtterances() | orderBy:utteranceOrder">
               <td>
@@ -195,11 +197,12 @@
       </div>
     </div>
   </div>
-  <div ng-if="classes.length + utterances.length === 0" class="ibm-nlc-nodata-message">
+  <div ng-if="classes.length + utterances.length === 0 && (!loading.classes || !loading.texts)" class="ibm-nlc-nodata-message">
     <h2>Watson needs your data.</h2>
     <p>Train NL Classifier by providing examples of how you want text to be labelled.</p>
     <p>- Enter your texts and labels manually.</p>
     <p>or</p>
     <p>- Import JSON or CSV data using the "Import" Option</p>
   </div>
+  <watson-loading ng-show="loading.savingClassifier" loading-message="'Saving & Training Classifier...'"></watson-loading>
 </div>
