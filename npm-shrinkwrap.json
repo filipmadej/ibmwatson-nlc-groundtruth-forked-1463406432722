@@ -2600,9 +2600,9 @@
       }
     },
     "watson-developer-cloud": {
-      "version": "0.9.27",
-      "from": "../../../../var/folders/bs/fnmnprgn4gx2_6wydlbddcj40000gn/T/npm-12868-04cdee5d/git-cache-55558d393553/f3160c0ea7effaa325d592637162c781e31dbd23",
-      "resolved": "git://github.com/jpbufe3/nodejs-wrapper.git#f3160c0ea7effaa325d592637162c781e31dbd23",
+      "version": "0.9.28",
+      "from": "watson-developer-cloud@>=0.9.28 <0.10.0",
+      "resolved": "https://registry.npmjs.org/watson-developer-cloud/-/watson-developer-cloud-0.9.28.tgz",
       "dependencies": {
         "async": {
           "version": "1.4.2",
@@ -2613,6 +2613,11 @@
           "version": "0.1.3",
           "from": "cookie@>=0.1.3 <0.2.0",
           "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.1.3.tgz"
+        },
+        "csv-stringify": {
+          "version": "0.0.8",
+          "from": "csv-stringify@>=0.0.8 <0.1.0",
+          "resolved": "https://registry.npmjs.org/csv-stringify/-/csv-stringify-0.0.8.tgz"
         },
         "extend": {
           "version": "3.0.0",
@@ -2652,11 +2657,6 @@
           "version": "1.1.1",
           "from": "object.pick@>=1.1.1 <1.2.0",
           "resolved": "https://registry.npmjs.org/object.pick/-/object.pick-1.1.1.tgz"
-        },
-        "string": {
-          "version": "3.3.1",
-          "from": "string@>=3.3.0 <3.4.0",
-          "resolved": "https://registry.npmjs.org/string/-/string-3.3.1.tgz"
         },
         "solr-client": {
           "version": "0.5.0",
@@ -2879,6 +2879,11 @@
               }
             }
           }
+        },
+        "string": {
+          "version": "3.3.1",
+          "from": "string@3.3.1",
+          "resolved": "https://registry.npmjs.org/string/-/string-3.3.1.tgz"
         }
       }
     }

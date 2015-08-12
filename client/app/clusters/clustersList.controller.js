@@ -49,18 +49,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             element.$$hashKey = data.id;
             element.seq = $scope.sequenceNumber++;
             element.label = element.value;
-            if (element.classes !== undefined) {
-              for (var i = 0, len = element.classes.length; i < len; i++) {
-                var classObj = $scope.getFromId($scope.classes, element.classes[i]);
-                element.classes[i] = classObj.label;
-              }
-            } else {
-              element.classes = [];
-            }
             element.classes = element.classes || [];
+            for (var i = 0, len = element.classes.length; i < len; i++) {
+              element.classes[i] = $scope.getFromId($scope.classes, element.classes[i]).label;
+            }
             element.edit = false;
             element.checked = false;
-            element.selected = false;
           });
           deferred.resolve(data);
           $scope.utterances = data;
@@ -70,19 +64,27 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // -----------------------------------------------------------------------------------
 
+      // sequence number for class and text elements
       $scope.sequenceNumber = 0;
-      $scope.languageCode = 'en';
+
+      // language options
+      $scope.languageOptions = [
+        { label: 'Brazilian Portuguese', value: 'pt-br' },
+        { label: 'English', value: 'en' },
+        { label: 'Japanese', value: 'ja' },
+        { label: 'Spanish', value: 'es' }
+      ];
+      $scope.languageOption = $scope.languageOptions[0];
 
       // class related elements
       $scope.classes = [];
       $scope.newClassString = '';
-      $scope.selectedClass = [];
       $scope.classOrderOptions = [
-        {label : 'Newest First', value : 'newest'},
-        {label : 'Oldest First', value : 'oldest'},
-        {label : 'Alphabetical', value : 'alpha'},
-        {label : 'Most Texts', value : 'most'},
-        {label : 'Fewest Texts', value : 'fewest'}
+        { label: 'Newest First', value: 'newest' },
+        { label: 'Oldest First', value: 'oldest' },
+        { label: 'Alphabetical', value: 'alpha' },
+        { label: 'Most Texts', value: 'most' },
+        { label: 'Fewest Texts', value: 'fewest' }
       ];
       $scope.classOrderOption = $scope.classOrderOptions[0];
 
@@ -91,19 +93,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.newUtteranceString = '';
       $scope.newTagStrings = [];
       $scope.utteranceOrderOptions = [
-        {label : 'Newest First', value : 'newest'},
-        {label : 'Oldest First', value : 'oldest'},
-        {label : 'Alphabetical', value : 'alpha'},
-        {label : 'Most Classes', value : 'most'},
-        {label : 'Fewest Classes', value : 'fewest'}
+        { label: 'Newest First', value: 'newest' },
+        { label: 'Oldest First', value: 'oldest' },
+        { label: 'Alphabetical', value: 'alpha' },
+        { label: 'Most Classes', value: 'most' },
+        { label: 'Fewest Classes', value: 'fewest' }
       ];
       $scope.utteranceOrderOption = $scope.utteranceOrderOptions[0];
       $scope.utteranceTextFieldVisble = false;
 
       // ngDialog data
-      $scope.promptDialog = {response: ''};
-
-      $scope.showDebugInfo = false;
+      $scope.promptDialog = { response: '' };
 
       $scope.loadClasses().then(function () {
         return $scope.loadTexts();
@@ -119,21 +119,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var name = args.name, data = args.data;
         switch (name) {
           case 'import':
-          $scope.classOrderOption = $scope.classOrderOptions[2];  // alpha
-          $scope.utteranceOrderOption = $scope.utteranceOrderOptions[2];  // alpha
-          $scope.importFile(data);
-          break;
+            $scope.importFile(data);
+            break;
           case 'export':
-          $scope.exportToFile();
-          break;
+            $scope.exportToFile();
+            break;
           case 'train':
-          $scope.train();
-          break;
+            $scope.train();
+            break;
           default:
-          ngDialog.open({
-            template: $scope.inform(name + ' not yet handled by clusterListController'),
-            plain: true
-          });
+            ngDialog.open({
+              template: $scope.inform(name + ' not yet handled by clusterListController'),
+              plain: true
+            });
         }
       });
 
@@ -144,22 +142,22 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // set ['checked'] to true for all objects in an array
-      $scope.checkAll = function(array, bool) {
-        array.forEach(function(d){
-          d.checked = bool;
+      $scope.checkAll = function checkAll (array, bool) {
+        array.forEach(function forEach (element) {
+          element.checked = bool;
         });
       };
 
       // return an array of 'checked' objects
-      $scope.getChecked = function (array) {
-        return _.filter(array, function(d) {
-          return d.checked;
+      $scope.getChecked = function getChecked (array) {
+        return _.filter(array, function filter (element) {
+          return element.checked;
         });
       };
 
       // return an array of selected classes
-      $scope.getSelected = function () {
-        return _.filter($scope.classes, function(c) {
+      $scope.getSelected = function getSelected () {
+        return _.filter($scope.classes, function filter (c) {
           return c.selected;
         });
       };
@@ -828,18 +826,18 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         // create training data
-        // var trainingData = [];
-        // $scope.utterances.forEach(function forEach (text) {
-        //   trainingData.push({
-        //     text: text.label,
-        //     classes: text.classes
-        //   });
-        // });
+        var trainingData = [];
+        $scope.utterances.forEach(function forEach (text) {
+          trainingData.push({
+            text: text.label,
+            classes: text.classes
+          });
+        });
 
-        var trainingData = $scope.toCsv();
+        // var trainingData = $scope.toCsv();
 
         // send to NLC service and then navigate to classifiers page
-        nlc.train(trainingData, $scope.languageCode, 'classifier').then(function(){
+        nlc.train(trainingData, $scope.languageOption.value, 'classifier').then(function(){
           $state.go('classifiers');
         });
       };

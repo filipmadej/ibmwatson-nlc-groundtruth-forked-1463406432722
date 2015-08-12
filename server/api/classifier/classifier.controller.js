@@ -11,7 +11,7 @@ var nlClassifier = watson.natural_language_classifier(credentials);
 exports.train = function train (req, res) {
   nlClassifier.create(req.body, function create (err, result) {
     if (err) {
-      res.status(400).send(err);
+      res.status(err.code).send(err);
     } else {
       res.send(result);
     }
@@ -43,7 +43,7 @@ exports.status = function status (req, res) {
 
   nlClassifier.status(params, function handleResult (err, results) {
     if (err) {
-      res.status(400).send(err);
+      res.status(err.code).send(err);
     } else {
       res.send(results);
     }
@@ -54,7 +54,7 @@ exports.status = function status (req, res) {
 exports.list = function list (req, res) {
   nlClassifier.list(null, function handleResult (err, results) {
     if (err) {
-      res.status(400).send(err);
+      res.status(err.code).send(err);
     } else {
       res.send(results);
     }
@@ -68,7 +68,7 @@ exports.remove = function remove (req, res) {
   }
   nlClassifier.remove(params, function handleResult (err, results) {
     if (err) {
-      res.status(400).send(err);
+      res.status(err.code).send(err);
     } else {
       res.send(results);
     }
