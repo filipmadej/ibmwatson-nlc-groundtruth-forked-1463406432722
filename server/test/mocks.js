@@ -113,16 +113,6 @@ function HttpMock () {
 
 }
 
-function LogMock () {
-
-  this.error = sinon.spy();
-  this.warn = sinon.spy();
-  this.info = sinon.spy();
-  this.debug = sinon.spy();
-  this['@noCallThru'] = true;
-
-}
-
 // Additional complexity is due to the fact this
 // dependency is > 1 level deep from app.js
 // and as such it only gets loaded once when
@@ -165,7 +155,5 @@ function WDCMock () {
 module.exports.StoreMock = StoreMock;
 
 module.exports.HttpMock = HttpMock;
-
-module.exports.LogMock = LogMock;
 
 module.exports.WDCMock = WDCMock;

@@ -40,6 +40,8 @@ module.exports = function init (app) {
 
         if (username === nlc.username) {
             callback(null,nlc);
+        } else {
+            callback(new Error('Unrecognized user'));
         }
     });
 

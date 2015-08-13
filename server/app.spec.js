@@ -95,8 +95,6 @@ describe('server/app', function () {
 
       this.error = 'test-generated';
 
-      this.logMock = new mocks.LogMock();
-
       this.originalException = process.listeners('uncaughtException').pop()
 
       if (this.originalException) {
@@ -124,7 +122,6 @@ describe('server/app', function () {
         this.storeMock.start.should.have.been.called;
         this.httpMock.createServer.should.have.been.called;
         this.httpMock.serverMock.listen.should.not.have.been.called;
-        this.logMock.error.should.have.been.called;
         done();
       }.bind(this);
 
@@ -136,8 +133,7 @@ describe('server/app', function () {
       try {
         app = proxyquire('./app', {
           'http' : this.httpMock,
-          './config/db/store' : this.storeMock,
-          './config/log' : this.logMock
+          './config/db/store' : this.storeMock
         });
       } catch(e) {
         verify();
@@ -158,7 +154,6 @@ describe('server/app', function () {
         this.storeMock.start.should.have.been.called;
         this.httpMock.createServer.should.have.been.called;
         this.httpMock.serverMock.listen.should.have.been.called;
-        this.logMock.error.should.have.been.called;
         done();
       }.bind(this);
 
@@ -167,8 +162,7 @@ describe('server/app', function () {
       try {
         app = proxyquire('./app', {
           'http' : this.httpMock,
-          './config/db/store' : this.storeMock,
-          './config/log' : this.logMock
+          './config/db/store' : this.storeMock
         });
       } catch(e) {
         // This is just a safeguard in case a race condition

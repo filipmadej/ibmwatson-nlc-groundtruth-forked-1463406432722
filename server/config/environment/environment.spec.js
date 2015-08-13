@@ -110,12 +110,8 @@ describe('server/config/environment', function () {
   it('should load production environment file', function () {
     process.env.NODE_ENV = 'production';
 
-    var prodEnv = proxyquire('./production',{'cfenv':this.cfenvMock});
-
     this.runTest( function () {
       env.should.have.property('env', 'production');
-      env.should.have.property('ip', prodEnv.ip);
-      env.should.have.property('port', prodEnv.port);
     });
   });
 
@@ -130,22 +126,19 @@ describe('server/config/environment', function () {
   it('should default required environment variables', function () {
     process.env.NODE_ENV = 'production';
 
-    // env will contain the environment WITH env variables
-
-    // load the prod file to mock cfenv
-    proxyquire('./production',{'cfenv':this.cfenvMock});
+    // customEnv will have the override values
+    var customEnv = proxyquire('./index', {});
 
     delete process.env.COOKIE_SECRET;
     delete process.env.SESSION_SECRET;
     delete process.env.CLASSIFIER_SERVICE_NAME;
 
-    // defaultEnv will have the defaults
-    var defaultEnv = require('./index');
+    // env will pick up the defaults
 
     this.runTest( function () {
-      defaultEnv.should.have.deep.property('secrets.cookie').that.not.equals(env.secrets.cookie);
-      defaultEnv.should.have.deep.property('secrets.session').that.not.equals(env.secrets.session);
-      defaultEnv.should.have.property('classifierServiceName').that.not.equals(env.classifierServiceName);
+      customEnv.should.have.deep.property('secrets.cookie').that.not.equals(env.secrets.cookie);
+      customEnv.should.have.deep.property('secrets.session').that.not.equals(env.secrets.session);
+      customEnv.should.have.property('classifierServiceName').that.not.equals(env.classifierServiceName);
     });
   });
 

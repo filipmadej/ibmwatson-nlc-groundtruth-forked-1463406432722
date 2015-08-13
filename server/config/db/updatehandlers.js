@@ -20,7 +20,7 @@
  * Invokes update-handlers on the Cloudant database.
  *
  * @author Andy Stoneberg
- * @module ibmwatson-nlc-store/lib/db/updatehandlers
+ * @module server/config/db/updatehandlers
  */
 
 // core dependency
