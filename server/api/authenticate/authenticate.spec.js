@@ -43,6 +43,7 @@ passport['@global'] = true;
 
 var app = proxyquire('../../app', {
   './config/db/store' : new mocks.StoreMock(),
+  'watson-developer-cloud' : new mocks.WDCMock(),
   'passport' : passport
 });
 

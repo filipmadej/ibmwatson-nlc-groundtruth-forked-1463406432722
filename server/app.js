@@ -25,12 +25,10 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var express = require('express');
-var cfenv = require('cfenv');
 var async = require('async');
 var config = require('./config/environment');
 var log = require('./config/log');
 // Setup server
-var appEnv = cfenv.getAppEnv();
 var app = express();
 var server = require('http').createServer(app);
 var db = require('./config/db/store');

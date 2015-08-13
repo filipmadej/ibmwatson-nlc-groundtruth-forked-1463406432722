@@ -32,7 +32,8 @@ var mocks = require('../../test/mocks');
 var should = chai.should();
 
 var app = proxyquire('../../app', {
-  './config/db/store' : new mocks.StoreMock()
+  './config/db/store' : new mocks.StoreMock(),
+  'watson-developer-cloud' : new mocks.WDCMock(),
 });
 
 describe('/server/api/import', function () {

@@ -54,7 +54,8 @@ authController['@global'] = true;
 var app = proxyquire('./app', {
   './config/db/store' : storeMock,
   '../../config/db/store' : storeMock,
-  './authenticate.controller' : authController
+  './authenticate.controller' : authController,
+  'watson-developer-cloud' : new mocks.WDCMock()
 });
 
 describe('/server/routes', function () {

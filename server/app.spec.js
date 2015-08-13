@@ -48,7 +48,8 @@ describe('server/app', function () {
 
     app = proxyquire('./app', {
       'http' : this.httpMock,
-      './config/db/store' : this.storeMock
+      './config/db/store' : this.storeMock,
+      'watson-developer-cloud' : new mocks.WDCMock()
     });
 
     // Need to pause momentarily to let the async function complete

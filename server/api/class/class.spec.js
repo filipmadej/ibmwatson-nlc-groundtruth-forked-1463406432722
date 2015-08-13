@@ -46,7 +46,8 @@ storeMock['@global'] = true;
 
 var app = proxyquire('../../app', {
   './config/db/store' : storeMock,
-  '../../config/db/store' : storeMock
+  '../../config/db/store' : storeMock,
+  'watson-developer-cloud' : new mocks.WDCMock()
 });
 
 describe('/server/api/class', function () {
