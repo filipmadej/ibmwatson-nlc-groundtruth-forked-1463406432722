@@ -816,14 +816,43 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.train = function () {
         var i, msg;
-        var unclassified = 0;
+        var unclassified = 0, validationIssues = 0;
+
+        // var trainingData = $scope.toCsv();
+
+        function createTrainingData() {
+          // create training data
+          var trainingData = [];
+          $scope.utterances.forEach(function forEach (text) {
+            if (text.classes.length > 0) {
+              trainingData.push({
+                text: text.label,
+                classes: text.classes
+              });
+            }
+          });
+          return trainingData;
+        }
+
+        function submitTrainingData(trainingData) {
+          $scope.loading.savingClassifier = true;
+          // send to NLC service and then navigate to classifiers page
+          nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
+            $scope.showTrainConfirm = false;
+            $state.go('classifiers');
+          });
+        }
+
         // validation - should this be server side, or at least a part of the service?
         for (i = 0; i < $scope.utterances.length; i++) {
+          // check to see if any of the texts have no classes tagged.
           if ($scope.utterances[i].classes.length === 0) {
             unclassified++;
             continue;
           }
+          // if the utterance's label is too long, stop the training from occuring, but inform the user first.
           if ($scope.utterances[i].label.length > 1024) {
+            validationIssues++;
             var stringFragment = $scope.utterances[i].label.substring(0, 60) + ' ...';
             msg = $scope.inform('"' + stringFragment + '" is longer than 1024 characters. Please shorten or remove it before starting training.');
             ngDialog.open({template: msg, plain: true});
@@ -831,49 +860,33 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }
         }
 
+        // if some texts do not have a class tagged, check that the user still wants to train.
         if (unclassified > 0) {
-          msg = $scope.inform(unclassified + ' texts are not classified. You can find them by sorting by "Fewest Classes". They will not be included in training. Continue?');
-          ngDialog.open({template: msg, plain: true});
-          // var response = ngDialog.openConfirm({
-          //   template:
-          //       '<p>' + msg + '</p>' +
-          //       '<div class="ngdialog-buttons">' +
-          //           '<button type="button" class="ngdialog-button ngdialog-button-secondary" ng-click="closeThisDialog(0)">No</button>' +
-          //           '<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="confirm(1)">Yes</button>' +
-          //       '</div>',
-          //   plain: true
-          // });
-          // if (response === 0) {
-          //   return;
-          // }
+          validationIssues++;
+          msg = $scope.question(unclassified + ' texts are not classified. You can find them by sorting by "Fewest Classes". They will not be included in training. Continue?');
+          ngDialog.openConfirm({
+            template: msg, plain: true
+          }).then(function() {
+            // if the user presses 'ok', then train, otherwise the dialog will be closed
+            submitTrainingData(createTrainingData());
+          });
         }
 
+        // if some invalid characters have been used, do not allow the training to go ahead.
+        // Inform the user using a dialog box and closr the box when they confirm they have read it.
         for (i = 0; i < $scope.classes.length; i++) {
           if ($scope.numberUtterancesInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
+            validationIssues++;
             msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
             ngDialog.open({template: msg, plain: true});
             return;
           }
         }
 
-        // create training data
-        var trainingData = [];
-        $scope.utterances.forEach(function forEach (text) {
-          if (text.classes.length > 0) {
-            trainingData.push({
-              text: text.label,
-              classes: text.classes
-            });
-          }
-        });
-
-        // var trainingData = $scope.toCsv();
-        $scope.loading.savingClassifier = true;
-        // send to NLC service and then navigate to classifiers page
-        nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
-          $scope.showTrainConfirm = false;
-          $state.go('classifiers');
-        });
+        // if no validation issues have been found, create and submit the training data
+        if (!validationIssues){
+          submitTrainingData(createTrainingData());
+        }
       };
 
       $scope.exportToFile = function () {
