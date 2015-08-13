@@ -8,8 +8,8 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc',
-    function ($scope, $state, $http, $q, ngDialog, classes, texts, nlc) {
+  .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
+    function ($scope, $state, $http, $q, ngDialog, classes, texts, nlc, errors) {
 
       // Page Loading Variables
       $scope.loading = {
@@ -840,6 +840,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
             $scope.showTrainConfirm = false;
             $state.go('classifiers');
+          }, function(err) {
+            $scope.loading.savingClassifier = false;
+            $scope.showTrainConfirm = false;
+            errors.publish(err);
           });
         }
 

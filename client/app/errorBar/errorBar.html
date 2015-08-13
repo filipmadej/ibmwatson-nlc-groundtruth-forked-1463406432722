@@ -1,0 +1,8 @@
+<div style="position: relative" ng-show="errors.length > 0 && display">
+  <!--<div style="position: absolute; width: 100%" class="alert alert-error alert-dismissible ibm-alert ibm-alert--error" role="alert">-->
+    <div style="margin-bottom:0px" class="alert alert-error alert-dismissible ibm-alert ibm-alert--error" role="collapse">
+      <button type="button" class="close ibm-alert__close" aria-label="Close"><span class="ibm-icon--close-cancel-error" ng-click="display=false;"></span>
+      </button>
+      <strong>Error</strong> (code: {{ errors[errors.length-1].data.code }}) {{ errors[errors.length-1].data.error }} - {{ errors[errors.length-1].data.description }}
+  </div>
+</div>

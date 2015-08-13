@@ -1,0 +1,52 @@
+/* Tags and labels */
+.ibm-tag, .ibm-label {border: 1px solid #E0E0E0; border-radius: 30em; margin: 0 .2em 1em 0; padding: .6em 1.2em .4em; position: relative; background-color: transparent; font-size: .8em; color: #5A5A5A;}
+	.ibm-tag, .ibm-tag span {transition: all .3s ease;}
+	.ibm-tag [class^="ibm-icon--"] {margin-right: 0; padding-left: .5em; position: relative; top: .25em; line-height: 0;}
+	.ibm-tag:hover {border-color: rgba(231,29,50,.5); background-color: rgba(231,29,50,.1); color: rgb(231,29,50)}
+	.ibm-tag:hover span {color: #E71D32;}
+.ibm-label:hover, .ibm-label--selected:hover {cursor: default;}
+.ibm-label--success, .ibm-alert--success {border-color: rgba(140,210,17,1); background-color: rgba(140,210,17,.1);}
+.ibm-label--selected, .ibm-tag--selected, .ibm-alert--info {border-color: rgba(124,199,255,1); background-color: rgba(124,199,255,.2);}
+.ibm-label--warning, .ibm-alert--warning {border-color: rgba(239,193,0,1); background-color: rgba(239,193,0,.1);}
+.ibm-label--error, .ibm-alert--error {border-color: rgba(231,29,50,.8); background-color: rgba(231,29,50,.1);}
+
+
+/* Alert Notifications */
+
+.ibm-alert {
+    border-left-width: 10px;
+    border-radius: 0;
+    padding: .7em 2em .5em 1em;
+    font-family: "HelvNeueRomanItalicforIBMRegular";
+    color: #5A5A5A;
+}
+.ibm-alert--success {
+    border-color: rgba(140, 210, 17, .8);
+    background-color: rgba(140, 210, 17, .1);
+}
+/*.ibm-alert--info {
+    border-color: ;
+    background-color: ;
+}*/
+.ibm-alert--warning {
+    background: repeating-linear-gradient(-55deg, rgba(239, 193, 0, .2), rgba(239, 193, 0, .2) 10px, rgba(239, 193, 0, .3) 10px, rgba(239, 193, 0, .3) 20px);
+}
+.ibm-alert--error {
+    background: repeating-linear-gradient(-55deg, rgba(231, 29, 50, .2), rgba(231, 29, 50, .2) 10px, rgba(231, 29, 50, .25) 10px, rgba(231, 29, 50, .25) 20px);
+}
+.ibm-alert .ibm-alert__close {
+    font-size: 1em;
+    color: #5A5A5A;
+    opacity: 1;
+    text-shadow: none;
+}
+.ibm-alert .ibm-alert__close:hover {
+    color: #AD1625;
+}
+.ibm-alert--no-results {
+    padding: 2em 20%;
+    background: repeating-linear-gradient(-55deg, rgba(199, 199, 199, .1), rgba(199, 199, 199, .1) 10px, rgba(199, 199, 199, .18) 10px, rgba(199, 199, 199, .18) 20px);
+    color: #777677;
+    border: 0;
+    text-align: center;
+}

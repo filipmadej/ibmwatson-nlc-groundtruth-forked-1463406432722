@@ -4,7 +4,7 @@
       <div>
         <ul class="nav navbar-nav navbar-left ibm-nav">
           <li>
-            <a ngf-select ngf-change="getFileContent(files)" data-multiple="true" ng-model="files">Import</a>
+            <a ngf-select ngf-change="getFileContent(files)" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
           </li>
           <li>
             <a ng-click="export()">Export</a>
@@ -37,6 +37,8 @@
     </div>
   </div>
 </nav>
+
+<error-bar></error-bar>
 
 <div class="container ibm-container" ng-init="setTableHeights()">
   <div class="row ibm-row" style="margin-top: 20px;" ng-show="!loading.savingClassifier">
