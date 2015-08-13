@@ -1,5 +1,5 @@
 <nav class="navbar navbar-default ibm-navbar ibm-nlc-navbar">
-  <div class="container ibm-container">
+  <div style="padding-left:0px" class="container ibm-container">
     <div ng-controller="AppController">
       <div>
         <ul class="nav navbar-nav navbar-left ibm-nav">
@@ -12,15 +12,24 @@
         </ul>
         <ul class="nav navbar-nav navbar-right ibm-nav">
           <li style="float: right">
-            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm">Save & Train</a>
-            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
+            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Save & Train</a>
+            <a ng-show="!showTrainConfirm && loading.savingClassifier">Saving & Training</a>
+            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm && !loading.savingClassifier">
               <div class="form-group ibm-form-group input-group">
-                <input type="text" id="classTextField" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
-              <span class="input-group-btn">
-                <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
-              </span>
+                <div class="input-group-btn dropdown">
+                  <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
+                  </button>
+                  <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
+                    <li ng-repeat="option in languageOptions">
+                      <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
+                    </li>
+                  </ul>
+                </div>
+                <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
+                <span class="input-group-btn">
+                  <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
+                </span>
               </div>
-
             </form>
           </li>
         </ul>
@@ -30,7 +39,7 @@
 </nav>
 
 <div class="container ibm-container" ng-init="setTableHeights()">
-  <div class="row ibm-row" style="margin-top: 20px;">
+  <div class="row ibm-row" style="margin-top: 20px;" ng-show="!loading.savingClassifier">
 
     <!-- --------------------------------- classes header and filter --------------------------------- -->
     <div class="col-sm-5 col-lg-4">
@@ -38,7 +47,7 @@
       <span class="ibm-nlc-showing-results">Showing {{ filteredClasses().length }} of {{ classes.length }} Classes</span>
 
       <!-- --------------------------------- classes sort --------------------------------- -->
-      <div ng-show="classes.length">
+      <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
           <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
@@ -66,8 +75,9 @@
       <datalist id="classList">
         <option ng-repeat="c in classes" value="{{ c.label }}" />
       </datalist>
-      <div class="ibm-nlc-table" ng-show="classes.length">
-        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''">
+      <div class="ibm-nlc-table">
+        <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
+        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
           <div class="inline check">
             <span>
               <input type="checkbox" ng-model="aClass.checked"/>
@@ -108,7 +118,7 @@
       <span class="ibm-nlc-showing-results">Showing {{ filteredUtterances().length }} of {{ utterances.length }} Texts</span>
 
       <!-- --------------------------------- utterances sort --------------------------------- -->
-      <div ng-show="utterances.length">
+      <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('utterance', newUtteranceString);">
           <input type="text" id="utteranceTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Utterance Label..." ng-model="newUtteranceString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
@@ -147,8 +157,9 @@
       </div>
 
       <!-- --------------------------------- utterances list --------------------------------- -->
-      <div id="utterancesTable" class="ibm-nlc-scrolling-table" ng-show="utterances.length">
-        <table class="table ibm-nlc-table" width="100%">
+      <div id="utterancesTable" class="ibm-nlc-scrolling-table">
+        <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
+        <table class="table ibm-nlc-table" width="100%" ng-show="utterances.length">
           <tbody>
             <tr class="ibm-nlc-table-row" ng-repeat="anUtterance in filteredUtterances() | orderBy:utteranceOrder">
               <td>
@@ -186,11 +197,12 @@
       </div>
     </div>
   </div>
-  <div ng-if="classes.length + utterances.length === 0" class="ibm-nlc-nodata-message">
+  <div ng-if="classes.length + utterances.length === 0 && (!loading.classes || !loading.texts)" class="ibm-nlc-nodata-message">
     <h2>Watson needs your data.</h2>
     <p>Train NL Classifier by providing examples of how you want text to be labelled.</p>
     <p>- Enter your texts and labels manually.</p>
     <p>or</p>
     <p>- Import JSON or CSV data using the "Import" Option</p>
   </div>
+  <watson-loading ng-show="loading.savingClassifier" loading-message="'Saving & Training Classifier...'"></watson-loading>
 </div>

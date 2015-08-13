@@ -14,7 +14,6 @@ function prepareUserForResponse (user) {
 exports.login = function login (req, res, next) {
 
     passport.authenticate('local', function verify (err, user) {
-
         if (err) {
             return next(err);
         }

@@ -9,16 +9,13 @@
 
 'use strict';
 
-var cookieParser = require('cookie-parser');
 var csrf = require('csurf');
-var appEnv = require('./environment');
 
 module.exports = function configure (app) {
 
   var env = app.get('env');
 
-  if(env === 'production'){
-    app.use(cookieParser(appEnv.secrets.cookie));
+  if (env === 'production') {
     app.use(csrf());
 
     app.use(function generateSyncToken (req, res, next) {

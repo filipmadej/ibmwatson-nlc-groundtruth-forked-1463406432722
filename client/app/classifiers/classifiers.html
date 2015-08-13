@@ -1,10 +1,11 @@
 <div class="ibm-container-wrapper">
-  <div class="container ibm-container">
+  <watson-loading ng-show="loading" loading-message="'Loading Classifiers...'"></watson-loading>
+  <div class="container ibm-container" ng-show="!loading">
     <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
     <div ng-if="classifiers.length === 0" class="ibm-nlc-nodata-message">
       <h2>Watson needs your data.</h2>
         <p>You have no trained classifiers.</p>
-        <p>Head over the the 'Training' tab to 'Save/Train' a classifier having uploaded/written some texts and classes.</p>
+        <p>Head over the the 'Training' tab to create and train a classifier. Here, you can upload your classes and texts. Once you're ready, press the 'Save & Train' option to create a classifier.</p>
     </div>
     <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
       <div class="col-sm-5 col-md-6">

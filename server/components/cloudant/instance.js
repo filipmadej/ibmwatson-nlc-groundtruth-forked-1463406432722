@@ -77,7 +77,7 @@ function updateView (dbconn, ddoc, existing, callback) {
     if (modified) {
         dbconn.insert(updated, updated._id, function updateCallback (updateError, result) {
             if (updateError) {
-                return handleError(updateError, util.format('Error in updating design document [%s]', result._id), callback);
+                return handleError(updateError, util.format('Error in updating design document [%s]', updated._id), callback);
             }
 
             log.debug({result : result}, 'Updated design document');
@@ -117,14 +117,13 @@ function handleView (dbconn, name, ddoc, callback) {
 function createIndex (dbconn, index, callback) {
     var indexName = index.name;
     log.debug('Index [%s] does not exist - creating...', indexName);
-
     var version = index.version;
     delete index.version;
     async.waterfall([
         function initializeIndex (next) {
             dbconn.index(index, function indexCallback (indexError, indexResult) {
                 if (indexError) {
-                    handleError(indexError, util.format('Error creating index [%s]', indexName), callback);
+                    handleError(indexError, util.format('Error creating index [%s]', indexName), next);
                 } else {
                     log.debug({result : indexResult}, 'Created index');
                     next(null, indexResult);
@@ -135,7 +134,7 @@ function createIndex (dbconn, index, callback) {
             if (version) {
                 dbconn.get(createdresult.id, function getCallback (getError, getResult) {
                     if (getError) {
-                        handleError(getError, util.format('Error retrieving index for versioning [%s]', indexName), callback);
+                        handleError(getError, util.format('Error retrieving index for versioning [%s]', indexName), next);
                     } else {
                         next(null, getResult);
                     }
@@ -149,7 +148,7 @@ function createIndex (dbconn, index, callback) {
                 createdindex.views[indexName].version = version;
                 dbconn.insert(createdindex, createdindex._id, function versionCallback (versionError, versionResult) {
                     if (versionError) {
-                        handleError(versionError, util.format('Error versioning index [%s]', indexName), callback);
+                        handleError(versionError, util.format('Error versioning index [%s]', indexName), next);
                     } else {
                         log.debug('Index versioned [%s:%d]', indexName, version);
                         next(null, versionResult);

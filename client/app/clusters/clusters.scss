@@ -241,7 +241,13 @@
   text-align: center;
   background-color: white;
   border: 1px solid silver;
-  padding: 30px 0px;
+  padding: 30px 50px;
   color: #6B6B6B;
   font-family: HelvNeueLightForIBM;
+}
+
+.form-field {
+  display: inline-block;
+  padding: 0px 5px;
+  vertical-align: middle;
 }
