@@ -12,8 +12,9 @@
         </ul>
         <ul class="nav navbar-nav navbar-right ibm-nav">
           <li style="float: right">
-            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm">Save & Train</a>
-            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm">
+            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Save & Train</a>
+            <a ng-show="!showTrainConfirm && loading.savingClassifier">Saving & Training</a>
+            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm && !loading.savingClassifier">
               <div class="form-group ibm-form-group input-group">
                 <div class="input-group-btn dropdown">
                   <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
