@@ -815,20 +815,37 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // -------------------------------------------------------------------------------------------------
 
       $scope.train = function () {
-        var i, msg, stringFragment;
+        var i, msg;
+        var unclassified = 0;
         // validation - should this be server side, or at least a part of the service?
         for (i = 0; i < $scope.utterances.length; i++) {
           if ($scope.utterances[i].classes.length === 0) {
-            msg = $scope.inform('"' + $scope.utterances[i].label + '" is not classified. Please add class or remove it before starting training.');
-            ngDialog.open({template: msg, plain: true});
-            return;
+            unclassified++;
+            continue;
           }
           if ($scope.utterances[i].label.length > 1024) {
-            stringFragment = $scope.utterances[i].label.substring(0, 60) + ' ...';
+            var stringFragment = $scope.utterances[i].label.substring(0, 60) + ' ...';
             msg = $scope.inform('"' + stringFragment + '" is longer than 1024 characters. Please shorten or remove it before starting training.');
             ngDialog.open({template: msg, plain: true});
             return;
           }
+        }
+
+        if (unclassified > 0) {
+          msg = $scope.inform(unclassified + ' texts are not classified. You can find them by sorting by "Fewest Classes". They will not be included in training. Continue?');
+          ngDialog.open({template: msg, plain: true});
+          // var response = ngDialog.openConfirm({
+          //   template:
+          //       '<p>' + msg + '</p>' +
+          //       '<div class="ngdialog-buttons">' +
+          //           '<button type="button" class="ngdialog-button ngdialog-button-secondary" ng-click="closeThisDialog(0)">No</button>' +
+          //           '<button type="button" class="ngdialog-button ngdialog-button-primary" ng-click="confirm(1)">Yes</button>' +
+          //       '</div>',
+          //   plain: true
+          // });
+          // if (response === 0) {
+          //   return;
+          // }
         }
 
         for (i = 0; i < $scope.classes.length; i++) {
@@ -842,10 +859,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         // create training data
         var trainingData = [];
         $scope.utterances.forEach(function forEach (text) {
-          trainingData.push({
-            text: text.label,
-            classes: text.classes
-          });
+          if (text.classes.length > 0) {
+            trainingData.push({
+              text: text.label,
+              classes: text.classes
+            });
+          }
         });
 
         // var trainingData = $scope.toCsv();
@@ -913,18 +932,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      $scope.toCsv = function toCsV () {
-        var result = '';
-        $scope.utterances.forEach(function forEach (text) {
-          result += '"' + text.label + '"';
-          text.classes.forEach(function forEach (clazz) {
-            result += ',' + clazz;
-          });
-          result += '\n';
-        });
-        return result;
-      };
-      
       // set language by dropdown selection
       $scope.setLanguageOption = function (option) {
         $scope.languageOption = option;
