@@ -1,4 +1,3 @@
-// Generated on 2015-04-27 using generator-angular-fullstack-bluemix 2.0.13
 'use strict';
 
 module.exports = function(grunt) {
@@ -7,6 +6,37 @@ module.exports = function(grunt) {
     localConfig = require('./server/config/local.env');
   } catch (e) {
     localConfig = {};
+  }
+
+  var banner = '/**\n' +
+    ' * Copyright 2015 IBM Corp.\n' +
+    ' *\n' +
+    ' * Licensed under the Apache License, Version 2.0 (the "License");\n' +
+    ' * you may not use this file except in compliance with the License.\n' +
+    ' * You may obtain a copy of the License at\n' +
+    ' *\n' +
+    ' * http://www.apache.org/licenses/LICENSE-2.0\n' +
+    ' *\n' +
+    ' * Unless required by applicable law or agreed to in writing, software\n' +
+    ' * distributed under the License is distributed on an "AS IS" BASIS,\n' +
+    ' * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n' +
+    ' * See the License for the specific language governing permissions and\n' +
+    ' * limitations under the License.\n' +
+    ' **/\n';
+
+  // Prepare a banner to be added to a file
+  function processBanner(/*String*/filepath) {
+
+    // Read the file, and check for headers
+    var fileContents = grunt.file.read(filepath),
+        headerOccs = fileContents.match('Copyright 2015 IBM Corp.');
+
+    // If the file contains the banner, return an empty string
+    if(headerOccs && headerOccs.length > 0){
+        return '';
+    }
+    // Othewise return the banner
+    return banner;
   }
 
   // Load grunt tasks automatically, when needed
@@ -19,7 +49,8 @@ module.exports = function(grunt) {
     buildcontrol: 'grunt-build-control',
     shell: 'grunt-shell',
     mocha_istanbul: 'grunt-mocha-istanbul',
-    bower: 'grunt-bower-task'
+    bower: 'grunt-bower-task',
+    usebanner: 'grunt-banner'
   });
 
   // Time how long tasks take. Can help when optimizing build times
@@ -596,6 +627,28 @@ module.exports = function(grunt) {
           '<%= yeoman.client %>': ['index.html']
         }
       }
+    },
+    usebanner: {
+        js: {
+            options: {
+                position: 'top',
+                linebreak: false,
+                process: processBanner
+            },
+            files: {
+                src: ['*.js','client/**/*.js','server/**/*.js','e2e/**/*.js']
+            }
+        },
+        css: {
+            options: {
+                position: 'top',
+                linebreak: false,
+                process: processBanner
+            },
+            files: {
+                src: ['client/**/*.scss','client/**/*.css']
+            }
+        }
     }
 
   });
@@ -724,4 +777,9 @@ module.exports = function(grunt) {
     'shell:push',
     'shell:start'
   ]);
+
+  grunt.registerTask('banner', [
+    'usebanner:js',
+    'usebanner:css'
+    ]);
 };
