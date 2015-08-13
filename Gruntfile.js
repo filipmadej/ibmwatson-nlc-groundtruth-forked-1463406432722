@@ -636,7 +636,7 @@ module.exports = function(grunt) {
                 process: processBanner
             },
             files: {
-                src: ['*.js','client/**/*.js','server/**/*.js','e2e/**/*.js']
+                src: ['client/**/*.js','server/**/*.js','e2e/**/*.js']
             }
         },
         css: {
