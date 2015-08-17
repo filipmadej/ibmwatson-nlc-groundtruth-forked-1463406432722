@@ -45,7 +45,7 @@ async.series([
   function startServer (next) {
     server.listen(config.port, config.ip, next);
   }
-], function handleStarupSeries (err, results) {
+], function handleStartupSeries (err, results) {
   if (err) {
     var message = 'Error during startup';
     log.error({err : err}, message);
