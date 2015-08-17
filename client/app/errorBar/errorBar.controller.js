@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
+
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
@@ -21,10 +21,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     function init ($scope, $log, errors) {
       $scope.display = false;
 
-      $scope.getErrors();
-
       $scope.$watch('errors', function display (newValue, oldValue) {
-        $log.debug('change from ' + oldValue + ' to ' + newValue);
+        $log.debug('change error bar from ' + oldValue + ' to ' + newValue);
         // when a new error comes in, display the error messsage
         if (newValue.length > oldValue.length){
           $scope.display = true;
@@ -34,5 +32,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.getErrors = function getErrors () {
         $scope.errors = errors.get();
       };
+
+      $scope.getErrors();
+
     }
   ]);
