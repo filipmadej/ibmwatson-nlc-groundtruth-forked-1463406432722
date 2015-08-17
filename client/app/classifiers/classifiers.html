@@ -9,11 +9,6 @@
     </div>
     <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
       <div class="col-sm-5 col-md-6">
-        <div class="inline check">
-          <span>
-            <input type="checkbox" ng-model="aClass.checked"/>
-          </span>
-        </div>
         <div class="inline ibm-nlc-classifier-name">
           <span>
             {{ classifier.name }} ({{ classifier.status }})
