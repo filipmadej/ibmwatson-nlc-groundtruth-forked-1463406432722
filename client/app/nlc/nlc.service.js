@@ -80,7 +80,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         /* Upload a JSON to NLC service and returns a trained classifier */
         train: function train (trainingData, language, name) {
           /*jshint camelcase: false */
-          console.log(name);
           return $q(function post (resolve, reject) {
             $http({
               method: 'POST',

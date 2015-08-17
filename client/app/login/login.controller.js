@@ -17,8 +17,8 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', 'authentication',
-    function init ($scope, $rootScope, $state, authentication) {
+  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', '$log', 'authentication',
+    function init ($scope, $rootScope, $state, $log, authentication) {
 
       // Error Message displayed in the event of login error
       $scope.message = $state.params.message;
@@ -35,10 +35,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         authentication.login(credentials.username, credentials.password)
           .then(function success () {
             // Broadcast login event?
-            console.log('login');
+            $log.debug('successful login');
             $state.go('classifiers');
           }, function error (err) {
-            console.log(err);
+            $log.debug('failed login: ' + JSON.stringify(err));
             $state.go('login', {message: err.message});
           });
       };

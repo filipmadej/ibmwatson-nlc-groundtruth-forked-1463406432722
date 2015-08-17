@@ -24,8 +24,8 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
-    function ($scope, $state, $http, $q, ngDialog, classes, texts, nlc, errors) {
+  .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
+    function ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors) {
 
       // Page Loading Variables
       $scope.loading = {
@@ -42,7 +42,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var deferred = $q.defer();
         classes.query({}, function query (err, data) {
           if (err) {
-            console.log('error getting classes: ' + JSON.stringify(err));
+            $log.error('error getting classes: ' + JSON.stringify(err));
             deferred.reject(err);
             return deferred.promise;
           }
@@ -65,7 +65,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var deferred = $q.defer();
         texts.query({}, function (err, data) {
           if (err) {
-            console.log('error loading texts: ' + JSON.stringify(err));
+            $log.error('error loading texts: ' + JSON.stringify(err));
             deferred.reject(err);
             return deferred.promise;
           }
@@ -138,11 +138,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.loadClasses().then(function () {
         return $scope.loadTexts();
       }, function (err) {
-        console.log('error loading classes: ' + JSON.stringify(err));
+        $log.error('error loading classes: ' + JSON.stringify(err));
       }).then(function () {
-        console.log('success loading classes and texts');
+        $log.debug('success loading classes and texts');
       }, function (err) {
-        console.log('error loading texts: ' + JSON.stringify(err));
+        $log.error('error loading texts: ' + JSON.stringify(err));
       });
 
       $scope.$on('appAction', function (event, args) {
@@ -381,9 +381,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         classes.update(object.id, { name: newLabel }, function (err) {
           if (err) {
-            console.log('error changing class label from ' + oldLabel + ' to ' + newLabel);
+            $log.error('error changing class label from ' + oldLabel + ' to ' + newLabel);
+            // TODO: need to revert other changes?
           } else {
-            console.log('success changing class label from ' + oldLabel + ' to ' + newLabel);
+            $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel);
           }
         });
       };
@@ -392,9 +393,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.textLabelChanged = function (object, oldLabel, newLabel) {
         texts.update(object.id, { value: newLabel }, function (err) {
           if (err) {
-            console.log('error changing text label from ' + oldLabel + ' to ' + newLabel);
+            $log.error('error changing text label from ' + oldLabel + ' to ' + newLabel);
           } else {
-            console.log('success changing text label from ' + oldLabel + ' to ' + newLabel);
+            $log.debug('success changing text label from ' + oldLabel + ' to ' + newLabel);
           }
         });
       };
@@ -513,7 +514,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           var taggedTexts = $scope.numberUtterancesInClass(d);
           if (taggedTexts>0) {
             textsInUse = textsInUse + $scope.numberUtterancesInClass(d);
-            console.log(d);
             classesInUse.push(d);
           }
         });
@@ -572,9 +572,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.removeClass = function (id) {
         classes.remove(id, function remove (err) {
           if (err) {
-            console.log('error removing class ' + id + ': ' + JSON.stringify(err));
+            $log.error('error removing class ' + id + ': ' + JSON.stringify(err));
           } else {
-            console.log('success removing class ' + id);
+            $log.debug('success removing class ' + id);
           }
         });
       };
@@ -593,9 +593,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.removeText = function (id) {
         texts.remove(id, function remove (err) {
           if (err) {
-            console.log('error removing text ' + id + ': ' + JSON.stringify(err));
+            $log.error('error removing text ' + id + ': ' + JSON.stringify(err));
           } else {
-            console.log('success removing text ' + id);
+            $log.debug('success removing text ' + id);
           }
         });
       };
@@ -678,9 +678,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             var clazz = $scope.getFromLabel($scope.classes, label);
             texts.removeClasses(anUtterance.id, [{id: clazz.id}], function (err) {
               if (err) {
-                console.log('error removing class ' + label + ' from text ' + anUtterance.label + ': ' + JSON.stringify(err));
+                $log.error('error removing class ' + label + ' from text ' + anUtterance.label + ': ' + JSON.stringify(err));
               } else {
-                console.log('success removing class ' + label + ' from text ' + anUtterance.label);
+                $log.debug('success removing class ' + label + ' from text ' + anUtterance.label);
               }
             });
           });
@@ -745,7 +745,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               $scope.add('class', classLabel).then(function (classObj) {
                 return $scope.tagUtterances([anUtterance], [classObj]);
               }, function (err) {
-                console.log('error creating new class: ' + JSON.stringify(err));
+                $log.error('error creating new class: ' + JSON.stringify(err));
               });
             });
           }
@@ -795,9 +795,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.addClassesToText = function (id, classIds) {
         return texts.addClasses(id, classIds, function (err) {
           if (err) {
-            console.log('error adding classes: ' + JSON.stringify(err));
+            $log.error('error adding classes: ' + JSON.stringify(err));
           } else {
-            console.log('success adding classes');
+            $log.debug('success adding classes');
           }
         });
       };
@@ -821,8 +821,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // construct html for ngDialog used to ask question in string <aString>
       $scope.question = function (aString, confirmStr) {
-        console.log(confirmStr);
-        console.log((confirmStr|| 'OK'));
         var contents;
         contents = '<div>' + aString + '</div>';
         contents += '<br>';
@@ -939,7 +937,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return $scope.add('class', label).then(function (data) {
           return data;
         }, function (err) {
-          console.log('error adding class: ' + JSON.stringify(err));
+          $log.error('error adding class: ' + JSON.stringify(err));
           return null;
         });
       };
@@ -949,7 +947,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           $scope.tagUtteranceByLabels(data, classes);
           return data;
         }, function (err) {
-          console.log('error adding text: ' + JSON.stringify(err));
+          $log.error('error adding text: ' + JSON.stringify(err));
           return null;
         });
       };
