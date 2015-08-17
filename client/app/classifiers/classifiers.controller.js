@@ -17,8 +17,8 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClassifiersCtrl', ['$scope', 'nlc',
-    function init ($scope, nlc) {
+  .controller('ClassifiersCtrl', ['$scope', 'nlc', 'ngDialog',
+    function init ($scope, nlc, ngDialog) {
       $scope.loading = true;
 
       $scope.classifiers = [];
@@ -33,13 +33,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           $scope.classifiers = data.classifiers;
           $scope.classifiers.forEach(function forEach (classifier) {
             // add additional data required for UI interactions
-            $scope.checkStatus(classifier); // get an initial status check
             //$scope.pollStatus(d, 5000); // set up the poll to update the status every 5 seconds
             classifier.logs = []; // store the texts and consequent classes
             classifier.status = ''; // what is the availibility status of the classifier
             classifier.errorMessage = '';
             classifier.textToClassify = ''; // store the ng-model variable for a given classifier
             classifier.showArrowDown = false; // show logs for a given classifier
+            $scope.checkStatus(classifier); // get an initial status check
           });
         });
       };
@@ -72,6 +72,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.classify = function classify (classifier, text) {
         /*jshint camelcase: false */
+        if (text.length === 0) {
+          return;
+        }
+        if (text.length > 1024) {
+          var msg = $scope.inform('Text length is greater than 1024 characters. Please shorten the text to test the classifier.');
+          ngDialog.open({ template: msg, plain: true });
+          return;
+        }
         classifier.textToClassify = '';
         classifier.logs.unshift({
           text: text
@@ -80,5 +88,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           classifier.logs.splice(1, 0, { classes: data.classes });
         });
       };
+
+      // construct html for ngDialog used to inform string <aString>
+      $scope.inform = function (aString) {
+        var contents;
+        contents = '<div>' + aString + '</div>';
+        contents += '<br>';
+        contents += '<form class="ngdialog-buttons">';
+        contents += '<input type="submit" value="OK" class="ngdialog-button ngdialog-button-primary" ng-click="closeThisDialog(' + 'Cancel' + ')">';
+        contents += '</form>';
+        return contents;
+      };
+
     }
   ]);

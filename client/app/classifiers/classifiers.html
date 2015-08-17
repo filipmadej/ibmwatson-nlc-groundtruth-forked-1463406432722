@@ -31,9 +31,8 @@
           <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
             <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this Classifier...' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
             <span class="input-group-btn">
-              <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available'">Classify</button>
+              <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available' || !classifier.textToClassify">Classify</button>
             </span>
-
           </form>
         </div>
       </div>
