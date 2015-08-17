@@ -481,9 +481,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.deleteClass = function (aClass) {
         var msg;
         if ($scope.numberUtterancesInClass(aClass) === 0) {
-          msg = $scope.question('Delete ' + aClass.label + ' class?');
+          msg = $scope.question('Delete ' + aClass.label + ' class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the '  + aClass.label + '. If you delete this class, it will be removed from those tests.');
+          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the '  + aClass.label + '. If you delete this class, it will be removed from those tests.', 'Delete');
         }
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
@@ -494,7 +494,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // prepare to delete utterance <anUtterance> if operation is confirmed
       $scope.deleteUtterance = function (anUtterance) {
         var msg;
-        msg = $scope.question('Delete this text?');
+        msg = $scope.question('Delete this text?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           $scope.deleteUtterances([anUtterance]);
@@ -519,12 +519,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
 
         if (classesInUse.length === 1) {
-          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + '. If you delete this class, the tags will be removed from those texts.');
+          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + '. If you delete this class, the tags will be removed from those texts.', 'Delete');
         }
         else if (classesInUse.length > 1) {
-          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different classes. If you delete these classes, the tags will be removed from those texts.');
+          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
         } else {
-          $scope.question('Are you sure that you want to delete the classes that you have selected?');
+          $scope.question('Are you sure that you want to delete the classes that you have selected?', 'Delete');
         }
 
         ngDialog.openConfirm({template: msg, plain: true
@@ -536,7 +536,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // prepare to delete all currently checked utterances if operation is confirmed
       $scope.deleteCheckedUtterances = function () {
         var msg, i, utterancesToDelete = [];
-        msg = $scope.question('Are you sure that you want to delete the texts that you have selected?');
+        msg = $scope.question('Are you sure that you want to delete the texts that you have selected?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           for (i = 0; i < $scope.utterances.length; i++) {
@@ -671,7 +671,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.removeTag = function (anUtterance, label) {
         var msg;
         if (anUtterance.classes.indexOf(label) >= 0) {
-          msg = $scope.question('Remove class "' + label + '" from this text?');
+          msg = $scope.question('Remove class "' + label + '" from this text?', 'Remove');
           ngDialog.openConfirm({template: msg, plain: true
           }).then(function() {
             anUtterance.classes = anUtterance.classes.filter($scope.doesNotMatch(label));
@@ -739,7 +739,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         if (classLabel) {
           classObj = $scope.getFromLabel($scope.classes, classLabel);
           if (!classObj) {
-            msg = $scope.question('The ' + classLabel + 'class doesn\'t yet exist. Do you want to create it?');
+            msg = $scope.question('The ' + classLabel + 'class doesn\'t yet exist. Do you want to create it?', 'Create');
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function() {
               $scope.add('class', classLabel).then(function (classObj) {
@@ -820,12 +820,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // construct html for ngDialog used to ask question in string <aString>
-      $scope.question = function (aString) {
+      $scope.question = function (aString, confirmStr) {
+        console.log(confirmStr);
+        console.log((confirmStr|| 'OK'));
         var contents;
         contents = '<div>' + aString + '</div>';
         contents += '<br>';
         contents += '<form class="ngdialog-buttons" ng-submit="confirm(' + 'OK' + ')">';
-        contents += '<input type="submit" value="OK" class="ngdialog-button ngdialog-button-primary" ng-click="confirm(' + 'OK' + ')">';
+        contents += '<input type="submit" value="'+(confirmStr || 'OK')+'" class="ngdialog-button ngdialog-button-primary" ng-click="confirm('+ 'OK'+ ')">';
         contents += '<input type="button" value="Cancel" class="ngdialog-button ngdialog-button-secondary" ng-click="closeThisDialog(' + 'Cancel' + ')">';
         contents += '</form>';
         return contents;
