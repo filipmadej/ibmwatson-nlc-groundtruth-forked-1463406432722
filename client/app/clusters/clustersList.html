@@ -53,7 +53,7 @@
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
           <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
-            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(classes, newClassString)">Add</button>
+            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(classes, newClassString)" ng-disabled="newClassString.length==0">Add</button>
           </span>
         </form>
       </div>
@@ -124,7 +124,7 @@
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('utterance', newUtteranceString);">
           <input type="text" id="utteranceTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Utterance Label..." ng-model="newUtteranceString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
-            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(utterances, newUtteranceString)">Add</button>
+            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(utterances, newUtteranceString)" ng-disabled="newUtteranceString.length==0">Add</button>
           </span>
         </form>
         <div ng-show="getSelected().length" style="margin-top: 10px;">

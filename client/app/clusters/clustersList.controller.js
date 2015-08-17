@@ -480,12 +480,20 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // prepare to delete class <aClass> if operation is confirmed
       $scope.deleteClass = function (aClass) {
+        var label;
+        if (aClass.label.length > 40) {
+          label = aClass.label.substring(0, 40) + '...';
+        } else {
+          label = aClass.label;
+        }
+
         var msg;
         if ($scope.numberUtterancesInClass(aClass) === 0) {
-          msg = $scope.question('Delete ' + aClass.label + ' class?', 'Delete');
+          msg = $scope.question('Delete "' + label + '" class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the '  + aClass.label + '. If you delete this class, it will be removed from those tests.', 'Delete');
+          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the "'  + label + '". If you delete this class, it will be removed from those tests.', 'Delete');
         }
+
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           $scope.deleteClasses([aClass]);
@@ -494,8 +502,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // prepare to delete utterance <anUtterance> if operation is confirmed
       $scope.deleteUtterance = function (anUtterance) {
-        var msg;
-        msg = $scope.question('Delete this text?', 'Delete');
+        var label;
+        if (anUtterance.label.length > 60) {
+          label = anUtterance.label.substring(0, 60) + '...';
+        } else {
+          label = anUtterance.label;
+        }
+
+        var msg = $scope.question('Delete "' + label + '" text?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           $scope.deleteUtterances([anUtterance]);
@@ -519,12 +533,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
 
         if (classesInUse.length === 1) {
-          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + '. If you delete this class, the tags will be removed from those texts.', 'Delete');
+          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with "' + classesInUse[0].name + '". If you delete this class, the tags will be removed from those texts.', 'Delete');
         }
         else if (classesInUse.length > 1) {
-          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
+          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different checked classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
         } else {
-          msg = $scope.question('Are you sure that you want to delete the classes that you have selected?', 'Delete');
+          msg = $scope.question('Are you sure that you want to delete the ' + checkedClasses.length + ' class(es) that you have checked?', 'Delete');
         }
 
         ngDialog.openConfirm({template: msg, plain: true
@@ -535,17 +549,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // prepare to delete all currently checked utterances if operation is confirmed
       $scope.deleteCheckedUtterances = function () {
-        var msg, i, utterancesToDelete = [];
-        msg = $scope.question('Are you sure that you want to delete the texts that you have selected?', 'Delete');
+        var checkedUtterances = $scope.getChecked($scope.utterances);
+        var msg = $scope.question('Are you sure that you want to delete the ' + checkedUtterances.length + ' text(s) that you have checked?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
-          for (i = 0; i < $scope.utterances.length; i++) {
-            if ($scope.utterances[i].checked) {
-              $scope.utterances[i].checked = false;
-              utterancesToDelete.push($scope.utterances[i]);
-            }
-          }
-          $scope.deleteUtterances(utterancesToDelete);
+          $scope.deleteUtterances(checkedUtterances);
         });
       };
 
