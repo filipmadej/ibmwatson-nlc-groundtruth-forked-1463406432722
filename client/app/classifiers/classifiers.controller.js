@@ -64,6 +64,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       $scope.deleteClassifier = function deleteClassifier (id) {
+        $scope.loading = true;
         nlc.remove(id).then(function reload () {
           $scope.loadClassifiers();
         });

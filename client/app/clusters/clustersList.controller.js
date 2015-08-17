@@ -481,9 +481,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.deleteClass = function (aClass) {
         var msg;
         if ($scope.numberUtterancesInClass(aClass) === 0) {
-          msg = $scope.question('Delete class "' + aClass.label + '"?');
+          msg = $scope.question('Delete ' + aClass.label + ' class?');
         } else {
-          msg = $scope.question('One or more text strings have been classified with "'  + aClass.label + '". Delete this class anyway?');
+          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the '  + aClass.label + '. If you delete this class, it will be removed from those tests.');
         }
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
@@ -506,7 +506,27 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // prepare to delete all currently checked classes if operation is confirmed
       $scope.deleteCheckedClasses = function () {
         var msg;
-        msg = $scope.question('Delete checked classes?');
+        var checkedClasses = $scope.getChecked($scope.classes);
+        var textsInUse = 0, classesInUse = [];
+
+        checkedClasses.forEach(function(d) {
+          var taggedTexts = $scope.numberUtterancesInClass(d);
+          if (taggedTexts>0) {
+            textsInUse = textsInUse + $scope.numberUtterancesInClass(d);
+            console.log(d);
+            classesInUse.push(d);
+          }
+        });
+
+        if (classesInUse.length === 1) {
+          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + '. If you delete this class, the tags will be removed from those texts.');
+        }
+        else if (classesInUse.length > 1) {
+          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different classes. If you delete these classes, the tags will be removed from those texts.');
+        } else {
+          $scope.question('Are you sure that you want to delete the classes that you have selected?');
+        }
+
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           $scope.deleteClasses($scope.getChecked($scope.classes));
@@ -516,7 +536,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // prepare to delete all currently checked utterances if operation is confirmed
       $scope.deleteCheckedUtterances = function () {
         var msg, i, utterancesToDelete = [];
-        msg = $scope.question('Delete checked texts?');
+        msg = $scope.question('Are you sure that you want to delete the texts that you have selected?');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           for (i = 0; i < $scope.utterances.length; i++) {
@@ -719,7 +739,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         if (classLabel) {
           classObj = $scope.getFromLabel($scope.classes, classLabel);
           if (!classObj) {
-            msg = $scope.question('The class "' + classLabel + '" has not been created. Create it now?');
+            msg = $scope.question('The ' + classLabel + 'class doesn\'t yet exist. Do you want to create it?');
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function() {
               $scope.add('class', classLabel).then(function (classObj) {
