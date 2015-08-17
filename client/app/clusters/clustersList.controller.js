@@ -524,7 +524,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         else if (classesInUse.length > 1) {
           msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
         } else {
-          $scope.question('Are you sure that you want to delete the classes that you have selected?', 'Delete');
+          msg = $scope.question('Are you sure that you want to delete the classes that you have selected?', 'Delete');
         }
 
         ngDialog.openConfirm({template: msg, plain: true
