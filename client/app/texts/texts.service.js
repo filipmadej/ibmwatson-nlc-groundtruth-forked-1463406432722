@@ -33,13 +33,15 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return endpoints.texts + '/' + session.tenant + '/texts';
       }
 
-      function query (/*Object*/ params, /*function*/ callback) {
-        $http.get(textsEndpoint(), params)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
+      function query (/*Object*/ config, /*function*/ callback) {
+        config = config || {};
+        _.set(config, 'headers.Range', 'items=0-9999');
+        $http.get(textsEndpoint(), config)
+          .success(function success (data) {
+            callback(null, data);
           })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
+          .error(function error (data) {
+            callback(data, null);
           });
       }
 
