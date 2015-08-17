@@ -902,6 +902,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }
         }
 
+        // if some invalid characters have been used, do not allow the training to go ahead.
+        // Inform the user using a dialog box and closr the box when they confirm they have read it.
+        for (i = 0; i < $scope.classes.length; i++) {
+          if ($scope.numberUtterancesInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
+            validationIssues++;
+            msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
+            ngDialog.open({template: msg, plain: true});
+            return;
+          }
+        }
+
         // if some texts do not have a class tagged, check that the user still wants to train.
         if (unclassified > 0) {
           validationIssues++;
@@ -912,17 +923,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             // if the user presses 'ok', then train, otherwise the dialog will be closed
             submitTrainingData(createTrainingData());
           });
-        }
-
-        // if some invalid characters have been used, do not allow the training to go ahead.
-        // Inform the user using a dialog box and closr the box when they confirm they have read it.
-        for (i = 0; i < $scope.classes.length; i++) {
-          if ($scope.numberUtterancesInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
-            validationIssues++;
-            msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
-            ngDialog.open({template: msg, plain: true});
-            return;
-          }
         }
 
         // if no validation issues have been found, create and submit the training data
