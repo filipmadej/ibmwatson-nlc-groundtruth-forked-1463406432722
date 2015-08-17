@@ -64,6 +64,14 @@ module.exports = function init (app) {
 
 
   if ('production' === env) {
+    // Force HTTPS
+    app.use(function requireHTTPS (req, res, next) {
+      if (req.headers && req.headers['x-forwarded-proto'] === 'http') {
+        return res.redirect('https://' + req.get('host') + req.url);
+      }
+      next();
+    });
+
     app.use(favicon(path.join(config.root, 'dist', 'public', 'favicon.ico')));
     app.use(express.static(path.join(config.root, 'dist', 'public')));
     app.set('appPath', path.join(config.root, 'dist', 'public'));
