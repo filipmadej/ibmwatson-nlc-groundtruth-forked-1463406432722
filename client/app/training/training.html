@@ -25,7 +25,7 @@
                     </li>
                   </ul>
                 </div>
-                <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Classifier's Name..." ng-model="newClassifier.name" show-focus="showTrainConfirm">
+                <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter new classifier's name" ng-model="newClassifier.name" show-focus="showTrainConfirm">
                 <span class="input-group-btn">
                   <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
                 </span>
@@ -46,12 +46,12 @@
     <!-- --------------------------------- classes header and filter --------------------------------- -->
     <div class="col-sm-5 col-lg-4">
       <span class="ibm-nlc-column-header">Classes</span>
-      <span class="ibm-nlc-showing-results">Showing {{ filteredClasses().length }} of {{ classes.length }} Classes</span>
+      <span class="ibm-nlc-showing-results">Showing {{ filteredClasses().length }} of {{ classes.length }} classes</span>
 
       <!-- --------------------------------- classes sort --------------------------------- -->
       <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
-          <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Class Label..." ng-model="newClassString" show-focus="classTextFieldVisible">
+          <input type="text" id="classTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a class" ng-model="newClassString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(classes, newClassString)" ng-disabled="newClassString.length==0">Add</button>
           </span>
@@ -117,12 +117,12 @@
     <!-- --------------------------------- texts header and filter --------------------------------- -->
     <div class="col-sm-7 col-lg-8">
       <span class="ibm-nlc-column-header">Texts</span>
-      <span class="ibm-nlc-showing-results">Showing {{ filteredTexts().length }} of {{ texts.length }} Texts</span>
+      <span class="ibm-nlc-showing-results">Showing {{ filteredTexts().length }} of {{ texts.length }} texts</span>
 
       <!-- --------------------------------- texts sort --------------------------------- -->
       <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('text', newTextString);">
-          <input type="text" id="textTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter New Text Label..." ng-model="newTextString" show-focus="classTextFieldVisible">
+          <input type="text" id="textTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a text" ng-model="newTextString" show-focus="classTextFieldVisible">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add</button>
           </span>

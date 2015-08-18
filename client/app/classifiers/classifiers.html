@@ -5,7 +5,7 @@
     <div ng-if="classifiers.length === 0" class="ibm-nlc-nodata-message">
       <h2>Watson needs your data.</h2>
         <p>You have no trained classifiers.</p>
-        <p>Head over the the 'Training' tab to create and train a classifier. Here, you can upload your classes and texts. Once you're ready, press the 'Save & Train' option to create a classifier.</p>
+      <p>You have no classifiers for this instance of the Natural Language Classifier service.<br>Create a classifier on the <b ui-sref="training" style="cursor:pointer">Training</b> page.</p>
     </div>
     <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
       <div class="col-sm-5 col-md-6">
@@ -29,7 +29,7 @@
       <div class="col-sm-7 col-md-6">
         <div class="inline pad col-xs-12">
           <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
-            <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this Classifier...' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
+            <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
             <span class="input-group-btn">
               <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available' || !classifier.textToClassify">Classify</button>
             </span>
