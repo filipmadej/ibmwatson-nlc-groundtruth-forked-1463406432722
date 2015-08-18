@@ -489,9 +489,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         var msg;
         if ($scope.numberTextsInClass(aClass) === 0) {
-          msg = $scope.question('Delete "' + label + '" class?', 'Delete');
+          msg = $scope.question('Delete ' + label + ' class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberTextsInClass(aClass) + ' text(s) are tagged with the "'  + label + '". If you delete this class, it will be removed from those tests.', 'Delete');
+          msg = $scope.question($scope.numberTextsInClass(aClass) + ' text(s) are tagged with the '  + label + ' class. If you delete this class, it will be removed from those tests.', 'Delete');
         }
 
         ngDialog.openConfirm({template: msg, plain: true
@@ -509,7 +509,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           label = anText.label;
         }
 
-        var msg = $scope.question('Delete "' + label + '" text?', 'Delete');
+        var msg = $scope.question('Delete ' + label + ' text?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
           $scope.deleteTexts([anText]);
@@ -533,7 +533,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
 
         if (classesInUse.length === 1) {
-          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with "' + classesInUse[0].name + '". If you delete this class, the tags will be removed from those texts.', 'Delete');
+          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + ' class. If you delete this class, the tags will be removed from those texts.', 'Delete');
         }
         else if (classesInUse.length > 1) {
           msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different checked classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
@@ -760,7 +760,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           else {
             for (i = 0; i < anText.classes.length; i++) {
               if (anText.classes[i].toLowerCase() === classLabel.toLowerCase()) {
-                msg = $scope.inform('This text has already been tagged with "' + anText.classes[i] + '".');
+                msg = $scope.inform('This text has already been tagged with ' + anText.classes[i] + '.');
                 ngDialog.openConfirm({template: msg, plain: true});
                 return;
               }
@@ -913,7 +913,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         for (i = 0; i < $scope.classes.length; i++) {
           if ($scope.numberTextsInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
             validationIssues++;
-            msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
+            msg = $scope.inform('The ' + $scope.classes[i].label + ' class has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
             ngDialog.open({template: msg, plain: true});
             return;
           }
