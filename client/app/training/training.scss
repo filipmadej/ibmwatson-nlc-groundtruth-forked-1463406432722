@@ -183,6 +183,8 @@
   cursor: default;
   border: 1px solid #C7C7C7;
   display: inline-block;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 .ibm-nlc-tag a:hover {
   color: orange;
@@ -190,10 +192,10 @@
 }
 .ibm-nlc-add-class-button {
   position: relative;
-  top: -0.22em;
   left: 0.5em;
   height: 20px;
   font-size: small;
+  vertical-align: middle;
 }
 .ibm-nlc-add-tag-field {
   position: relative;
@@ -266,4 +268,14 @@
   display: inline-block;
   padding: 0px 5px;
   vertical-align: middle;
+}
+
+/* quick hack until text layout is changed */
+.table > tbody > tr > td.ibm-left-icon {
+  padding: 0;
+  text-align: right;
+}
+.table > tbody > tr > td.ibm-right-icon {
+  padding: 0 10px 0 0;
+  text-align: left;
 }
