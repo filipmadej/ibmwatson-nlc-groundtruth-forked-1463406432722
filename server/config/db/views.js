@@ -35,6 +35,10 @@ function defaultMapFn (row) {
     return row.doc;
 }
 
+function noopMapFn (row) {
+    return row;
+}
+
 function countDocumentsUsingView (db, designdoc, view, options, callback) {
     log.debug({
         design : designdoc,
@@ -118,7 +122,8 @@ module.exports.getClasses = function getClasses (db, tenant, options, callback) 
     var designdoc = 'class';
     var viewname = 'class';
     var req = {
-        keys : [tenant],
+        startkey : [tenant],
+        endkey : [tenant, []],
         skip : options.skip || 0,
         limit : options.limit || 10,
         reduce : false,
@@ -152,7 +157,8 @@ module.exports.getTexts = function getTexts (db, tenant, options, callback) {
     var designdoc = 'text';
     var viewname = 'text';
     var req = {
-        keys : [tenant],
+        startkey : [tenant],
+        endkey : [tenant, []],
         skip : options.skip || 0,
         limit : options.limit || 10,
         reduce : false,
@@ -212,6 +218,17 @@ module.exports.countDocumentsInTenant = function countDocumentsInTenant (db, ten
     countDocumentsUsingView(db, designdoc, viewname, req, callback);
 };
 
+module.exports.getClassByName = function getTenantByName (db, tenant, name, callback) {
+    var designdoc = 'class';
+    var viewname = 'class';
+    var req = {
+        key : [tenant, name],
+        reduce : false
+    };
+
+    getDocumentsUsingView(db, designdoc, viewname, req, noopMapFn, getSingleResultFn(callback));
+};
+
 module.exports.lookupClasses = function lookupClasses (db, ids, callback) {
     var req = {
         keys : makeArray(ids)
@@ -224,6 +241,17 @@ module.exports.lookupClasses = function lookupClasses (db, ids, callback) {
 
         callback(null, results.rows);
     });
+};
+
+module.exports.getTextByValue = function getTenantByName (db, tenant, value, callback) {
+    var designdoc = 'text';
+    var viewname = 'text';
+    var req = {
+        key : [tenant, value],
+        reduce : false
+    };
+
+    getDocumentsUsingView(db, designdoc, viewname, req, noopMapFn, getSingleResultFn(callback));
 };
 
 module.exports.getProfileByUsername = function getProfileByUsername (db, username, callback) {

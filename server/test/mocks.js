@@ -26,6 +26,19 @@ var uuid = require('node-uuid');
 var should = chai.should();
 chai.use(sinonChai);
 
+function DBMock () {
+
+  this.view = sinon.stub();
+  this['@noCallThru'] = true;
+
+  this.reset = function () {
+    this.view.reset();
+    this.view.callsArgWith(3, null, {'total_rows' : 0, offset : 0, rows : []});
+  };
+
+  this.reset();
+}
+
 function StoreMock () {
 
   this.start = sinon.stub();
@@ -151,6 +164,8 @@ function WDCMock () {
 
   this.natural_language_classifier.returns(this.nlcMock);
 }
+
+module.exports.DBMock = DBMock;
 
 module.exports.StoreMock = StoreMock;
 

@@ -182,7 +182,7 @@ var tenantViews = {
 var profileViews = {
     views: {
         'by-username': {
-          
+
           map: function (doc) {
             if (doc.schema === 'profile' && doc.username) {
                 emit(doc.username, doc._id);

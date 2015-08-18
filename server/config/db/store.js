@@ -52,17 +52,17 @@ var nlcstore = 'nlcstore';
 
 module.exports.start = function start (callback) {
 
-    log.debug('Connecting to cloudant');
-    cloudant(nlcstore, dbdesigns, function storeDbHandle (err, dbhandle) {
-        db = dbhandle;
-        callback(err);
-    });
+  log.debug('Connecting to cloudant');
+  cloudant(nlcstore, dbdesigns, function storeDbHandle (err, dbhandle) {
+    db = dbhandle;
+    callback(err);
+  });
 
 };
 
 module.exports.stop = function stop () {
-    log.debug('Stopping');
-    db = null;
+  log.debug('Stopping');
+  db = null;
 };
 
 /**
@@ -77,31 +77,61 @@ module.exports.stop = function stop () {
  */
 module.exports.createClass = function createClass (tenant, attrs, callback) {
 
-    // check for required parameter
-    if (!attrs.name) {
-        return callback(dberrors.missingrequired('Missing required class name'));
-    }
+  // check for required parameter
+  if (!attrs.name) {
+    return callback(dberrors.missingrequired('Missing required class name'));
+  }
 
-    // prepare object for storing
-    var classification = dbobjects.prepareClassInfo(tenant, attrs);
 
-    db.insert(classification, function checkResponse (err, docstatus) {
+  async.waterfall([
+    function uniqueCheck (next) {
+      checkIfClassExists(tenant, attrs.name, function handleExisting (err, result) {
+        if (result) {
+          return next(dberrors.nonunique(util.format('Class [%s] already exists', attrs.name)));
+        }
+
+        return next(err);
+      });
+    },
+    function doCreate (next) {
+      // prepare object for storing
+      var classification = dbobjects.prepareClassInfo(tenant, attrs);
+
+      db.insert(classification, function checkResponse (err, docstatus) {
         if (err) {
-            return callback(err);
+          return next(err);
         }
 
         // store the rev to return to the caller
         classification._rev = docstatus.rev;
 
         // return the stored question
-        callback(null, classification);
+        next(null, classification);
 
-    });
+      });
+    }], callback)
+
 };
 
 
 function getClass (tenant, id, callback) {
-    dbfetch.getClass(db, tenant, id, callback);
+  dbfetch.getClass(db, tenant, id, callback);
+}
+
+function getClassByName (tenant, name, callback) {
+  dbviews.getClassByName(db, tenant, name, callback);
+}
+
+function checkIfClassExists (tenant, name, callback) {
+  getClassByName(tenant, name, function handleExistCheck (err, existing) {
+    if (err && err.error === dberrors.NOT_FOUND) {
+      return callback(null, null);
+    } else if (err) {
+      return callback(err);
+    } else {
+      return callback(null, existing);
+    }
+  });
 }
 
 /**
@@ -117,98 +147,98 @@ function getClass (tenant, id, callback) {
  */
 module.exports.replaceClass = function replaceClass (tenant, attrs, rev, callback) {
 
-    // check for required parameter
-    if (!attrs.name) {
-        return callback(dberrors.missingrequired('Missing required class name'));
-    }
+  // check for required parameter
+  if (!attrs.name) {
+    return callback(dberrors.missingrequired('Missing required class name'));
+  }
 
-    // prepare object for storing
-    var classification = dbobjects.prepareClassInfo(tenant, attrs);
+  // prepare object for storing
+  var classification = dbobjects.prepareClassInfo(tenant, attrs);
 
-    async.waterfall([
-        function getCurrentClass (next) {
-            getClass(tenant, classification._id, function getCallback (err, current) {
-                if (err) {
-                    return callback(err);
-                }
+  async.waterfall([
+    function getCurrentClass (next) {
+      getClass(tenant, classification._id, function getCallback (err, current) {
+        if (err) {
+          return callback(err);
+        }
 
-                // check that we have the right version (or a wildcard)
-                //  before trying to do the delete
-                if (rev === '*') {
-                    rev = current._rev;
-                } else if (rev !== current._rev) {
-                    return callback(dberrors.rev());
-                }
+        // check that we have the right version (or a wildcard)
+        //  before trying to do the delete
+        if (rev === '*') {
+          rev = current._rev;
+        } else if (rev !== current._rev) {
+          return callback(dberrors.rev());
+        }
 
-                classification._rev = rev;
+        classification._rev = rev;
 
-                next();
-            });
-        },
-        function replaceClass (next) {
-            db.insert(classification, function checkResponse (err, docstatus) {
-                if (err) {
-                    return callback(err);
-                }
+        next();
+      });
+    },
+    function replaceClass (next) {
+      db.insert(classification, function checkResponse (err, docstatus) {
+        if (err) {
+          return callback(err);
+        }
 
-                // store the rev to return to the caller
-                classification._rev = docstatus.rev;
+        // store the rev to return to the caller
+        classification._rev = docstatus.rev;
 
-                // return the stored question
-                next(null, classification);
+        // return the stored question
+        next(null, classification);
 
-            });
-        }], callback);
+      });
+    }], callback);
 };
 
 function updateReferencesBatch (db, tenant, classid, callback) {
-    var options = {
-        skip : 0,
-        limit : 100,
-        class : classid
-    };
+  var options = {
+    skip : 0,
+    limit : 100,
+    class : classid
+  };
 
-    async.waterfall([
-        function getTexts (next) {
-            dbfetch.getTextsWithClass(db, tenant, options, next);
-        },
-        function prepareUpdateRequest (texts, next) {
-            var docs = texts.map(function update (doc) {
-                var idx = doc.classes.indexOf(classid);
-                if (idx > -1) {
-                    doc.classes.splice(idx, 1);
-                }
-                return doc;
-            });
-            next(null, { docs : docs });
-        },
-        function submitUpdate (req, next) {
-            if (req.docs && req.docs.length > 0) {
-                return db.bulk(req, function checkDeleteResponse (err, results) {
-                    next(err, results);
-                });
-            }
-
-            return next(null, null);
-        },
-        function checkForMore (results, next) {
-            var count = makeArray(results).length;
-            next(null, count === options.limit);
+  async.waterfall([
+    function getTexts (next) {
+      dbfetch.getTextsWithClass(db, tenant, options, next);
+    },
+    function prepareUpdateRequest (texts, next) {
+      var docs = texts.map(function update (doc) {
+        var idx = doc.classes.indexOf(classid);
+        if (idx > -1) {
+          doc.classes.splice(idx, 1);
         }
-    ], callback);
+        return doc;
+      });
+      next(null, { docs : docs });
+    },
+    function submitUpdate (req, next) {
+      if (req.docs && req.docs.length > 0) {
+        return db.bulk(req, function checkDeleteResponse (err, results) {
+          next(err, results);
+        });
+      }
+
+      return next(null, null);
+    },
+    function checkForMore (results, next) {
+      var count = makeArray(results).length;
+      next(null, count === options.limit);
+    }
+  ], callback);
 }
 
 function runReferenceUpdate (db, tenant, classid, callback) {
-    updateReferencesBatch(db, tenant, classid, function nextStep (err, moretoupdate) {
-        if (err) {
-            return callback(err);
-        }
-        if (moretoupdate) {
-            return runReferenceUpdate(db, tenant, classid, callback);
-        }
+  updateReferencesBatch(db, tenant, classid, function nextStep (err, moretoupdate) {
+    if (err) {
+      return callback(err);
+    }
+    if (moretoupdate) {
+      return runReferenceUpdate(db, tenant, classid, callback);
+    }
 
-        return callback();
-    });
+    return callback();
+  });
 }
 
 /**
@@ -222,40 +252,56 @@ function runReferenceUpdate (db, tenant, classid, callback) {
  */
 module.exports.deleteClass = function deleteClass (tenant, id, rev, callback) {
 
-    async.waterfall([
-        function getCurrentClass (next) {
-            getClass(tenant, id, function getCallback (err, classification) {
-                if (err) {
-                    return callback(err);
-                }
+  async.waterfall([
+    function getCurrentClass (next) {
+      getClass(tenant, id, function getCallback (err, classification) {
+        if (err) {
+          return callback(err);
+        }
 
-                // check that we have the right version (or a wildcard)
-                //  before trying to do the delete
-                if (rev === '*') {
-                    rev = classification._rev;
-                } else if (rev !== classification._rev) {
-                    return callback(dberrors.rev());
-                }
+        // check that we have the right version (or a wildcard)
+        //  before trying to do the delete
+        if (rev === '*') {
+          rev = classification._rev;
+        } else if (rev !== classification._rev) {
+          return callback(dberrors.rev());
+        }
 
-                next(null, classification);
-            });
-        },
-        function deleteClass (classification, next) {
-            db.destroy(id, classification._rev, next);
-        },
-        function removeReferences (status, resp, next) {
-            runReferenceUpdate(db, tenant, id, next);
-        }], callback);
+        next(null, classification);
+      });
+    },
+    function deleteClass (classification, next) {
+      db.destroy(id, classification._rev, next);
+    },
+    function removeReferences (status, resp, next) {
+      runReferenceUpdate(db, tenant, id, next);
+    }], callback);
 };
 
 module.exports.getClasses = function getClasses (tenant, options, callback) {
-    dbfetch.getClasses(db, tenant, options, callback);
+  dbfetch.getClasses(db, tenant, options, callback);
 };
 module.exports.countClasses = function countClasses (tenant, callback) {
-    dbviews.countClasses(db, tenant, callback);
+  dbviews.countClasses(db, tenant, callback);
 };
 module.exports.getClass = getClass;
 
+
+function getTextByValue (tenant, value, callback) {
+  dbviews.getTextByValue(db, tenant, value, callback);
+}
+
+function checkIfTextExists (tenant, value, callback) {
+  getTextByValue(tenant, value, function handleExistCheck (err, existing) {
+    if (err && err.error === dberrors.NOT_FOUND) {
+      return callback(null, null);
+    } else if (err) {
+      return callback(err);
+    } else {
+      return callback(null, existing);
+    }
+  });
+}
 
 /**
  * Creates a new text.
@@ -269,17 +315,28 @@ module.exports.getClass = getClass;
  */
 module.exports.createText = function createText (tenant, attrs, callback) {
 
-    // check for required parameter
-    if (!attrs.value) {
-        return callback(dberrors.missingrequired('Missing required text value'));
-    }
+  // check for required parameter
+  if (!attrs.value) {
+    return callback(dberrors.missingrequired('Missing required text value'));
+  }
 
-    // prepare object for storing
-    var text = dbobjects.prepareTextInfo(tenant, attrs);
+  async.waterfall([
+    function uniqueCheck (next) {
+      checkIfTextExists(tenant, attrs.value, function handleExisting (err, result) {
+        if (result) {
+          return next(dberrors.nonunique(util.format('Text [%s] already exists', attrs.value)));
+        }
 
-    db.insert(text, function checkResponse (err, docstatus) {
+        return next(err);
+      });
+    },
+    function doCreate (next) {
+
+      var text = dbobjects.prepareTextInfo(tenant, attrs);
+
+      db.insert(text, function checkResponse (err, docstatus) {
         if (err) {
-            return callback(err);
+          return callback(err);
         }
 
         // store the rev to return to the caller
@@ -288,11 +345,14 @@ module.exports.createText = function createText (tenant, attrs, callback) {
         // return the stored question
         callback(null, text);
 
-    });
+      });
+
+    }], callback)
+
 };
 
 function getText (tenant, id, callback) {
-    dbfetch.getText(db, tenant, id, callback);
+  dbfetch.getText(db, tenant, id, callback);
 }
 
 /**
@@ -306,12 +366,12 @@ function getText (tenant, id, callback) {
  */
 function addClassesToText (text, classes, callback) {
 
-    log.debug({
-        text : text,
-        classes : classes
-    }, 'Adding tenants to profile');
+  log.debug({
+    text : text,
+    classes : classes
+  }, 'Adding tenants to profile');
 
-    dbhandlers.addClassesToText(db, text, makeArray(classes), callback);
+  dbhandlers.addClassesToText(db, text, makeArray(classes), callback);
 
 }
 
@@ -328,18 +388,18 @@ module.exports.addClassesToText = addClassesToText;
  */
 function removeClassesFromText (text, classes, callback) {
 
-    log.debug({
-        text : text,
-        classes : classes
-    }, 'Removing classes from text');
+  log.debug({
+    text : text,
+    classes : classes
+  }, 'Removing classes from text');
 
-    dbhandlers.removeClassesFromText(db, text, makeArray(classes), callback);
+  dbhandlers.removeClassesFromText(db, text, makeArray(classes), callback);
 }
 
 module.exports.removeClassesFromText = removeClassesFromText;
 
 module.exports.updateTextMetadata = function updateTextMetadata (id, metadata, callback) {
-    dbhandlers.updateTextMetadata(db, id, metadata, callback);
+  dbhandlers.updateTextMetadata(db, id, metadata, callback);
 };
 
 /**
@@ -353,39 +413,39 @@ module.exports.updateTextMetadata = function updateTextMetadata (id, metadata, c
  */
 module.exports.deleteText = function deleteText (tenant, id, rev, callback) {
 
-    async.waterfall([
-        function getCurrentText (next) {
-            getText(tenant, id, function getCallback (err, text) {
-                if (err) {
-                    return callback(err);
-                }
+  async.waterfall([
+    function getCurrentText (next) {
+      getText(tenant, id, function getCallback (err, text) {
+        if (err) {
+          return callback(err);
+        }
 
-                // check that we have the right version (or a wildcard)
-                //  before trying to do the delete
-                if (rev === '*') {
-                    rev = text._rev;
-                } else if (rev !== text._rev) {
-                    return callback(dberrors.rev());
-                }
+        // check that we have the right version (or a wildcard)
+        //  before trying to do the delete
+        if (rev === '*') {
+          rev = text._rev;
+        } else if (rev !== text._rev) {
+          return callback(dberrors.rev());
+        }
 
-                next(null, text);
-            });
-        },
-        function deleteText (text, next) {
-            db.destroy(text._id, text._rev, next);
-        }], callback);
+        next(null, text);
+      });
+    },
+    function deleteText (text, next) {
+      db.destroy(text._id, text._rev, next);
+    }], callback);
 };
 
 module.exports.getTexts = function getTexts (tenant, options, callback) {
-    dbfetch.getTexts(db, tenant, options, callback);
+  dbfetch.getTexts(db, tenant, options, callback);
 };
 module.exports.countTexts = function countTexts (tenant, callback) {
-    dbviews.countTexts(db, tenant, callback);
+  dbviews.countTexts(db, tenant, callback);
 };
 module.exports.getText = getText;
 
 module.exports.deleteTenant = function deleteTenant (tenant, callback) {
-    deleteall(db, tenant, callback);
+  deleteall(db, tenant, callback);
 };
 
 /***********************************************************************/
@@ -404,78 +464,78 @@ module.exports.deleteTenant = function deleteTenant (tenant, callback) {
  */
 function createProfile (attrs, callback) {
 
-    if (!attrs.username) {
-        return callback(dberrors.missingrequired('Missing required Profile username'));
-    }
+  if (!attrs.username) {
+    return callback(dberrors.missingrequired('Missing required Profile username'));
+  }
 
-    if (!attrs.password) {
-        return callback(dberrors.missingrequired('Missing required Profile password'));
-    }
+  if (!attrs.password) {
+    return callback(dberrors.missingrequired('Missing required Profile password'));
+  }
 
-    attrs.username = attrs.username.toLowerCase();
+  attrs.username = attrs.username.toLowerCase();
 
-    async.waterfall([
-        function checkIfUsernameUnique (next) {
-            checkIfProfileExists(attrs.username, function handleExisting (err, result) {
-                if (result) {
-                    return next(dberrors.nonunique(util.format('Profile [%s] already exists', attrs.username)));
-                }
-                return next(err);
-            });
-        },
-        function doCreate (next) {
-            // prepare object for storing
-            var profile = dbobjects.prepareProfileInfo(attrs);
+  async.waterfall([
+    function checkIfUsernameUnique (next) {
+      checkIfProfileExists(attrs.username, function handleExisting (err, result) {
+        if (result) {
+          return next(dberrors.nonunique(util.format('Profile [%s] already exists', attrs.username)));
+        }
+        return next(err);
+      });
+    },
+    function doCreate (next) {
+      // prepare object for storing
+      var profile = dbobjects.prepareProfileInfo(attrs);
 
-            db.bulk({ docs : [profile] }, function checkResponse (err, docstatus) {
-                if (err) {
-                    log.error({ err : err }, 'Failed to create profile');
-                    return callback(err);
-                }
+      db.bulk({ docs : [profile] }, function checkResponse (err, docstatus) {
+        if (err) {
+          log.error({ err : err }, 'Failed to create profile');
+          return callback(err);
+        }
 
-                // store the rev to return to the caller
-                profile._rev = docstatus[0].rev;
+        // store the rev to return to the caller
+        profile._rev = docstatus[0].rev;
 
-                // return the stored question
-                log.debug({ profile : profile }, 'Created profile');
-                next(null, profile);
+        // return the stored question
+        log.debug({ profile : profile }, 'Created profile');
+        next(null, profile);
 
-            });
-        }], callback)
+      });
+    }], callback)
 }
 
 module.exports.createProfile = createProfile;
 
 function getProfile (id, callback) {
-    async.waterfall([
-        function dbGetProfile(next){
-            dbfetch.getProfile(db, id, function handleProfile (err, profile) {
-                next(err, profile);
-            });
-        },function dbAddProfileTenant(profile,next){
-            profile.tenants = [nlc.username];
-            next(null,profile);
-        }
-    ],callback);
+  async.waterfall([
+    function dbGetProfile(next){
+      dbfetch.getProfile(db, id, function handleProfile (err, profile) {
+        next(err, profile);
+      });
+    },function dbAddProfileTenant(profile,next){
+      profile.tenants = [nlc.username];
+      next(null,profile);
+    }
+  ],callback);
 
 }
 
 module.exports.getProfile = getProfile;
 
 module.exports.getProfiles = function getProfiles (options, callback) {
-    async.waterfall([
-        function dbGetProfiles(next){
-            dbfetch.getProfiles(db, options, next);
-        },
-        function dbAddProfilesTenant(profiles,next){
-            if(profiles && typeof profiles.sort === 'function'){
-                for (var i = 0; i < profiles.length; i++) {
-                    profiles[i].tenants = [nlc.username];
-                }
-            }
-            next(null,profiles);
+  async.waterfall([
+    function dbGetProfiles(next){
+      dbfetch.getProfiles(db, options, next);
+    },
+    function dbAddProfilesTenant(profiles,next){
+      if(profiles && typeof profiles.sort === 'function'){
+        for (var i = 0; i < profiles.length; i++) {
+          profiles[i].tenants = [nlc.username];
         }
-    ],callback);
+      }
+      next(null,profiles);
+    }
+  ],callback);
 }
 
 /**
@@ -488,55 +548,55 @@ module.exports.getProfiles = function getProfiles (options, callback) {
  */
 module.exports.deleteProfile = function deleteProfile (id, rev, callback) {
 
-    async.waterfall([
-        function getCurrentProfile (next) {
-            dbfetch.getProfile(db, id, function getCallback (err, profile) {
-                if (err) {
-                    return callback(err);
-                }
-
-                // check that we have the right version (or a wildcard)
-                //  before trying to do the delete
-                if (rev === '*') {
-                    rev = profile._rev;
-                } else if (rev !== profile._rev) {
-                    return callback(dberrors.rev());
-                }
-
-                next(null, profile);
-            });
-        },
-        function deleteProfile (profile, next) {
-            db.destroy(profile._id, profile._rev, function afterDelete (err, result) {
-                next(err, profile._id);
-            });
+  async.waterfall([
+    function getCurrentProfile (next) {
+      dbfetch.getProfile(db, id, function getCallback (err, profile) {
+        if (err) {
+          return callback(err);
         }
-    ], callback);
+
+        // check that we have the right version (or a wildcard)
+        //  before trying to do the delete
+        if (rev === '*') {
+          rev = profile._rev;
+        } else if (rev !== profile._rev) {
+          return callback(dberrors.rev());
+        }
+
+        next(null, profile);
+      });
+    },
+    function deleteProfile (profile, next) {
+      db.destroy(profile._id, profile._rev, function afterDelete (err, result) {
+        next(err, profile._id);
+      });
+    }
+  ], callback);
 };
 
 function checkIfProfileExists (username, callback) {
-    getProfileByUsername(username, function handleExistCheck (err, existing) {
-        if (err && err.error === dberrors.NOT_FOUND) {
-            return callback(null, null);
-        } else if (err) {
-            return callback(err);
-        } else {
-            return callback(null, existing);
-        }
-    });
+  getProfileByUsername(username, function handleExistCheck (err, existing) {
+    if (err && err.error === dberrors.NOT_FOUND) {
+      return callback(null, null);
+    } else if (err) {
+      return callback(err);
+    } else {
+      return callback(null, existing);
+    }
+  });
 }
 
 function getProfileByUsername (username, callback) {
-    async.waterfall([
-        function dbGetProfileByUserName(next){
-            dbviews.getProfileByUsername(db, username, function handleProfile (err, profile) {
-                next(err, profile);
-            });
-        },function dbAddProfileTenant(profile,next){
-            profile.tenants = [nlc.username];
-            next(null,profile);
-        }
-    ],callback);
+  async.waterfall([
+    function dbGetProfileByUserName(next){
+      dbviews.getProfileByUsername(db, username, function handleProfile (err, profile) {
+        next(err, profile);
+      });
+    },function dbAddProfileTenant(profile,next){
+      profile.tenants = [nlc.username];
+      next(null,profile);
+    }
+  ],callback);
 }
 
 module.exports.getProfileByUsername = getProfileByUsername;
