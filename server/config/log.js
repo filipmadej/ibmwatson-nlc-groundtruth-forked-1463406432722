@@ -30,7 +30,7 @@ var config = {
     ]
 };
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'test') {
     config.streams.push({
             level : 'info',
             stream : process.stdout

@@ -50,16 +50,8 @@ describe('/server/config/log', function () {
     };
   });
 
-  it('should configure bunyan', function () {
 
-    var log = proxyquire('./log', this.overrides);
-    this.bunyanMock.createLogger.should.have.been.calledWith(sinon.match.object);
-    this.bunyanMock.createLogger.lastCall.args[0].streams.should.be.an('array').with.length(1);
-    this.bunyanMock.createLogger.lastCall.args[0].streams[0].should.contain({level : 'debug'});
-
-  });
-
-  it('should write info to stdout in production', function () {
+  it('should write info to stdout in non-test', function () {
 
     process.env.NODE_ENV = 'production';
 
@@ -68,6 +60,17 @@ describe('/server/config/log', function () {
     this.bunyanMock.createLogger.lastCall.args[0].streams.should.be.an('array').with.length(2);
     this.bunyanMock.createLogger.lastCall.args[0].streams[0].should.contain({level : 'debug'});
     this.bunyanMock.createLogger.lastCall.args[0].streams[1].should.contain({level : 'info'});
+
+  });
+
+  it('should not write info to stdout in test', function () {
+
+    process.env.NODE_ENV = 'test';
+
+    var log = proxyquire('./log', this.overrides);
+    this.bunyanMock.createLogger.should.have.been.calledWith(sinon.match.object);
+    this.bunyanMock.createLogger.lastCall.args[0].streams.should.be.an('array').with.length(1);
+    this.bunyanMock.createLogger.lastCall.args[0].streams[0].should.contain({level : 'debug'});
 
   });
 
