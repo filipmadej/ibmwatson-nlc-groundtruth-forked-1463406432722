@@ -26,7 +26,8 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'ngDialog',
     'ngFileUpload',
     'config',
-  'ibmwatson-common-ui-components'
+    'angular-multi-check',
+    'ibmwatson-common-ui-components'
   ])
   .config(
     ['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider',

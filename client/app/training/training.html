@@ -77,12 +77,12 @@
       <datalist id="classList">
         <option ng-repeat="c in classes" value="{{ c.label }}" />
       </datalist>
-      <div class="ibm-nlc-table">
+      <div class="ibm-nlc-table" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
         <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
           <div class="inline check">
             <span>
-              <input type="checkbox" ng-model="aClass.checked"/>
+              <input type="checkbox" ng-model="aClass.checked" multi-check/>
             </span>
           </div>
           <div class="inline ibm-nlc-class-label" width="100%">
@@ -162,11 +162,11 @@
       <div id="textsTable" class="ibm-nlc-scrolling-table">
         <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
         <table class="table ibm-nlc-table" width="100%" ng-show="texts.length">
-          <tbody>
+          <tbody multi-check-group>
             <tr class="ibm-nlc-table-row" ng-repeat="anText in filteredTexts() | orderBy:textOrder">
               <td>
                 <span>
-                  <input type="checkbox" ng-model="anText.checked"/>
+                  <input type="checkbox" ng-model="anText.checked" multi-check/>
                 </span>
               </td>
               <td width="100%" style="padding: 10px 8px 5px;">
