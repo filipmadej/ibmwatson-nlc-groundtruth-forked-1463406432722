@@ -46,7 +46,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             deferred.reject(err);
             return deferred.promise;
           }
-          data.forEach( function forEach (element) {
+          data.forEach(function forEach (element) {
             element.$$hashKey = data.id;
             element.seq = $scope.sequenceNumber++;
             element.label = element.name;
@@ -63,13 +63,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.loadTexts = function loadTexts () {
         var deferred = $q.defer();
-        texts.query({}, function (err, data) {
+        texts.query({}, function query (err, data) {
           if (err) {
             $log.error('error loading texts: ' + JSON.stringify(err));
             deferred.reject(err);
             return deferred.promise;
           }
-          data.forEach( function forEach (element) {
+          data.forEach(function forEach (element) {
             element.$$hashKey = data.id;
             element.seq = $scope.sequenceNumber++;
             element.label = element.value;
@@ -103,8 +103,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // training related elements
       $scope.showTrainConfirm = false;
-      $scope.newClassifier = {}; // for some reason the ng-model needed to be talking to an object
-      $scope.newClassifier.name = '';
+      $scope.newClassifier = { name: '' }; // for some reason the ng-model needed to be talking to an object
 
       // class related elements
       $scope.classes = [];
@@ -130,22 +129,20 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         { label: 'Fewest Classes', value: 'fewest' }
       ];
       $scope.textOrderOption = $scope.textOrderOptions[0];
-      $scope.textTextFieldVisble = false;
 
-      // ngDialog data
-      $scope.promptDialog = { response: '' };
-
-      $scope.loadClasses().then(function () {
+      // load the classes and texts to initialize the page
+      $scope.loadClasses().then(function afterLoadClasses () {
         return $scope.loadTexts();
-      }, function (err) {
+      }, function error (err) {
         $log.error('error loading classes: ' + JSON.stringify(err));
-      }).then(function () {
+      }).then(function afterLoadTexts () {
         $log.debug('success loading classes and texts');
-      }, function (err) {
+      }, function error (err) {
         $log.error('error loading texts: ' + JSON.stringify(err));
       });
 
-      $scope.$on('appAction', function (event, args) {
+      // watch for appActions from the UI
+      $scope.$on('appAction', function watch (event, args) {
         var name = args.name, data = args.data;
         switch (name) {
           case 'import':
@@ -171,7 +168,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       //
       // ---------------------------------------------------------------------------------------------
 
-      // set ['checked'] to true for all objects in an array
+      // set ['checked'] to `bool` for all objects in an array
       $scope.checkAll = function checkAll (array, bool) {
         array.forEach(function forEach (element) {
           element.checked = bool;
@@ -284,18 +281,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           default:
           return -anText.seq;
         }
-      };
-
-      // ---------------------------------------------------------------------------------------------
-
-      // toggle visibility of new class text field
-      $scope.toggleClassTextField = function () {
-        $scope.classTextFieldVisible = !$scope.classTextFieldVisible;
-      };
-
-      // toggle visibility of new text text field
-      $scope.toggleTextTextField = function () {
-        $scope.textTextFieldVisible = !$scope.textTextFieldVisible;
       };
 
       // ---------------------------------------------------------------------------------------------

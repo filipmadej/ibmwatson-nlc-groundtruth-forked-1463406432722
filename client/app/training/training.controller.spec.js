@@ -221,20 +221,6 @@ describe('Controller: TrainingCtrl', function() {
         expect(obj).toBeNull();
     });
 
-    it('should be able to toggle the \'Enter New Class\' field', function() {
-        // should be hidden by default
-        expect(scope.classTextFieldVisible).toBeFalsy();
-        scope.toggleClassTextField();
-        expect(scope.classTextFieldVisible).toBeTruthy();
-    });
-
-    it('should be able to toggle the \'Enter New Text\' field', function() {
-        // should be hidden by default
-        expect(scope.textTextFieldVisible).toBeFalsy();
-        scope.toggleTextTextField();
-        expect(scope.textTextFieldVisible).toBeTruthy();
-    });
-
     it('should allow the user to edit a field', function() {
         scope.editField(CLASSES[1]);
         expect(CLASSES[1].edit).toBeTruthy();
