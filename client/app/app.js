@@ -53,14 +53,14 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
       }
     ]
   )
-  .run(
-    function(editableOptions) {
-      editableOptions.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
-    },
-    ['$rootScope', '$state', '$location', '$log',
+  .run(['$rootScope', '$state', '$location', '$log',
       function($rootScope, $state, $location, $log) {
         $rootScope.$on('$stateChangeStart', function(event, nextState) {
           $log.debug('changing state',nextState.url);
+          
+        });
+        $rootScope.$on('$stateChangeSuccess', function(event, nextState) {
+          $log.debug('state change success!',nextState.url);
         });
       }
     ]
@@ -93,6 +93,7 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
 app.controller('AppController',
   ['$rootScope', '$scope',
     function($rootScope, $scope) {
+
       // Currently logged in user
       $scope.currentUser = null;
 

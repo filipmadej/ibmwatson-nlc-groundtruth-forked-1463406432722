@@ -34,7 +34,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         authentication.logout().then(function logout () {
           $scope.isLoggedIn = false;
-          $state.go('login', {message : 'Successfully logged out.'});
+          $state.go('login', {alerts : [{text: 'Successfully logged out.', dismissable:true}]});
         });
       };
 

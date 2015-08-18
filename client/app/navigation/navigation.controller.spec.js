@@ -87,7 +87,7 @@ describe('Controller: NavigationCtrl', function() {
     expect(scope.isLoggedIn).toBe(false);
 
     // User should have been directed to the bluemix login page
-    expect(state.go).toHaveBeenCalledWith('login', { message : 'Successfully logged out.' });
+    expect(state.go).toHaveBeenCalledWith('login', { alerts : jasmine.any(Object) });
 
   });
 });

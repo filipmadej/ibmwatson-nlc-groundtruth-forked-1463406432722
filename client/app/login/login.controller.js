@@ -17,11 +17,17 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', '$log', 'authentication',
-    function init ($scope, $rootScope, $state, $log, authentication) {
+  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', '$log', 'authentication', 'alerts',
+    function init ($scope, $rootScope, $state, $log, authentication, alertsSvc) {
 
-      // Error Message displayed in the event of login error
-      $scope.message = $state.params.message;
+      $scope.alerts = alertsSvc.alerts;
+
+      // Any messages to be displayed
+      if($state.params.alerts && _.isArray($state.params.alerts)){
+        for (var i = 0; i < $state.params.alerts.length; i++) {
+          alertsSvc.add($state.params.alerts[i]);
+        }
+      }
 
       // Credentials for logging in
       $scope.credentials = {
@@ -39,7 +45,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             $state.go('classifiers');
           }, function error (err) {
             $log.debug('failed login: ' + JSON.stringify(err));
-            $state.go('login', {message: err.message});
+            $state.go('login', {alerts: [{level:'error',text:err.message}]}, {reload:true, notify: true});
           });
       };
     }

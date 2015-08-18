@@ -40,18 +40,13 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      '**/*.jade': 'ng-jade2js',
-      '**/*.html': 'html2js',
-      '**/*.coffee': 'coffee',
+      'client/app/**/*.html': 'ng-html2js',
+      'client/components/**/*.html': 'ng-html2js',
       'client/app/**/*.js': 'coverage',
       'client/components/**/*.js': 'coverage'
     },
 
     ngHtml2JsPreprocessor: {
-      stripPrefix: 'client/'
-    },
-
-    ngJade2JsPreprocessor: {
       stripPrefix: 'client/'
     },
 

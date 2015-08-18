@@ -19,11 +19,16 @@
 describe('Service: texts', function() {
 
     var $httpBackend;
-    var TENANT = 'myTenant', EP_TEXTS = 'http://texts';
+    var TENANT = 'myTenant', EP_TEXTS = 'https://texts';
     var TEXT_ID = 'id123456';
 
     // load the controller's module
     beforeEach(module('ibmwatson-nlc-groundtruth-app'));
+
+    // Defer resolution of state transitions so we can test this in isolation
+    beforeEach(module(function($urlRouterProvider) {
+      $urlRouterProvider.deferIntercept();
+    }));
 
     beforeEach(function() {
       var endpointsMock = {

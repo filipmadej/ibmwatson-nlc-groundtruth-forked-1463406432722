@@ -21,6 +21,11 @@ describe('Service: authentication', function () {
   // load the service's module and mock $cookies
   beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
+  // Defer resolution of state transitions so we can test this in isolation
+  beforeEach(module(function($urlRouterProvider) {
+    $urlRouterProvider.deferIntercept();
+  }));
+
   // instantiate service
   var authentication, endpoints, $httpBackend;
 

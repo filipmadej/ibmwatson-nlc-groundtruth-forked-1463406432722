@@ -25,6 +25,11 @@ describe('Service: classes', function() {
     // load the controller's module
     beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
+    // Defer resolution of state transitions so we can test this in isolation
+    beforeEach(module(function($urlRouterProvider) {
+      $urlRouterProvider.deferIntercept();
+    }));
+
     beforeEach(function() {
       var endpointsMock = {
             classes: EP_CLASSES

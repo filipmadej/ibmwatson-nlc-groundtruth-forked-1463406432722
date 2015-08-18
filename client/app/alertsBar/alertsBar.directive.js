@@ -17,21 +17,14 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .config(function init ($stateProvider) {
-    $stateProvider
-      .state('login', {
-        url: '/login',
-        templateUrl: 'app/login/login.html',
-        controller: 'LoginCtrl',
-        params: {
-          alerts:null
-        },
-        access: {
-          requiredLogin: false
-        },
-        onExit:function onExit(alerts){
-          console.log('onExit clearing alerts');
-          alerts.clear();
-        }
-      });
-  });
+	.directive('alertsBar', function() {
+		return {
+			templateUrl: 'app/alertsBar/alertsBar.html',
+			scope:{
+				alerts: '=alerts'
+			},
+			//controller: 'AlertsBarCtrl',
+			restrict: 'E',
+			replace: true
+		};
+	});

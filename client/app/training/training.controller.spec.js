@@ -21,6 +21,11 @@ describe('Controller: TrainingCtrl', function() {
     // load the controller's module
     beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
+    // Defer resolution of state transitions so we can test this in isolation
+    beforeEach(module(function($urlRouterProvider) {
+        $urlRouterProvider.deferIntercept();
+    }));
+
     var TrainingCtrl, scope;
     var CLASSES, TEXTS;
 
