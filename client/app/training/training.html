@@ -87,7 +87,7 @@
           </div>
           <div class="inline ibm-nlc-class-label" width="100%">
             <!-- width="100%" to force this cell to maximum available space -->
-            <span ng-show="!aClass.edit">
+            <span ng-show="!aClass.edit" title="{{ aClass.label || 'empty' }}”>
               {{ aClass.label || 'empty' }}
             </span>
             <form ng-show="aClass.edit" ng-submit="changeLabel('class', aClass);">
@@ -187,10 +187,10 @@
                 <input type="text" id="newTagField{{ anText.$$hashKey }}" class="ibm-nlc-add-tag-field" placeholder="class name..." ng-model="newTagStrings[anText.$$hashKey]" ng-keyup="newTagFieldKeyUp($event, anText)" list="classList" ng-show="anText.beingTagged" show-focus="anText.beingTagged">
                 <input type="button" value="+" class="ibm-nlc-add-class-button" ng-click="beginTaggingText(anText)" />
               </td>
-              <td>
+              <td class="ibm-left-icon">
                 <span class="ibm-icon ibm-icon-edit" ng-click="editField(anText)"></span>
               </td>
-              <td ng-click="deleteText(anText)">
+              <td ng-click="deleteText(anText)" class="ibm-right-icon">
                 <span class="ibm-icon ibm-icon-delete"></span>
               </td>
             </tr>
