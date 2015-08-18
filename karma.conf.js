@@ -20,6 +20,7 @@ module.exports = function(config) {
       'client/bower_components/angular-route/angular-route.js',
       'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'client/bower_components/angular-xeditable/dist/js/xeditable.js',
+      'client/bower_components/angular-multi-check/angular-multi-check.js',
       'client/bower_components/lodash/lodash.min.js',
       'client/bower_components/angular-ui-router/release/angular-ui-router.js',
       'client/bower_components/d3/d3.js',

@@ -58,7 +58,7 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
       function($rootScope, $state, $location, $log) {
         $rootScope.$on('$stateChangeStart', function(event, nextState) {
           $log.debug('changing state',nextState.url);
-          
+
         });
         $rootScope.$on('$stateChangeSuccess', function(event, nextState) {
           $log.debug('state change success!',nextState.url);

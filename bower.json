@@ -11,6 +11,7 @@
     "angular-cookies": ">=1.2.*",
     "angular-sanitize": ">=1.2.*",
     "angular-bootstrap": "~0.11.0",
+    "angular-multi-check": "git://github.com/Schlogen/angular-multi-check.git",
     "font-awesome": ">=4.1.0",
     "lodash": "~3.8.0",
     "angular-ui-router": "~0.2.10",
