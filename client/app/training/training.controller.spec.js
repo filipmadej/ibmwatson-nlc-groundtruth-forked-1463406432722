@@ -16,13 +16,13 @@
 
 'use strict';
 
-describe('Controller: ClustersListCtrl', function() {
+describe('Controller: TrainingCtrl', function() {
 
     // load the controller's module
     beforeEach(module('ibmwatson-nlc-groundtruth-app'));
 
-    var ClustersListCtrl, scope;
-    var CLASSES, UTTERANCES;
+    var TrainingCtrl, scope;
+    var CLASSES, TEXTS;
 
     function resetClasses() {
         CLASSES = [{
@@ -52,8 +52,8 @@ describe('Controller: ClustersListCtrl', function() {
     var OLD_CLASS = 'object1';
     var NEW_CLASS = 'object2';
 
-    function resetUtterances() {
-        UTTERANCES = [{
+    function resetTexts() {
+        TEXTS = [{
             $$hashKey: 'ID',
             checked: true,
             beingTagged : false,
@@ -145,7 +145,7 @@ describe('Controller: ClustersListCtrl', function() {
 
 
         scope = $rootScope.$new();
-        ClustersListCtrl = $controller('ClustersListCtrl', {
+        TrainingCtrl = $controller('TrainingCtrl', {
             $scope: scope,
             nlc: nlcMock,
             classes: classesMock,
@@ -156,7 +156,7 @@ describe('Controller: ClustersListCtrl', function() {
         var elm = angular.element(document.body).append(html);
         $compile(elm)($rootScope);
         resetClasses();
-        resetUtterances();
+        resetTexts();
     }));
 
     it('should set the attribute \'checked\' to a given boolean for an array of objects', function() {
@@ -225,9 +225,9 @@ describe('Controller: ClustersListCtrl', function() {
 
     it('should be able to toggle the \'Enter New Text\' field', function() {
         // should be hidden by default
-        expect(scope.utteranceTextFieldVisible).toBeFalsy();
-        scope.toggleUtteranceTextField();
-        expect(scope.utteranceTextFieldVisible).toBeTruthy();
+        expect(scope.textTextFieldVisible).toBeFalsy();
+        scope.toggleTextTextField();
+        expect(scope.textTextFieldVisible).toBeTruthy();
     });
 
     it('should allow the user to edit a field', function() {
@@ -249,31 +249,31 @@ describe('Controller: ClustersListCtrl', function() {
         expect(angular.element('#ID')[0].value).toBe(CLASSES[2].label);
     });
 
-    it('should propogate a new class name to all utterances', function() {
+    it('should propogate a new class name to all texts', function() {
 
-        scope.utterances = UTTERANCES;
+        scope.texts = TEXTS;
 
         scope.classLabelChanged(CLASSES[0], OLD_CLASS, NEW_CLASS);
 
-        expect(scope.utterances[0].classes[0]).toBe(NEW_CLASS);
-        expect(scope.utterances[1].classes[0]).toBe(NEW_CLASS);
-        expect(scope.utterances[2].classes[0]).toBe('object3');
+        expect(scope.texts[0].classes[0]).toBe(NEW_CLASS);
+        expect(scope.texts[1].classes[0]).toBe(NEW_CLASS);
+        expect(scope.texts[2].classes[0]).toBe('object3');
     });
 
-    it('should count the number of utterances with a given class tagged', function() {
-        scope.utterances = UTTERANCES;
+    it('should count the number of texts with a given class tagged', function() {
+        scope.texts = TEXTS;
 
-        var count = scope.numberUtterancesInClass({
+        var count = scope.numberTextsInClass({
             label: OLD_CLASS
         });
 
         expect(count).toBe(2);
     });
 
-    it('should return an array of classes tagged for a given utterance', function() {
-        scope.utterances = UTTERANCES;
+    it('should return an array of classes tagged for a given text', function() {
+        scope.texts = TEXTS;
         scope.classes = CLASSES;
-        var classes = scope.classesForUtterance(UTTERANCES[0]);
+        var classes = scope.classesForText(TEXTS[0]);
 
         expect(classes).toEqual([CLASSES[0]]);
     });
@@ -281,9 +281,9 @@ describe('Controller: ClustersListCtrl', function() {
     it('should provide a converter to input a <type> string and get back the consequent list of <type>\'s', function() {
         var array = [];
 
-        scope.utterances = UTTERANCES;
-        array = scope.getScopeArray('utterance');
-        expect(array).toEqual(scope.utterances);
+        scope.texts = TEXTS;
+        array = scope.getScopeArray('text');
+        expect(array).toEqual(scope.texts);
 
         scope.classes = CLASSES;
         array = scope.getScopeArray('class');
@@ -291,51 +291,51 @@ describe('Controller: ClustersListCtrl', function() {
     });
 
     // TODO: Finish tests
-    /*it('should be able to delete a list of utterances from $scope.utterances', function() {
-        scope.utterances = UTTERANCES;
-        var deletedObj = UTTERANCES.splice(2);
+    /*it('should be able to delete a list of texts from $scope.texts', function() {
+        scope.texts = TEXTS;
+        var deletedObj = TEXTS.splice(2);
         console.log(deletedObj);
-        scope.deleteUtterances([deletedObj]);
-        console.log(scope.utterances);
-        expect(scope.utterances).toEqual(UTTERANCES[0], UTTERANCES[1]);
+        scope.deleteTexts([deletedObj]);
+        console.log(scope.texts);
+        expect(scope.texts).toEqual(TEXTS[0], TEXTS[1]);
     });*/
 
 
 
     // -------------------------------------------------------------------------------------------------
     //
-    // --------------------- tagging (associating utterance with class or classes) ---------------------
+    // --------------------- tagging (associating text with class or classes) ---------------------
     //
     // -------------------------------------------------------------------------------------------------
 
-    it('should determine whether a given utterance has been tagged or not', function() {
+    it('should determine whether a given text has been tagged or not', function() {
         expect(scope.isTagged({classes:[]})).toBeFalsy();
         expect(scope.isTagged({classes:['class1', 'class2']})).toBeTruthy();
     });
 
-    it('should toggle \'beingTagged\' attribute of an utterance', function() {
-        scope.beginTaggingUtterance(UTTERANCES[1]);
-        expect(UTTERANCES[1].beingTagged).toBeFalsy();
+    it('should toggle \'beingTagged\' attribute of an text', function() {
+        scope.beginTaggingText(TEXTS[1]);
+        expect(TEXTS[1].beingTagged).toBeFalsy();
 
-        scope.beginTaggingUtterance(UTTERANCES[0]);
-        expect(UTTERANCES[0].beingTagged).toBeTruthy();
+        scope.beginTaggingText(TEXTS[0]);
+        expect(TEXTS[0].beingTagged).toBeTruthy();
     });
 
-    it('should be able to tag an utterance with any number of classes', function() {
-        scope.tagUtterances(UTTERANCES, [{label: 'newClass'}]);
+    it('should be able to tag an text with any number of classes', function() {
+        scope.tagTexts(TEXTS, [{label: 'newClass'}]);
 
-        UTTERANCES.forEach(function(d) {
+        TEXTS.forEach(function(d) {
             expect(d.classes[d.classes.length - 1]).toBe('newClass');
         });
     });
 
-    it('should be able to tag all checked utterances with all checked classes', function() {
-        scope.utterances = UTTERANCES;
+    it('should be able to tag all checked texts with all checked classes', function() {
+        scope.texts = TEXTS;
         scope.classes = CLASSES;
 
-        expect(UTTERANCES[0].classes.length).toBe(1);
-        scope.tagCheckedUtterances();
-        expect(UTTERANCES[0].classes.length).toBe(2);
+        expect(TEXTS[0].classes.length).toBe(1);
+        scope.tagCheckedTexts();
+        expect(TEXTS[0].classes.length).toBe(2);
     });
 
     // -------------------------------------------------------------------------------------------------
@@ -377,8 +377,8 @@ describe('Controller: ClustersListCtrl', function() {
         scope.importFile(fileContent);
         $rootScope.$digest();
         expect(scope.classes[0].label).toEqual('class');
-        expect(scope.utterances[0].label).toEqual('text');
-        expect(scope.utterances[0].classes).toEqual(['class']);
+        expect(scope.texts[0].label).toEqual('text');
+        expect(scope.texts[0].classes).toEqual(['class']);
     }));*/
 
 });

@@ -41,7 +41,7 @@
         <div class="logs-title">Logs</div>
         <div class="logs">
           <div ng-repeat="entry in classifier.logs">
-            <div class="utterance" ng-if="entry.text">
+            <div class="text" ng-if="entry.text">
               {{ entry.text }}
             </div>
             <div class="classes" ng-if="entry.classes">

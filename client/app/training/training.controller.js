@@ -24,8 +24,8 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClustersListCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
-    function ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors) {
+  .controller('TrainingCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
+    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors) {
 
       // Page Loading Variables
       $scope.loading = {
@@ -82,7 +82,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           });
           deferred.resolve(data);
           $scope.loading.texts = false;
-          $scope.utterances = data;
+          $scope.texts = data;
         });
         return deferred.promise;
       };
@@ -118,19 +118,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       ];
       $scope.classOrderOption = $scope.classOrderOptions[0];
 
-      // utterance related elements
-      $scope.utterances = [];
-      $scope.newUtteranceString = '';
+      // text related elements
+      $scope.texts = [];
+      $scope.newTextString = '';
       $scope.newTagStrings = [];
-      $scope.utteranceOrderOptions = [
+      $scope.textOrderOptions = [
         { label: 'Newest First', value: 'newest' },
         { label: 'Oldest First', value: 'oldest' },
         { label: 'Alphabetical', value: 'alpha' },
         { label: 'Most Classes', value: 'most' },
         { label: 'Fewest Classes', value: 'fewest' }
       ];
-      $scope.utteranceOrderOption = $scope.utteranceOrderOptions[0];
-      $scope.utteranceTextFieldVisble = false;
+      $scope.textOrderOption = $scope.textOrderOptions[0];
+      $scope.textTextFieldVisble = false;
 
       // ngDialog data
       $scope.promptDialog = { response: '' };
@@ -159,7 +159,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             break;
           default:
             ngDialog.open({
-              template: $scope.inform(name + ' not yet handled by clusterListController'),
+              template: $scope.inform(name + ' not yet handled by training controller.'),
               plain: true
             });
         }
@@ -192,7 +192,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      // return a class or utterance with a given label
+      // return a class or text with a given label
       $scope.getFromLabel = function(array, label) {
         var idx = -1;
         array.some(function find (element, index) {
@@ -204,7 +204,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return idx < 0 ? null : array[idx];
       };
 
-      // return a class or utterance with a given id
+      // return a class or text with a given id
       $scope.getFromId = function(array, id) {
         var idx = -1;
         array.some(function find (element, index) {
@@ -227,14 +227,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         switch(type) {
           case 'class':
           return $scope.classes;
-          case 'utterance':
-          return $scope.utterances;
+          case 'text':
+          return $scope.texts;
         }
       };
 
       // ---------------------------------------------------------------------------------------------
       //
-      // ----------------------------------- classes & utterances ------------------------------------
+      // ----------------------------------- classes & texts ------------------------------------
       //
       // ---------------------------------------------------------------------------------------------
 
@@ -254,35 +254,35 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           case 'alpha':
           return aClass.label;
           case 'most':
-          return -$scope.numberUtterancesInClass(aClass);
+          return -$scope.numberTextsInClass(aClass);
           case 'fewest':
-          return $scope.numberUtterancesInClass(aClass);
+          return $scope.numberTextsInClass(aClass);
           default:
           return -aClass.seq;
         }
       };
 
       // set function for the variable controlling the list's sort
-      $scope.setUtteranceOrderOption = function (option){
+      $scope.setTextOrderOption = function (option){
         // needs wrapping inside a $scope function to be accessible in HTML
-        $scope.utteranceOrderOption = option;
+        $scope.textOrderOption = option;
       };
 
       // a switch to determine the value used for the list's sort
-      $scope.utteranceOrder = function (anUtterance) {
-        switch ($scope.utteranceOrderOption.value) {
+      $scope.textOrder = function (anText) {
+        switch ($scope.textOrderOption.value) {
           case 'newest':
-          return -anUtterance.seq;
+          return -anText.seq;
           case 'oldest':
-          return anUtterance.seq;
+          return anText.seq;
           case 'alpha':
-          return anUtterance.label;
+          return anText.label;
           case 'most':
-          return -$scope.classesForUtterance(anUtterance).length;
+          return -$scope.classesForText(anText).length;
           case 'fewest':
-          return $scope.classesForUtterance(anUtterance).length;
+          return $scope.classesForText(anText).length;
           default:
-          return -anUtterance.seq;
+          return -anText.seq;
         }
       };
 
@@ -293,9 +293,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         $scope.classTextFieldVisible = !$scope.classTextFieldVisible;
       };
 
-      // toggle visibility of new utterance text field
-      $scope.toggleUtteranceTextField = function () {
-        $scope.utteranceTextFieldVisible = !$scope.utteranceTextFieldVisible;
+      // toggle visibility of new text text field
+      $scope.toggleTextTextField = function () {
+        $scope.textTextFieldVisible = !$scope.textTextFieldVisible;
       };
 
       // ---------------------------------------------------------------------------------------------
@@ -309,32 +309,32 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // toggle 'edit' attribute of <classOrUtterance>
-      $scope.editField = function (classOrUtterance) {
-        if (!classOrUtterance.edit) {
-          classOrUtterance.edit = true;
+      // toggle 'edit' attribute of <classOrText>
+      $scope.editField = function (classOrText) {
+        if (!classOrText.edit) {
+          classOrText.edit = true;
         }
         else {
-          $scope.dismissEditField(classOrUtterance);
+          $scope.dismissEditField(classOrText);
         }
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      // set the edit attibute of a given object to false. Used for toggline edit-mode for classes and utterances
-      $scope.dismissEditField = function(classOrUtterance) {
+      // set the edit attibute of a given object to false. Used for toggline edit-mode for classes and texts
+      $scope.dismissEditField = function(classOrText) {
         var field;
-        field = window.document.getElementById(classOrUtterance.$$hashKey);
-        field.value = classOrUtterance.label;
-        classOrUtterance.edit = false;
+        field = window.document.getElementById(classOrText.$$hashKey);
+        field.value = classOrText.label;
+        classOrText.edit = false;
       };
 
       // ---------------------------------------------------------------------------------------------
 
       // check the keyup event to see if the user has pressed 'esc' key. If so, dismiss the editing field
-      $scope.keyUpCancelEditing = function(classOrUtterance, event) {
+      $scope.keyUpCancelEditing = function(classOrText, event) {
         if (event.keyCode === 27) {
-          $scope.dismissEditField(classOrUtterance);
+          $scope.dismissEditField(classOrText);
         }
       };
 
@@ -360,7 +360,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               case 'class':
               $scope.classLabelChanged(object, oldLabel, newLabel);
               break;
-              case 'utterance':
+              case 'text':
               $scope.textLabelChanged(object, oldLabel, newLabel);
               break;
             }
@@ -370,9 +370,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // propagate label <newLabel> to all utterances tagged with label <oldLabel>
+      // propagate label <newLabel> to all texts tagged with label <oldLabel>
       $scope.classLabelChanged = function (object, oldLabel, newLabel) {
-        $scope.utterances.forEach(function forEach (text) {
+        $scope.texts.forEach(function forEach (text) {
           var index = text.classes.indexOf(oldLabel);
           if (index >= 0) {
             text.classes[index] = newLabel;
@@ -402,11 +402,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // Counts the number of utterances that have a given <aClass> tagged
-      $scope.numberUtterancesInClass = function (aClass) {
+      // Counts the number of texts that have a given <aClass> tagged
+      $scope.numberTextsInClass = function (aClass) {
         var i, n = 0;
-        for (i = 0; i < $scope.utterances.length; i += 1) {
-          if ($scope.utterances[i].classes.indexOf(aClass.label) >= 0) {
+        for (i = 0; i < $scope.texts.length; i += 1) {
+          if ($scope.texts[i].classes.indexOf(aClass.label) >= 0) {
             n++;
           }
         }
@@ -415,11 +415,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ------------------------------------------------------------------------------------------------
 
-      // return all classes tagged in utterance <anUtterance>
-      $scope.classesForUtterance = function (anUtterance) {
+      // return all classes tagged in text <anText>
+      $scope.classesForText = function (anText) {
         var i, classes = [];
-        for (i = 0; i < anUtterance.classes.length; i++) {
-          classes.push($scope.getFromLabel($scope.classes, anUtterance.classes[i]));
+        for (i = 0; i < anText.classes.length; i++) {
+          classes.push($scope.getFromLabel($scope.classes, anText.classes[i]));
         }
         return classes;
       };
@@ -428,7 +428,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.add = function (type, label) {
         $scope.newClassString = '';
-        $scope.newUtteranceString = '';
+        $scope.newTextString = '';
         var deferred = $q.defer();
         if (!label) {
           deferred.resolve();
@@ -457,17 +457,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               }
             });
             return deferred.promise;
-            case 'utterance' :
+            case 'text' :
             texts.post({ value : label }, function post (err, data) {
               if (err) {
                 deferred.reject(err);
               } else {
                 id = data.id;
-                var newUtterance = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                $scope.tagUtterances([newUtterance], $scope.getSelected());
-                $scope.utterances.push(newUtterance);
-                $scope.newUtteranceString = '';
-                deferred.resolve(newUtterance);
+                var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
+                $scope.tagTexts([newText], $scope.getSelected());
+                $scope.texts.push(newText);
+                $scope.newTextString = '';
+                deferred.resolve(newText);
               }
             });
             return deferred.promise;
@@ -488,10 +488,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         var msg;
-        if ($scope.numberUtterancesInClass(aClass) === 0) {
+        if ($scope.numberTextsInClass(aClass) === 0) {
           msg = $scope.question('Delete "' + label + '" class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberUtterancesInClass(aClass) + ' text(s) are tagged with the "'  + label + '". If you delete this class, it will be removed from those tests.', 'Delete');
+          msg = $scope.question($scope.numberTextsInClass(aClass) + ' text(s) are tagged with the "'  + label + '". If you delete this class, it will be removed from those tests.', 'Delete');
         }
 
         ngDialog.openConfirm({template: msg, plain: true
@@ -500,19 +500,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      // prepare to delete utterance <anUtterance> if operation is confirmed
-      $scope.deleteUtterance = function (anUtterance) {
+      // prepare to delete text <anText> if operation is confirmed
+      $scope.deleteText = function (anText) {
         var label;
-        if (anUtterance.label.length > 60) {
-          label = anUtterance.label.substring(0, 60) + '...';
+        if (anText.label.length > 60) {
+          label = anText.label.substring(0, 60) + '...';
         } else {
-          label = anUtterance.label;
+          label = anText.label;
         }
 
         var msg = $scope.question('Delete "' + label + '" text?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
-          $scope.deleteUtterances([anUtterance]);
+          $scope.deleteTexts([anText]);
         });
       };
 
@@ -525,9 +525,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var textsInUse = 0, classesInUse = [];
 
         checkedClasses.forEach(function(d) {
-          var taggedTexts = $scope.numberUtterancesInClass(d);
+          var taggedTexts = $scope.numberTextsInClass(d);
           if (taggedTexts>0) {
-            textsInUse = textsInUse + $scope.numberUtterancesInClass(d);
+            textsInUse = textsInUse + $scope.numberTextsInClass(d);
             classesInUse.push(d);
           }
         });
@@ -547,13 +547,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      // prepare to delete all currently checked utterances if operation is confirmed
-      $scope.deleteCheckedUtterances = function () {
-        var checkedUtterances = $scope.getChecked($scope.utterances);
-        var msg = $scope.question('Are you sure that you want to delete the ' + checkedUtterances.length + ' text(s) that you have checked?', 'Delete');
+      // prepare to delete all currently checked texts if operation is confirmed
+      $scope.deleteCheckedTexts = function () {
+        var checkedTexts = $scope.getChecked($scope.texts);
+        var msg = $scope.question('Are you sure that you want to delete the ' + checkedTexts.length + ' text(s) that you have checked?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function() {  // ok
-          $scope.deleteUtterances(checkedUtterances);
+          $scope.deleteTexts(checkedTexts);
         });
       };
 
@@ -561,12 +561,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // delete all class in <classArray>
       $scope.deleteClasses = function (classArray) {
-        var i, j, classLength, utteranceLength, index;
+        var i, j, classLength, textLength, index;
         for (i = 0, classLength = classArray.length; i < classLength; i++) {
-          for (j = 0, utteranceLength = $scope.utterances.length; j < utteranceLength; j++) {
-            index = $scope.utterances[j].classes.indexOf(classArray[i].label);
+          for (j = 0, textLength = $scope.texts.length; j < textLength; j++) {
+            index = $scope.texts[j].classes.indexOf(classArray[i].label);
             if (index >= 0) {
-              $scope.utterances[j].classes.splice(index, 1);
+              $scope.texts[j].classes.splice(index, 1);
             }
           }
           var clazz = classArray[i];
@@ -587,13 +587,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      // delete all utterances in <utteranceArray>
-      $scope.deleteUtterances = function (utteranceArray) {
+      // delete all texts in <textArray>
+      $scope.deleteTexts = function (textArray) {
         var i, index;
-        for (i = 0; i < utteranceArray.length; i++) {
-          var text = utteranceArray[i];
-          index = $scope.utterances.indexOf(text);
-          $scope.utterances.splice(index, 1);
+        for (i = 0; i < textArray.length; i++) {
+          var text = textArray[i];
+          index = $scope.texts.indexOf(text);
+          $scope.texts.splice(index, 1);
           $scope.removeText(text.id);
         }
       };
@@ -611,7 +611,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // return array of classes filtered by label substring match with newClassString field
-      // (this matches interactive behavior of utterance filter so not just based on leading characters e.g.)
+      // (this matches interactive behavior of text filter so not just based on leading characters e.g.)
       $scope.filteredClasses = function () {
         var i, results = [];
         if (!$scope.newClassString) {
@@ -625,28 +625,28 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return results;
       };
 
-      // return array of utterances filtered by class inclusion and further filtered by label substring match with newUtteranceString field
-      $scope.filteredUtterances = function () {
+      // return array of texts filtered by class inclusion and further filtered by label substring match with newTextString field
+      $scope.filteredTexts = function () {
         var i, j, selectedClasses = $scope.getSelected(), firstFilteredResults = [], results = [];
         if (selectedClasses.length === 0) {
           // no class filters present
-          firstFilteredResults = $scope.utterances;
+          firstFilteredResults = $scope.texts;
         }
         else {
           // filter first by class inclusion
-          for (i = 0; i < $scope.utterances.length; i++) {
+          for (i = 0; i < $scope.texts.length; i++) {
             for (j = 0; j < selectedClasses.length; j++) {
-              if ($scope.utterances[i].classes.indexOf(selectedClasses[j].label) >= 0) {
-                firstFilteredResults.push($scope.utterances[i]);
+              if ($scope.texts[i].classes.indexOf(selectedClasses[j].label) >= 0) {
+                firstFilteredResults.push($scope.texts[i]);
                 break;
               }
             }
           }
         }
-        // filter further by newUtteranceString string if not empty
-        if ($scope.newUtteranceString) {
+        // filter further by newTextString string if not empty
+        if ($scope.newTextString) {
           for (i = 0; i < firstFilteredResults.length; i++) {
-            if (firstFilteredResults[i].label.toLowerCase().indexOf($scope.newUtteranceString.toLowerCase()) >= 0) {
+            if (firstFilteredResults[i].label.toLowerCase().indexOf($scope.newTextString.toLowerCase()) >= 0) {
               results.push(firstFilteredResults[i]);
             }
           }
@@ -659,36 +659,36 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // uncheck class <aClass> removing it from the collection of class filters for the utterances list
+      // uncheck class <aClass> removing it from the collection of class filters for the texts list
       $scope.removeClassFromView = function (aClass) {
         aClass.selected = false;
       };
 
       // -------------------------------------------------------------------------------------------------
       //
-      // --------------------- tagging (associating utterance with class or classes) ---------------------
+      // --------------------- tagging (associating text with class or classes) ---------------------
       //
       // -------------------------------------------------------------------------------------------------
 
-      // return boolean indicating whether utterance <anUtterance> has any class tags
-      $scope.isTagged = function (anUtterance) {
-        return anUtterance.classes.length > 0;
+      // return boolean indicating whether text <anText> has any class tags
+      $scope.isTagged = function (anText) {
+        return anText.classes.length > 0;
       };
 
-      // remove class tag with label <label> from utterance <anUtterance> if confirmed
-      $scope.removeTag = function (anUtterance, label) {
+      // remove class tag with label <label> from text <anText> if confirmed
+      $scope.removeTag = function (anText, label) {
         var msg;
-        if (anUtterance.classes.indexOf(label) >= 0) {
+        if (anText.classes.indexOf(label) >= 0) {
           msg = $scope.question('Remove class "' + label + '" from this text?', 'Remove');
           ngDialog.openConfirm({template: msg, plain: true
           }).then(function() {
-            anUtterance.classes = anUtterance.classes.filter($scope.doesNotMatch(label));
+            anText.classes = anText.classes.filter($scope.doesNotMatch(label));
             var clazz = $scope.getFromLabel($scope.classes, label);
-            texts.removeClasses(anUtterance.id, [{id: clazz.id}], function (err) {
+            texts.removeClasses(anText.id, [{id: clazz.id}], function (err) {
               if (err) {
-                $log.error('error removing class ' + label + ' from text ' + anUtterance.label + ': ' + JSON.stringify(err));
+                $log.error('error removing class ' + label + ' from text ' + anText.label + ': ' + JSON.stringify(err));
               } else {
-                $log.debug('success removing class ' + label + ' from text ' + anUtterance.label);
+                $log.debug('success removing class ' + label + ' from text ' + anText.label);
               }
             });
           });
@@ -698,36 +698,36 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
       };
 
-      // mark utterance <anUtterance> as being tagged or dismiss tag field if already being tagged
-      $scope.beginTaggingUtterance = function (anUtterance) {
+      // mark text <anText> as being tagged or dismiss tag field if already being tagged
+      $scope.beginTaggingText = function (anText) {
         //var field;
-        if (!anUtterance.beingTagged) {
-          $scope.newTagStrings[anUtterance.$$hashKey] = '';
-          anUtterance.beingTagged = true;
+        if (!anText.beingTagged) {
+          $scope.newTagStrings[anText.$$hashKey] = '';
+          anText.beingTagged = true;
         }
         else {
-          anUtterance.beingTagged = false;
+          anText.beingTagged = false;
         }
       };
 
       // handle keyup events from new tag field
-      $scope.newTagFieldKeyUp = function (event, anUtterance) {
+      $scope.newTagFieldKeyUp = function (event, anText) {
         var keyCode = event.keyCode, tagString;
         switch (keyCode) {
           case 13:
-          tagString = $scope.newTagStrings[anUtterance.$$hashKey];
-          $scope.newTagStrings[anUtterance.$$hashKey] = '';
-          anUtterance.beingTagged = false;
-          $scope.tagUtterance(tagString, anUtterance);
+          tagString = $scope.newTagStrings[anText.$$hashKey];
+          $scope.newTagStrings[anText.$$hashKey] = '';
+          anText.beingTagged = false;
+          $scope.tagText(tagString, anText);
           break;
           case 27:
-          $scope.newTagStrings[anUtterance.$$hashKey] = '';
-          anUtterance.beingTagged = false;
+          $scope.newTagStrings[anText.$$hashKey] = '';
+          anText.beingTagged = false;
           break;
         }
       };
 
-      $scope.tagUtteranceByLabels = function tagUtteranceByLabels (utterance, classes) {
+      $scope.tagTextByLabels = function tagTextByLabels (text, classes) {
         var classObjects = [];
         for (var i = 0, len = classes.length; i < len; i++) {
           var classObj = $scope.getFromLabel($scope.classes, classes[i]);
@@ -737,12 +737,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         if (classObjects.length > 0) {
-          $scope.tagUtterances([utterance], classObjects);
+          $scope.tagTexts([text], classObjects);
         }
       };
 
-      // add a class tag with label <classLabel> to utterance <anUtterance>
-      $scope.tagUtterance = function (classLabel, anUtterance) {
+      // add a class tag with label <classLabel> to text <anText>
+      $scope.tagText = function (classLabel, anText) {
         var i, msg, classObj;
         if (classLabel) {
           classObj = $scope.getFromLabel($scope.classes, classLabel);
@@ -751,51 +751,51 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function() {
               $scope.add('class', classLabel).then(function (classObj) {
-                return $scope.tagUtterances([anUtterance], [classObj]);
+                return $scope.tagTexts([anText], [classObj]);
               }, function (err) {
                 $log.error('error creating new class: ' + JSON.stringify(err));
               });
             });
           }
           else {
-            for (i = 0; i < anUtterance.classes.length; i++) {
-              if (anUtterance.classes[i].toLowerCase() === classLabel.toLowerCase()) {
-                msg = $scope.inform('This text has already been tagged with "' + anUtterance.classes[i] + '".');
+            for (i = 0; i < anText.classes.length; i++) {
+              if (anText.classes[i].toLowerCase() === classLabel.toLowerCase()) {
+                msg = $scope.inform('This text has already been tagged with "' + anText.classes[i] + '".');
                 ngDialog.openConfirm({template: msg, plain: true});
                 return;
               }
             }
-            $scope.tagUtterances([anUtterance], [classObj]);
+            $scope.tagTexts([anText], [classObj]);
           }
         }
       };
 
-      // prepare to add class tags for all checked classes to all checked utterances
-      $scope.tagCheckedUtterances = function () {
+      // prepare to add class tags for all checked classes to all checked texts
+      $scope.tagCheckedTexts = function () {
         var msg;
         if (!$scope.getChecked($scope.classes).length) {
           msg = $scope.inform('Please select one or more classes first');
           ngDialog.openConfirm({template: msg, plain: true});
         }
-        $scope.tagUtterances($scope.getChecked($scope.utterances), $scope.getChecked($scope.classes));
+        $scope.tagTexts($scope.getChecked($scope.texts), $scope.getChecked($scope.classes));
       };
 
-      // add class tags in array <classesArray> to all utterances in array <utterancesArray>
-      $scope.tagUtterances = function (utterancesArray, classesArray) {
+      // add class tags in array <classesArray> to all texts in array <textsArray>
+      $scope.tagTexts = function (textsArray, classesArray) {
         var i, j;
-        var textsLength = utterancesArray.length;
+        var textsLength = textsArray.length;
         var classesLength = classesArray.length;
         var classIds;
         for (i = 0; i < textsLength; i++) {
           classIds = [];
           for (j = 0; j < classesLength; j++) {
-            if (utterancesArray[i].classes.indexOf(classesArray[j].label) < 0) {
-              utterancesArray[i].classes.push(classesArray[j].label);
+            if (textsArray[i].classes.indexOf(classesArray[j].label) < 0) {
+              textsArray[i].classes.push(classesArray[j].label);
               classIds.push({ id : classesArray[j].id });
             }
           }
           if (classIds.length > 0) {
-            $scope.addClassesToText(utterancesArray[i].id, classIds);
+            $scope.addClassesToText(textsArray[i].id, classIds);
           }
         }
       };
@@ -867,7 +867,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         function createTrainingData() {
           // create training data
           var trainingData = [];
-          $scope.utterances.forEach(function forEach (text) {
+          $scope.texts.forEach(function forEach (text) {
             if (text.classes.length > 0) {
               trainingData.push({
                 text: text.label,
@@ -892,16 +892,16 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         // validation - should this be server side, or at least a part of the service?
-        for (i = 0; i < $scope.utterances.length; i++) {
+        for (i = 0; i < $scope.texts.length; i++) {
           // check to see if any of the texts have no classes tagged.
-          if ($scope.utterances[i].classes.length === 0) {
+          if ($scope.texts[i].classes.length === 0) {
             unclassified++;
             continue;
           }
-          // if the utterance's label is too long, stop the training from occuring, but inform the user first.
-          if ($scope.utterances[i].label.length > 1024) {
+          // if the text's label is too long, stop the training from occuring, but inform the user first.
+          if ($scope.texts[i].label.length > 1024) {
             validationIssues++;
-            var stringFragment = $scope.utterances[i].label.substring(0, 60) + ' ...';
+            var stringFragment = $scope.texts[i].label.substring(0, 60) + ' ...';
             msg = $scope.inform('"' + stringFragment + '" is longer than 1024 characters. Please shorten or remove it before starting training.');
             ngDialog.open({template: msg, plain: true});
             return;
@@ -911,7 +911,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         // if some invalid characters have been used, do not allow the training to go ahead.
         // Inform the user using a dialog box and closr the box when they confirm they have read it.
         for (i = 0; i < $scope.classes.length; i++) {
-          if ($scope.numberUtterancesInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
+          if ($scope.numberTextsInClass($scope.classes[i]) > 0 && !$scope.classes[i].label.match('^[a-zA-Z0-9_-]*$')) {
             validationIssues++;
             msg = $scope.inform('Class "' + $scope.classes[i].label + '" has invalid characters. Class values can include only alphanumeric characters (A-Z, a-z, 0-9), underscores, and dashes.');
             ngDialog.open({template: msg, plain: true});
@@ -938,7 +938,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       $scope.exportToFile = function () {
-        nlc.download($scope.utterances, $scope.classes);
+        nlc.download($scope.texts, $scope.classes);
       };
 
       $scope.addClass = function addClass (label) {
@@ -950,9 +950,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      $scope.addUtterance = function addUtterance (label, classes) {
-        return $scope.add('utterance', label).then(function (data) {
-          $scope.tagUtteranceByLabels(data, classes);
+      $scope.addText = function addText (label, classes) {
+        return $scope.add('text', label).then(function (data) {
+          $scope.tagTextByLabels(data, classes);
           return data;
         }, function (err) {
           $log.error('error adding text: ' + JSON.stringify(err));
@@ -973,11 +973,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.importTexts = function importTexts (texts) {
         var promises = [];
         for (var i = 0, len = texts.length; i < len; i++) {
-          var text = $scope.getFromLabel($scope.utterances, texts[i].text);
+          var text = $scope.getFromLabel($scope.texts, texts[i].text);
           if (text === null) {
-            promises.push($scope.addUtterance(texts[i].text, texts[i].classes));
+            promises.push($scope.addText(texts[i].text, texts[i].classes));
           } else {
-            $scope.tagUtteranceByLabels(text, texts[i].classes);
+            $scope.tagTextByLabels(text, texts[i].classes);
           }
         }
         return $q.all(promises);

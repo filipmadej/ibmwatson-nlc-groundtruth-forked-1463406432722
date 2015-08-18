@@ -18,7 +18,7 @@
 
 /**
  * Retrieve the etag metadata in the form of an 'If-Match' Header
- * @returns {object} The If-Match header from the cluster
+ * @returns {object} The If-Match header
  */
 function getMetadataEtag() {
   return {
