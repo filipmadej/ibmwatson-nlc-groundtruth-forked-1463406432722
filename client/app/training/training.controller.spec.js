@@ -191,7 +191,7 @@ describe('Controller: TrainingCtrl', function() {
 
     it('should return a set of \'selected\' objects from within an array', function() {
         scope.classes = CLASSES;
-        var filteredArray = scope.getSelected();
+        var filteredArray = scope.getSelectedClasses();
 
         expect(filteredArray.length).toBe(1);
         expect(filteredArray[0]).toBe(CLASSES[0]);
