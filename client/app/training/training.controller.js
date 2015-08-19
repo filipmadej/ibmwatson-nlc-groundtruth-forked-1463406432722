@@ -698,13 +698,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // handle keyup events from new tag field
       $scope.newTagFieldKeyUp = function (event, anText) {
-        var keyCode = event.keyCode, tagString;
+        var keyCode = event.keyCode;
         switch (keyCode) {
           case 13:
-          tagString = $scope.newTagStrings[anText.$$hashKey];
-          $scope.newTagStrings[anText.$$hashKey] = '';
-          anText.beingTagged = false;
-          $scope.tagText(tagString, anText);
+          $scope.tagText($scope.newTagStrings[anText.$$hashKey], anText);
           break;
           case 27:
           $scope.newTagStrings[anText.$$hashKey] = '';
@@ -730,10 +727,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // add a class tag with label <classLabel> to text <anText>
       $scope.tagText = function (classLabel, anText) {
         var i, msg, classObj;
+
+        $scope.newTagStrings[anText.$$hashKey] = '';
+        anText.beingTagged = false;
+
         if (classLabel) {
           classObj = $scope.getFromLabel($scope.classes, classLabel);
           if (!classObj) {
-            msg = $scope.question('The ' + classLabel + 'class doesn\'t yet exist. Do you want to create it?', 'Create');
+            msg = $scope.question('The ' + classLabel + ' class doesn\'t yet exist. Do you want to create it?', 'Create');
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function() {
               $scope.add('class', classLabel).then(function (classObj) {
