@@ -168,7 +168,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       //
       // ---------------------------------------------------------------------------------------------
 
-      // set ['checked'] to `bool` for all objects in an array
+      // set ['checked'] to <bool> for all objects in an array
       $scope.checkAll = function checkAll (array, bool) {
         array.forEach(function forEach (element) {
           element.checked = bool;
@@ -261,82 +261,86 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // set function for the variable controlling the list's sort
-      $scope.setTextOrderOption = function (option){
+      $scope.setTextOrderOption = function setTextOrderOption (option){
         // needs wrapping inside a $scope function to be accessible in HTML
         $scope.textOrderOption = option;
       };
 
       // a switch to determine the value used for the list's sort
-      $scope.textOrder = function (anText) {
+      $scope.textOrder = function textOrder (text) {
         switch ($scope.textOrderOption.value) {
           case 'newest':
-          return -anText.seq;
+            return -text.seq;
           case 'oldest':
-          return anText.seq;
+            return text.seq;
           case 'alpha':
-          return anText.label;
+            return text.label;
           case 'most':
-          return -$scope.classesForText(anText).length;
+            return -$scope.classesForText(text).length;
           case 'fewest':
-          return $scope.classesForText(anText).length;
+            return $scope.classesForText(text).length;
           default:
-          return -anText.seq;
+            return -text.seq;
         }
       };
 
       // ---------------------------------------------------------------------------------------------
 
       // handle a click on a class row in the classes table
-      $scope.selectClass = function (aClass) {
-        if (!aClass.edit) {
-          aClass.selected = !aClass.selected;
+      $scope.selectClass = function selectClass (clazz) {
+        if (!clazz.edit) {
+          clazz.selected = !clazz.selected;
         }
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      // toggle 'edit' attribute of <classOrText>
-      $scope.editField = function (classOrText) {
-        if (!classOrText.edit) {
-          classOrText.edit = true;
-        }
-        else {
-          $scope.dismissEditField(classOrText);
+      // toggle 'edit' attribute of <object>
+      $scope.editField = function editField (object) {
+        if (!object.edit) {
+          object.edit = true;
+        } else {
+          $scope.dismissEditField(object);
         }
       };
 
       // ---------------------------------------------------------------------------------------------
 
       // set the edit attibute of a given object to false. Used for toggline edit-mode for classes and texts
-      $scope.dismissEditField = function(classOrText) {
-        var field;
-        field = window.document.getElementById(classOrText.$$hashKey);
-        field.value = classOrText.label;
-        classOrText.edit = false;
+      $scope.dismissEditField = function dismissEditField (object) {
+        var field = window.document.getElementById(object.$$hashKey);
+        field.value = object.label;
+        object.edit = false;
       };
 
       // ---------------------------------------------------------------------------------------------
 
       // check the keyup event to see if the user has pressed 'esc' key. If so, dismiss the editing field
-      $scope.keyUpCancelEditing = function(classOrText, event) {
+      $scope.keyUpCancelEditing = function keyUpCancelEditing (object, event) {
         if (event.keyCode === 27) {
-          $scope.dismissEditField(classOrText);
+          $scope.dismissEditField(object);
         }
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      $scope.changeLabel = function(type, object) {
-        var msg, oldLabel = object.label, field, newLabel;
-        field = window.document.getElementById(object.$$hashKey);
-        newLabel = field.value;
+      // changes the label of the object unless the label already exists
+      $scope.changeLabel = function changeLabel (type, object) {
+        var oldLabel = object.label;
+        var field = window.document.getElementById(object.$$hashKey);
+        var newLabel = field.value;
         if (newLabel === '' || newLabel === oldLabel) {
           field.value = oldLabel;  // required so that empty value doesn't stick in text field
           object.edit = false;
         } else {
           var allObjects = $scope.getScopeArray(type);
           if ($scope.containsLabel(allObjects, newLabel)) {
-            msg = $scope.inform('The ' + type + ' "' + newLabel + '" already exists.');
+            var msg;
+            if (type === 'class') {
+              msg = $scope.inform('The ' + newLabel + ' ' + type + ' already exists.');
+            } else {
+              msg = $scope.inform('The "' + newLabel + '" ' + type + ' already exists.');
+            }
             ngDialog.open({template: msg, plain: true});
           } else {
             object.edit = false;  // turn editing back off before saving state
@@ -344,11 +348,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             field.value = newLabel;
             switch (type) {
               case 'class':
-              $scope.classLabelChanged(object, oldLabel, newLabel);
-              break;
+                $scope.classLabelChanged(object, oldLabel, newLabel);
+                break;
               case 'text':
-              $scope.textLabelChanged(object, oldLabel, newLabel);
-              break;
+                $scope.textLabelChanged(object, oldLabel, newLabel);
+                break;
             }
           }
         }
@@ -357,7 +361,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // propagate label <newLabel> to all texts tagged with label <oldLabel>
-      $scope.classLabelChanged = function (object, oldLabel, newLabel) {
+      $scope.classLabelChanged = function classLabelChanged (object, oldLabel, newLabel) {
         $scope.texts.forEach(function forEach (text) {
           var index = text.classes.indexOf(oldLabel);
           if (index >= 0) {
@@ -365,10 +369,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }
         });
 
-        classes.update(object.id, { name: newLabel }, function (err) {
+        classes.update(object.id, { name: newLabel }, function error (err) {
           if (err) {
             $log.error('error changing class label from ' + oldLabel + ' to ' + newLabel);
-            // TODO: need to revert other changes?
+            // TODO: need to revert other changes? alert user of error?
           } else {
             $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel);
           }
@@ -376,10 +380,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // persist the change to the text label
-      $scope.textLabelChanged = function (object, oldLabel, newLabel) {
-        texts.update(object.id, { value: newLabel }, function (err) {
+      $scope.textLabelChanged = function textLabelChanged (object, oldLabel, newLabel) {
+        texts.update(object.id, { value: newLabel }, function error (err) {
           if (err) {
             $log.error('error changing text label from ' + oldLabel + ' to ' + newLabel);
+            // TODO: need to revert change, alert user of error.
           } else {
             $log.debug('success changing text label from ' + oldLabel + ' to ' + newLabel);
           }
@@ -388,31 +393,32 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // Counts the number of texts that have a given <aClass> tagged
-      $scope.numberTextsInClass = function (aClass) {
-        var i, n = 0;
-        for (i = 0; i < $scope.texts.length; i += 1) {
-          if ($scope.texts[i].classes.indexOf(aClass.label) >= 0) {
+      // Counts the number of texts that have a given <clazz> tagged
+      $scope.numberTextsInClass = function numberTextsInClass (clazz) {
+        var n = 0;
+        $scope.texts.forEach(function forEach (text) {
+          if (text.classes.indexOf(clazz.label) >= 0) {
             n++;
           }
-        }
+        });
         return n;
       };
 
       // ------------------------------------------------------------------------------------------------
 
-      // return all classes tagged in text <anText>
-      $scope.classesForText = function (anText) {
-        var i, classes = [];
-        for (i = 0; i < anText.classes.length; i++) {
-          classes.push($scope.getFromLabel($scope.classes, anText.classes[i]));
-        }
+      // return all classes tagged in text <text>
+      $scope.classesForText = function classesForText (text) {
+        var classes = [];
+        text.classes.forEach(function forEach (clazz) {
+          classes.push($scope.getFromLabel($scope.classes, clazz));
+        });
         return classes;
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      $scope.add = function (type, label) {
+      // adds a new object
+      $scope.add = function add (type, label) {
         $scope.newClassString = '';
         $scope.newTextString = '';
         var deferred = $q.defer();
@@ -431,95 +437,94 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           var id = '';
           switch (type) {
             case 'class' :
-            classes.post({ name : label }, function post (err, data) {
-              if (err) {
-                deferred.reject(err);
-              } else {
-                id = data.id;
-                var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
-                $scope.classes.push(newClass);
-                $scope.newClassString = '';
-                deferred.resolve(newClass);
-              }
-            });
-            return deferred.promise;
+              classes.post({ name : label }, function post (err, data) {
+                if (err) {
+                  deferred.reject(err);
+                } else {
+                  id = data.id;
+                  var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
+                  $scope.classes.push(newClass);
+                  $scope.newClassString = '';
+                  deferred.resolve(newClass);
+                }
+              });
+              return deferred.promise;
             case 'text' :
-            texts.post({ value : label }, function post (err, data) {
-              if (err) {
-                deferred.reject(err);
-              } else {
-                id = data.id;
-                var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                $scope.tagTexts([newText], $scope.getSelectedClasses());
-                $scope.texts.push(newText);
-                $scope.newTextString = '';
-                deferred.resolve(newText);
-              }
-            });
-            return deferred.promise;
+              texts.post({ value : label }, function post (err, data) {
+                if (err) {
+                  deferred.reject(err);
+                } else {
+                  id = data.id;
+                  var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
+                  $scope.tagTexts([newText], $scope.getSelectedClasses());
+                  $scope.texts.push(newText);
+                  $scope.newTextString = '';
+                  deferred.resolve(newText);
+                }
+              });
+              return deferred.promise;
           }
         }
-
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      // prepare to delete class <aClass> if operation is confirmed
-      $scope.deleteClass = function (aClass) {
+      // prepare to delete class <clazz> if operation is confirmed
+      $scope.deleteClass = function deleteClass (clazz) {
         var label;
-        if (aClass.label.length > 40) {
-          label = aClass.label.substring(0, 40) + '...';
+        if (clazz.label.length > 40) {
+          label = clazz.label.substring(0, 40) + '...';
         } else {
-          label = aClass.label;
+          label = clazz.label;
         }
 
         var msg;
-        if ($scope.numberTextsInClass(aClass) === 0) {
+        if ($scope.numberTextsInClass(clazz) === 0) {
           msg = $scope.question('Delete ' + label + ' class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberTextsInClass(aClass) + ' text(s) are tagged with the '  + label + ' class. If you delete this class, it will be removed from those tests.', 'Delete');
+          msg = $scope.question($scope.numberTextsInClass(clazz) + ' text(s) are tagged with the '  + label + ' class. If you delete this class, it will be removed from those texts.', 'Delete');
         }
-
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function() {  // ok
-          $scope.deleteClasses([aClass]);
+        }).then(function remove () {  // ok
+          $scope.deleteClasses([clazz]);
         });
       };
 
-      // prepare to delete text <anText> if operation is confirmed
-      $scope.deleteText = function (anText) {
+      // prepare to delete text <text> if operation is confirmed
+      $scope.deleteText = function deleteText (text) {
         var label;
-        if (anText.label.length > 60) {
-          label = anText.label.substring(0, 60) + '...';
+        if (text.label.length > 60) {
+          label = text.label.substring(0, 60) + '...';
         } else {
-          label = anText.label;
+          label = text.label;
         }
 
-        var msg = $scope.question('Delete ' + label + ' text?', 'Delete');
+        var msg = $scope.question('Do you want to delete the "' + label + '" text?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function() {  // ok
-          $scope.deleteTexts([anText]);
+        }).then(function remove () {
+          $scope.deleteTexts([text]);
         });
       };
 
       // ---------------------------------------------------------------------------------------------
 
       // prepare to delete all currently checked classes if operation is confirmed
-      $scope.deleteCheckedClasses = function () {
-        var msg;
+      $scope.deleteCheckedClasses = function deleteCheckedClasses () {
         var checkedClasses = $scope.getChecked($scope.classes);
-        var textsInUse = 0, classesInUse = [];
+        var textsInUse = 0;
+        var classesInUse = [];
 
-        checkedClasses.forEach(function(d) {
-          var taggedTexts = $scope.numberTextsInClass(d);
-          if (taggedTexts>0) {
-            textsInUse = textsInUse + $scope.numberTextsInClass(d);
-            classesInUse.push(d);
+        checkedClasses.forEach(function forEach (clazz) {
+          var taggedTexts = $scope.numberTextsInClass(clazz);
+          if (taggedTexts > 0) {
+            textsInUse += taggedTexts;
+            classesInUse.push(clazz);
           }
         });
 
+        var msg;
         if (classesInUse.length === 1) {
-          msg = $scope.question(textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + ' class. If you delete this class, the tags will be removed from those texts.', 'Delete');
+          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + ' class. If you delete this class, the tags will be deleted from those texts.', 'Delete');
         }
         else if (classesInUse.length > 1) {
           msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different checked classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
@@ -528,17 +533,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function() {  // ok
-          $scope.deleteClasses($scope.getChecked($scope.classes));
+        }).then(function remove () {
+          $scope.deleteClasses(checkedClasses);
         });
       };
 
       // prepare to delete all currently checked texts if operation is confirmed
-      $scope.deleteCheckedTexts = function () {
+      $scope.deleteCheckedTexts = function deleteCheckedTexts () {
         var checkedTexts = $scope.getChecked($scope.texts);
         var msg = $scope.question('Are you sure that you want to delete the ' + checkedTexts.length + ' text(s) that you have checked?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function() {  // ok
+        }).then(function remove () {
           $scope.deleteTexts(checkedTexts);
         });
       };
@@ -546,7 +551,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // delete all class in <classArray>
-      $scope.deleteClasses = function (classArray) {
+      $scope.deleteClasses = function deleteClasses (classArray) {
         var i, j, classLength, textLength, index;
         for (i = 0, classLength = classArray.length; i < classLength; i++) {
           for (j = 0, textLength = $scope.texts.length; j < textLength; j++) {
@@ -656,25 +661,25 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       //
       // -------------------------------------------------------------------------------------------------
 
-      // return boolean indicating whether text <anText> has any class tags
-      $scope.isTagged = function (anText) {
-        return anText.classes.length > 0;
+      // return boolean indicating whether text <text> has any class tags
+      $scope.isTagged = function (text) {
+        return text.classes.length > 0;
       };
 
-      // remove class tag with label <label> from text <anText> if confirmed
-      $scope.removeTag = function (anText, label) {
+      // remove class tag with label <label> from text <text> if confirmed
+      $scope.removeTag = function (text, label) {
         var msg;
-        if (anText.classes.indexOf(label) >= 0) {
+        if (text.classes.indexOf(label) >= 0) {
           msg = $scope.question('Remove class "' + label + '" from this text?', 'Remove');
           ngDialog.openConfirm({template: msg, plain: true
           }).then(function() {
-            anText.classes = anText.classes.filter($scope.doesNotMatch(label));
+            text.classes = text.classes.filter($scope.doesNotMatch(label));
             var clazz = $scope.getFromLabel($scope.classes, label);
-            texts.removeClasses(anText.id, [{id: clazz.id}], function (err) {
+            texts.removeClasses(text.id, [{id: clazz.id}], function (err) {
               if (err) {
-                $log.error('error removing class ' + label + ' from text ' + anText.label + ': ' + JSON.stringify(err));
+                $log.error('error removing class ' + label + ' from text ' + text.label + ': ' + JSON.stringify(err));
               } else {
-                $log.debug('success removing class ' + label + ' from text ' + anText.label);
+                $log.debug('success removing class ' + label + ' from text ' + text.label);
               }
             });
           });
@@ -684,28 +689,28 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
       };
 
-      // mark text <anText> as being tagged or dismiss tag field if already being tagged
-      $scope.beginTaggingText = function (anText) {
+      // mark text <text> as being tagged or dismiss tag field if already being tagged
+      $scope.beginTaggingText = function (text) {
         //var field;
-        if (!anText.beingTagged) {
-          $scope.newTagStrings[anText.$$hashKey] = '';
-          anText.beingTagged = true;
+        if (!text.beingTagged) {
+          $scope.newTagStrings[text.$$hashKey] = '';
+          text.beingTagged = true;
         }
         else {
-          anText.beingTagged = false;
+          text.beingTagged = false;
         }
       };
 
       // handle keyup events from new tag field
-      $scope.newTagFieldKeyUp = function (event, anText) {
+      $scope.newTagFieldKeyUp = function (event, text) {
         var keyCode = event.keyCode;
         switch (keyCode) {
           case 13:
-          $scope.tagText($scope.newTagStrings[anText.$$hashKey], anText);
+          $scope.tagText($scope.newTagStrings[text.$$hashKey], text);
           break;
           case 27:
-          $scope.newTagStrings[anText.$$hashKey] = '';
-          anText.beingTagged = false;
+          $scope.newTagStrings[text.$$hashKey] = '';
+          text.beingTagged = false;
           break;
         }
       };
@@ -724,12 +729,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
       };
 
-      // add a class tag with label <classLabel> to text <anText>
-      $scope.tagText = function (classLabel, anText) {
+      // add a class tag with label <classLabel> to text <text>
+      $scope.tagText = function (classLabel, text) {
         var i, msg, classObj;
 
-        $scope.newTagStrings[anText.$$hashKey] = '';
-        anText.beingTagged = false;
+        $scope.newTagStrings[text.$$hashKey] = '';
+        text.beingTagged = false;
 
         if (classLabel) {
           classObj = $scope.getFromLabel($scope.classes, classLabel);
@@ -738,21 +743,21 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function() {
               $scope.add('class', classLabel).then(function (classObj) {
-                return $scope.tagTexts([anText], [classObj]);
+                return $scope.tagTexts([text], [classObj]);
               }, function (err) {
                 $log.error('error creating new class: ' + JSON.stringify(err));
               });
             });
           }
           else {
-            for (i = 0; i < anText.classes.length; i++) {
-              if (anText.classes[i].toLowerCase() === classLabel.toLowerCase()) {
-                msg = $scope.inform('This text has already been tagged with ' + anText.classes[i] + '.');
+            for (i = 0; i < text.classes.length; i++) {
+              if (text.classes[i].toLowerCase() === classLabel.toLowerCase()) {
+                msg = $scope.inform('This text has already been tagged with ' + text.classes[i] + '.');
                 ngDialog.openConfirm({template: msg, plain: true});
                 return;
               }
             }
-            $scope.tagTexts([anText], [classObj]);
+            $scope.tagTexts([text], [classObj]);
           }
         }
       };
