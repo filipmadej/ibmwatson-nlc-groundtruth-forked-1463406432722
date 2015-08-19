@@ -124,12 +124,12 @@
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('text', newTextString);">
           <input type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a text to add or filter" ng-model="newTextString">
           <span class="input-group-btn">
-            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add</button>
+            <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="!newTextString">Add</button>
           </span>
         </form>
-        <div ng-show="getSelected().length" style="margin-top: 10px;">
+        <div ng-show="getSelectedClasses().length" style="margin-top: 10px;">
           <span class="ibm-nlc-showing-tagged-results">Tagged with:</span>
-          <span ng-repeat="aClass in getSelected()">
+          <span ng-repeat="aClass in getSelectedClasses()">
             <span class="ibm-nlc-tag ibm-nlc-filter-tag">
               {{ aClass.label }}
               <a ng-click="removeClassFromView(aClass)">

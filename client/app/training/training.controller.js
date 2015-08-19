@@ -183,14 +183,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // return an array of selected classes
-      $scope.getSelected = function getSelected () {
-        return _.filter($scope.classes, function filter (c) {
-          return c.selected;
+      $scope.getSelectedClasses = function getSelectedClasses () {
+        return _.filter($scope.classes, function filter (clazz) {
+          return clazz.selected;
         });
       };
 
       // return a class or text with a given label
-      $scope.getFromLabel = function(array, label) {
+      $scope.getFromLabel = function getFromLabel (array, label) {
         var idx = -1;
         array.some(function find (element, index) {
           if (element.label === label) {
@@ -202,7 +202,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // return a class or text with a given id
-      $scope.getFromId = function(array, id) {
+      $scope.getFromId = function getFromId (array, id) {
         var idx = -1;
         array.some(function find (element, index) {
           if (element.id === id) {
@@ -220,12 +220,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       };
 
-      $scope.getScopeArray = function(type) {
-        switch(type) {
+      // gets the classes or texts array
+      $scope.getScopeArray = function getScopeArray (type) {
+        switch (type) {
           case 'class':
-          return $scope.classes;
+            return $scope.classes;
           case 'text':
-          return $scope.texts;
+            return $scope.texts;
         }
       };
 
@@ -236,26 +237,26 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // set function for the variable controlling the list's sort
-      $scope.setClassOrderOption = function (option) {
+      $scope.setClassOrderOption = function setClassOrderOption (option) {
         // needs wrapping inside a $scope function to be accessible in HTML
         $scope.classOrderOption = option;
       };
 
       // a switch to determine the value used for the list's sort
-      $scope.classOrder = function (aClass) {
+      $scope.classOrder = function classOrder (clazz) {
         switch ($scope.classOrderOption.value) {
           case 'newest':
-          return -aClass.seq;
+            return -clazz.seq;
           case 'oldest':
-          return aClass.seq;
+            return clazz.seq;
           case 'alpha':
-          return aClass.label;
+            return clazz.label;
           case 'most':
-          return -$scope.numberTextsInClass(aClass);
+            return -$scope.numberTextsInClass(clazz);
           case 'fewest':
-          return $scope.numberTextsInClass(aClass);
+            return $scope.numberTextsInClass(clazz);
           default:
-          return -aClass.seq;
+            return -clazz.seq;
         }
       };
 
@@ -425,7 +426,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           var msg = $scope.inform('The ' + type + ' "' + existingObject.label + '" already exists.');
           ngDialog.open({template: msg, plain: true});
           deferred.resolve();
-          return deferred.promise();
+          return deferred.promise;
         } else {
           var id = '';
           switch (type) {
@@ -449,7 +450,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               } else {
                 id = data.id;
                 var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                $scope.tagTexts([newText], $scope.getSelected());
+                $scope.tagTexts([newText], $scope.getSelectedClasses());
                 $scope.texts.push(newText);
                 $scope.newTextString = '';
                 deferred.resolve(newText);
@@ -612,7 +613,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // return array of texts filtered by class inclusion and further filtered by label substring match with newTextString field
       $scope.filteredTexts = function () {
-        var i, j, selectedClasses = $scope.getSelected(), firstFilteredResults = [], results = [];
+        var i, j, selectedClasses = $scope.getSelectedClasses(), firstFilteredResults = [], results = [];
         if (selectedClasses.length === 0) {
           // no class filters present
           firstFilteredResults = $scope.texts;
