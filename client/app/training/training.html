@@ -4,7 +4,7 @@
       <div>
         <ul class="nav navbar-nav navbar-left ibm-nav">
           <li>
-            <a ngf-select ngf-change="getFileContent(files)" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
+            <a ngf-select ngf-change="getFileContent(files)" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
           </li>
           <li>
             <a ng-click="export()">Export</a>
@@ -51,7 +51,7 @@
       <!-- --------------------------------- classes sort --------------------------------- -->
       <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('class', newClassString);">
-          <input type="text" id="newClassField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a class" ng-model="newClassString">
+          <input type="text" id="newClassField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a class to add or filter" ng-model="newClassString">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(classes, newClassString)" ng-disabled="newClassString.length==0">Add</button>
           </span>
@@ -61,7 +61,7 @@
         <span ng-show="filteredClasses().length" class="ibm-nlc-checkall">
           <input type="checkbox" ng-model="checkAllClassesChecked" ng-click="checkAll(filteredClasses(),checkAllClassesChecked);">
         </span>
-        <input ng-show="getChecked(classes).length && filteredClasses().length" type="image" class="ibm-nlc-icon-header" src="assets/images/remove-trash_32.png" width="20px" height="20px" ng-click="deleteCheckedClasses()">
+        <input ng-show="getChecked(classes).length && filteredClasses().length" type="image" class="ibm-nlc-icon-header" src="https://ibmwatson-assets-nlc.mybluemix.net/images/remove-trash_32.png" width="20px" height="20px" ng-click="deleteCheckedClasses()">
         <div class="dropdown ibm-dropdown ibm-nlc-sortbydropdown">
           <button class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="classOrderDropdown" aria-haspopup="true" aria-expanded="false">Sort by: {{ classOrderOption.label }} <span class="caret"></span>
           </button>
@@ -122,7 +122,7 @@
       <!-- --------------------------------- texts sort --------------------------------- -->
       <div>
         <form class="form-group ibm-form-group input-group" style="width:100%;margin-top: 5px;margin-bottom: 0px;" ng-submit="add('text', newTextString);">
-          <input type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a text" ng-model="newTextString">
+          <input type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter a text to add or filter" ng-model="newTextString">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add</button>
           </span>
@@ -144,8 +144,8 @@
           <input type="checkbox" ng-model="checkAllTextsChecked" ng-click="checkAll(filteredTexts(),checkAllTextsChecked);">
         </span>
         <span ng-show="getChecked(texts).length && filteredTexts().length">
-          <input type="image" class="ibm-nlc-icon-header" src="assets/images/remove-trash_32.png" width="20px" height="20px" ng-click="deleteCheckedTexts()" style="margin-left:0px;">
-          <input type="image" class="ibm-nlc-icon-header" src="assets/images/tag_32.png" width="20px" height="20px" ng-click="tagCheckedTexts()"/>
+          <input type="image" class="ibm-nlc-icon-header" src="https://ibmwatson-assets-nlc.mybluemix.net/images/remove-trash_32.png" width="20px" height="20px" ng-click="deleteCheckedTexts()" style="margin-left:0px;">
+          <input type="image" class="ibm-nlc-icon-header" src="https://ibmwatson-assets-nlc.mybluemix.net/images/tag_32.png" width="20px" height="20px" ng-click="tagCheckedTexts()"/>
         </span>
         <div class="dropdown ibm-dropdown ibm-nlc-sortbydropdown">
           <button class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="dropdownMenu1" aria-haspopup="true" aria-expanded="false">Sort by: {{ textOrderOption.label }} <span class="caret"></span>
