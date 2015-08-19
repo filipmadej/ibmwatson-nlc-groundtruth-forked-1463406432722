@@ -10,7 +10,7 @@ applications:
   description: An application to configure and train a Watson Natural Language Classifier
   memory: 256M
   disk_quota: 256M
-  command: NODE_ENV=production node server/app.js
+  command: NODE_ENV=production node server/start.js
   domain: mybluemix.net
   host: @appBaseName@-@environment.name@-@BUILD_NUMBER@
   timeout: 180

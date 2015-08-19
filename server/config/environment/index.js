@@ -41,18 +41,7 @@ var all = {
   // Default values for VCAP, to be used with node cfenv if not present
   vcap : {
     application : null,
-    services : {'natural_language_classifier': [
-        { 
-           'name': 'ibmwatson-nlc-classifier', 
-           'label': 'natural_language_classifier', 
-           'plan': 'beta', 
-           'credentials': { 
-              'url': 'https://gateway.watsonplatform.net/natural-language-classifier-beta/api', 
-              'username': 'b1acf55a-ae19-49af-939a-9ed3d5bda6ab', 
-              'password': 'EYRqGOthx1Id' 
-           } 
-        } 
-     ] }
+    services : null
   },
 
   endpoints : {

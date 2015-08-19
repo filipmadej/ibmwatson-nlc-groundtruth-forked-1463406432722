@@ -31,7 +31,34 @@ chai.use(sinonChai);
 
 var app;
 
-describe('server/app', function () {
+var vcapTest = '{\
+    "natural_language_classifier": [ \
+        { \
+        "name": "ibmwatson-nlc-classifier", \
+        "label": "natural_language_classifier", \
+        "plan": "standard", \
+        "credentials": { \
+          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
+          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
+          "password": "wgGb9arQWnqw" \
+        } \
+      } \
+     ] \
+  }';
+
+describe('server/start', function () {
+
+  before(function(){
+
+    this.originalVcapServices = process.env.VCAP_SERVICES;
+
+    process.env.VCAP_SERVICES = vcapTest;
+
+  });
+
+  after(function(){
+    process.env.VCAP_SERVICES = this.originalVcapServices;
+  });
 
   beforeEach(function () {
     this.httpMock = new mocks.HttpMock();
@@ -46,7 +73,7 @@ describe('server/app', function () {
       delete process.env.NODE_ENV;
     }
 
-    app = proxyquire('./app', {
+    app = proxyquire('./start', {
       'http' : this.httpMock,
       './config/db/store' : this.storeMock,
       'watson-developer-cloud' : new mocks.WDCMock()
@@ -68,7 +95,7 @@ describe('server/app', function () {
     beforeEach(function (done) {
       this.timeout(5000);
 
-      app = proxyquire('./app', {
+      app = proxyquire('./start', {
         'http' : this.httpMock,
         './config/db/store' : this.storeMock
       });
@@ -131,7 +158,7 @@ describe('server/app', function () {
       process.once('uncaughtException', verify);
 
       try {
-        app = proxyquire('./app', {
+        app = proxyquire('./start', {
           'http' : this.httpMock,
           './config/db/store' : this.storeMock
         });
@@ -160,7 +187,7 @@ describe('server/app', function () {
       process.once('uncaughtException', verify);
 
       try {
-        app = proxyquire('./app', {
+        app = proxyquire('./start', {
           'http' : this.httpMock,
           './config/db/store' : this.storeMock
         });
