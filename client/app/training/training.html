@@ -12,7 +12,7 @@
         </ul>
         <ul class="nav navbar-nav navbar-right ibm-nav">
           <li style="float: right">
-            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Save & Train</a>
+            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Train</a>
             <a ng-show="!showTrainConfirm && loading.savingClassifier">Saving & Training</a>
             <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm && !loading.savingClassifier">
               <div class="form-group ibm-form-group input-group">
