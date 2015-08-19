@@ -23,20 +23,47 @@ var request = require('supertest');
 var proxyquire = require('proxyquire');
 
 
-// local dependencies
-var nlc = require('../../config/nlc');
-
 // test dependencies
 var mocks = require('../../test/mocks');
 
 var should = chai.should();
 
-var app = proxyquire('../../app', {
-  './config/db/store' : new mocks.StoreMock(),
-  'watson-developer-cloud' : new mocks.WDCMock(),
-});
+var app, nlc;
+
+var vcapTest = '{\
+    "natural_language_classifier": [ \
+        { \
+        "name": "ibmwatson-nlc-classifier", \
+        "label": "natural_language_classifier", \
+        "plan": "standard", \
+        "credentials": { \
+          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
+          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
+          "password": "wgGb9arQWnqw" \
+        } \
+      } \
+     ] \
+  }';
 
 describe('/server/api/import', function () {
+
+  before(function(){
+
+    this.originalVcapServices = process.env.VCAP_SERVICES;
+
+    process.env.VCAP_SERVICES = vcapTest;
+
+    nlc = proxyquire('../../config/nlc',{});
+
+    app = proxyquire('../../app', {
+      './config/db/store' : new mocks.StoreMock(),
+      'watson-developer-cloud' : new mocks.WDCMock(),
+    });
+  });
+
+  after(function(){
+    process.env.VCAP_SERVICES = this.originalVcapServices;
+  });
 
   describe('POST /api/import/csv', function () {
 

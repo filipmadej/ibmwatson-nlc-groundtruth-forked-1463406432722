@@ -24,13 +24,10 @@ var util = require('util');
 var async = require('async');
 var chai = require('chai');
 var httpstatus = require('http-status');
-var proxyquire = require('proxyquire');
+var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
-
-// local dependencies
-var nlc = require('../../config/nlc');
 
 // test dependencies
 var mocks = require('../../test/mocks');
@@ -41,13 +38,47 @@ chai.use(sinonChai);
 var passport = require('passport');
 passport['@global'] = true;
 
-var app = proxyquire('../../app', {
-  './config/db/store' : new mocks.StoreMock(),
-  'watson-developer-cloud' : new mocks.WDCMock(),
-  'passport' : passport
-});
+var app, nlc;
+
+var vcapTest = '{\
+    "natural_language_classifier": [ \
+        { \
+        "name": "ibmwatson-nlc-classifier", \
+        "label": "natural_language_classifier", \
+        "plan": "standard", \
+        "credentials": { \
+          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
+          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
+          "password": "wgGb9arQWnqw" \
+        } \
+      } \
+     ] \
+  }';
 
 describe('/server/api/authenticate', function () {
+
+  // proxyquire of app takes longer than the default 2000ms
+  this.timeout(5000);
+
+  before(function(){
+
+    this.originalVcapServices = process.env.VCAP_SERVICES;
+
+    process.env.VCAP_SERVICES = vcapTest;
+
+    nlc = proxyquire('../../config/nlc',{});
+
+    app = proxyquire('../../app', {
+      './config/db/store' : new mocks.StoreMock(),
+      'watson-developer-cloud' : new mocks.WDCMock(),
+      'passport' : passport
+    });
+
+  });
+
+  after(function(){
+    process.env.VCAP_SERVICES = this.originalVcapServices;
+  });
 
   describe('GET /api/authenticate', function () {
 
@@ -90,6 +121,9 @@ describe('/server/api/authenticate', function () {
   describe('POST /api/authenticate', function () {
 
     it('should respond with a 200 response if the user provides the correct credentials', function (done) {
+
+      console.log('username',nlc.username);
+
       request(app)
         .post('/api/authenticate')
         .send({username : nlc.username, password : nlc.password})

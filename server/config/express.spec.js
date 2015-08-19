@@ -33,6 +33,21 @@ var sinonChai = require('sinon-chai');
 var should = chai.should();
 chai.use(sinonChai);
 
+var vcapTest = '{\
+    "natural_language_classifier": [ \
+        { \
+        "name": "ibmwatson-nlc-classifier", \
+        "label": "natural_language_classifier", \
+        "plan": "standard", \
+        "credentials": { \
+          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
+          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
+          "password": "wgGb9arQWnqw" \
+        } \
+      } \
+     ] \
+  }';
+
 /*
  * AJS - Admittedly this unit test is ridiculously complex but
  * given that the configuration of express is vital part of a
@@ -44,10 +59,14 @@ describe('/server/config/express', function () {
 
   before(function () {
     this.originalEnv = process.env.NODE_ENV;
+    this.originalVcapServices = process.env.VCAP_SERVICES;
+    process.env.VCAP_SERVICES = vcapTest;
   });
 
   after(function () {
     process.env.NODE_ENV = this.originalEnv;
+    process.env.VCAP_SERVICES = this.originalVcapServices;
+
   });
 
   beforeEach(function () {

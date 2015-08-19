@@ -83,13 +83,13 @@ module.exports = function(grunt) {
       },
       dev: {
         options: {
-          script: 'server/app.js',
+          script: 'server/start.js',
           debug: true
         }
       },
       prod: {
         options: {
-          script: 'dist/server/app.js'
+          script: 'dist/server/start.js'
         }
       }
     },
@@ -248,7 +248,7 @@ module.exports = function(grunt) {
     // Use nodemon to run server in debug mode with an initial breakpoint
     nodemon: {
       debug: {
-        script: 'server/app.js',
+        script: 'server/start.js',
         options: {
           nodeArgs: ['--debug-brk'],
           env: {
