@@ -47,7 +47,7 @@ module.exports = function init (app) {
 
     // Use local strategy
     passport.use(new LocalStrategy(function authenticate (username, password, done) {
-
+        console.log(nlc);
         if (username === nlc.username && password === nlc.password) {
             return done(null,nlc);
         }

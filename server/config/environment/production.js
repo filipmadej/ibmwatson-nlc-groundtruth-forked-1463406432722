@@ -22,9 +22,7 @@ var cfenv = require('cfenv');
 var appEnv = cfenv.getAppEnv();
 module.exports = {
     // Server IP
-    ip: appEnv.bind ||
-        process.env.IP ||
-        undefined,
+    ip: undefined,
 
     // Server port
     port:   appEnv.port ||

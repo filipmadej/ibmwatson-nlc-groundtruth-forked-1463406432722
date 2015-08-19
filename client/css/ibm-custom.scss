@@ -71,7 +71,7 @@ body {margin-bottom: 60px; padding-top: 0; background-color: #F4F4F4; font-size:
 			.ibm-radio {margin-bottom: 2em;}
 			.ibm-form-control {height: 3em; border: 1px solid #777677; box-shadow: inset 1px 1px 1px #ECECEC;}
 			.ibm-input-group-search {width: 100%;}
-				.ibm-input-group-search input {padding-left: 3.5em; padding-top: .6em; background: url(../assets/images/search_24.svg) no-repeat .7em 50% #fff; box-shadow: inset 1px 1px 1px #ECECEC; color: #777677;}
+				.ibm-input-group-search input {padding-left: 3.5em; padding-top: .6em; background: url(http://ibmwatson-assets-nlc.mybluemix.net/images/search_24.svg) no-repeat .7em 50% #fff; box-shadow: inset 1px 1px 1px #ECECEC; color: #777677;}
 			.ibm-form-group .ibm-form-control-required:after {content: " *"; color: #E71D32;}
 			.ibm-form-group-links {padding-top: 2em; color: rgb(224,224,224);}
 				.ibm-form-group-links a {color: rgb(118,119,118); font-size: 0.8em;}
@@ -124,27 +124,27 @@ body {margin-bottom: 60px; padding-top: 0; background-color: #F4F4F4; font-size:
 
 
 	/* Icons */
-	.ibm-icon {display: inline-block; height: 20px; width: 20px; background: url(../assets/images/chat-im_32.svg) no-repeat 50% 0 / 100% auto transparent; margin-right: .3em; vertical-align: middle;}
-	.ibm-icon-add {height: 24px; width: 24px; background-image: url(../assets/images/add-new_32.svg);}
-	.ibm-icon-add-selected {height: 24px; width: 24px; background-image: url(../assets/images/add-new-active_32.svg);}
-	.ibm-icon-close {height: 24px; width: 24px; background-image: url(../assets/images/close-cancel-error_32.svg);}
-	.ibm-icon-down {height: 16px; width: 16px; background-image: url(../assets/images/down.svg);}
-	.ibm-icon-up {height: 16px; width: 16px; background-image: url(../assets/images/up.svg);}
-	.ibm-icon-expand {background-image: url(../assets/images/menuoverflow_32.svg);}
-	.ibm-icon-grid {height: 16px; width: 16px; background-image: url(../assets/images/tile-tiles-tileview_32.svg);}
-	.ibm-icon-help {background-image: url(../assets/images/help_32.svg);}
-	.ibm-icon-left {background-image: url(../assets/images/back-left-previous_32.svg);}
-	.ibm-icon-right {background-image: url(../assets/images/forward-right-next_32.svg);}
-	.ibm-icon-question {background-image: url(../assets/images/info_question_32.svg);}
-	.ibm-icon-remove {height: 24px; width: 24px; background-image: url(../assets/images/remove-delete_32.svg);}
-	.ibm-icon-row {height: 16px; width: 16px; background-image: url(../assets/images/tile-tiles-row_32.svg);}
-	.ibm-icon-search {background-image: url(../assets/images/search_24.svg);}
-	.ibm-icon-settings {background-image: url(../assets/images/settings-manage_32.svg);}
-	.ibm-icon-star {height: 32px; width: 32px; margin-right: 0; background-image: url(../assets/images/rating-star_32.svg);}
-	.ibm-icon-star-selected {height: 32px; width: 32px; margin-right: 0; background-image: url(../assets/images/rating-star_32.svg); background-position: 0 100%;}
-	.ibm-icon-success {height: 32px; width: 32px; background-image: url(../assets/images/success-confirmation_32.svg); background-position: 0 -64px;}
-	.ibm-icon-success-poor {height: 32px; width: 32px; background-image: url(../assets/images/success-confirmation_32.svg); background-position: 0 0;}
-	.ibm-icon-user {background-image: url(../assets/images/user-profile_32.svg);}
+	.ibm-icon {display: inline-block; height: 20px; width: 20px; background: url(http://ibmwatson-assets-nlc.mybluemix.net/images/chat-im_32.svg) no-repeat 50% 0 / 100% auto transparent; margin-right: .3em; vertical-align: middle;}
+	.ibm-icon-add {height: 24px; width: 24px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/add-new_32.svg);}
+	.ibm-icon-add-selected {height: 24px; width: 24px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/add-new-active_32.svg);}
+	.ibm-icon-close {height: 24px; width: 24px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/close-cancel-error_32.svg);}
+	.ibm-icon-down {height: 16px; width: 16px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/down.svg);}
+	.ibm-icon-up {height: 16px; width: 16px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/up.svg);}
+	.ibm-icon-expand {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/menuoverflow_32.svg);}
+	.ibm-icon-grid {height: 16px; width: 16px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/tile-tiles-tileview_32.svg);}
+	.ibm-icon-help {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/help_32.svg);}
+	.ibm-icon-left {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/back-left-previous_32.svg);}
+	.ibm-icon-right {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/forward-right-next_32.svg);}
+	.ibm-icon-question {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/info_question_32.svg);}
+	.ibm-icon-remove {height: 24px; width: 24px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/remove-delete_32.svg);}
+	.ibm-icon-row {height: 16px; width: 16px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/tile-tiles-row_32.svg);}
+	.ibm-icon-search {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/search_24.svg);}
+	.ibm-icon-settings {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/settings-manage_32.svg);}
+	.ibm-icon-star {height: 32px; width: 32px; margin-right: 0; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/rating-star_32.svg);}
+	.ibm-icon-star-selected {height: 32px; width: 32px; margin-right: 0; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/rating-star_32.svg); background-position: 0 100%;}
+	.ibm-icon-success {height: 32px; width: 32px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/success-confirmation_32.svg); background-position: 0 -64px;}
+	.ibm-icon-success-poor {height: 32px; width: 32px; background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/success-confirmation_32.svg); background-position: 0 0;}
+	.ibm-icon-user {background-image: url(http://ibmwatson-assets-nlc.mybluemix.net/images/user-profile_32.svg);}
 
 	/* Unicode Characters */
 	.icon-arrow-sm-up {font-size: .8em;}
@@ -271,13 +271,13 @@ body {margin-bottom: 60px; padding-top: 0; background-color: #F4F4F4; font-size:
 				#collapseOne .ibm-arrow-up, #collapseTwo .ibm-arrow-up, #collapseThree .ibm-arrow-up {border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 15px solid rgb(50,50,50); position: absolute; top: -31px; left: 25%;}
 
 			/* Tasks */
-			.ibm-panel-group-task .ibm-panel-heading {padding-left: 3.6em; padding-right: 1.5em; border-bottom: 1px solid #E0E0E0; background: url(../assets/images/task-types.svg) no-repeat 1.5em 1em #fff; line-height: 2.2em;}
+			.ibm-panel-group-task .ibm-panel-heading {padding-left: 3.6em; padding-right: 1.5em; border-bottom: 1px solid #E0E0E0; background: url(http://ibmwatson-assets-nlc.mybluemix.net/images/task-types.svg) no-repeat 1.5em 1em #fff; line-height: 2.2em;}
 			.ibm-panel-group-task-search .ibm-panel-heading {background-position: 1.5em -108px;}
 				.ibm-panel-group-task .ibm-panel-heading .ibm-btn {float: right;}
 			.ibm-panel-task-topic {margin-bottom: 1em; font-family: "HelvNeueBoldforIBM"; font-size: .9em;}
 				.ibm-panel-task-topic span {font-family: "HelvNeueRomanforIBM";}
 			.ibm-panel-task-description {margin-bottom: 1em; font-size: .9em; color: rgb(118,119,118);}
-			.ibm-badge-task-timestamp {float: right; padding-left: 1.5em; background: url(../assets/images/icon_complete.svg) no-repeat 0 40%; font-size: .8em; color: rgb(118,119,118);}
+			.ibm-badge-task-timestamp {float: right; padding-left: 1.5em; background: url(http://ibmwatson-assets-nlc.mybluemix.net/images/icon_complete.svg) no-repeat 0 40%; font-size: .8em; color: rgb(118,119,118);}
 				.ibm-panel-task-timestamp, .ibm-panel-task-user {font-size: .8em; font-family: "HelvNeueLightItalicforIBMRegular";}
 
 	/* Highlight */
@@ -291,7 +291,7 @@ body {margin-bottom: 60px; padding-top: 0; background-color: #F4F4F4; font-size:
 
 	/* Loading */
 	.ibm-loading {text-align: center; padding: 2em;}
-		.ibm-loading .ibm-loading-img {height: 100px; width: 100px;margin:auto;background-image:url(../assets/images/watson_busy_icn.gif);background-size:100%}
+		.ibm-loading .ibm-loading-img {height: 100px; width: 100px;margin:auto;background-image:url(http://ibmwatson-assets-nlc.mybluemix.net/images/watson_busy_icn.gif);background-size:100%}
 		.ibm-loading-message {padding-top: 1em; font-family: "HelvNeueLightforIBM"; font-size: 1.5em;}
 
 	/* Sticky Div After Scroll - http://jsfiddle.net/livibetter/HV9HM */
