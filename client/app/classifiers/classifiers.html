@@ -7,7 +7,7 @@
         <p>You have no trained classifiers.</p>
       <p>You have no classifiers for this instance of the Natural Language Classifier service.<br>Create a classifier on the <b ui-sref="training" style="cursor:pointer">Training</b> page.</p>
     </div>
-    <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true">
+      <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true" ng-class="classifier.status">
       <div class="col-sm-5 col-md-6">
         <div class="inline ibm-nlc-classifier-name">
           <span>
