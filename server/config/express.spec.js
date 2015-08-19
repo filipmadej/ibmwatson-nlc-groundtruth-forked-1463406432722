@@ -24,7 +24,9 @@ var util = require('util');
 var async = require('async');
 var chai = require('chai');
 var express = require('express');
+var httpstatus = require('http-status');
 var proxyquire = require('proxyquire').noPreserveCache();
+var request = require('supertest');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 
@@ -233,6 +235,27 @@ describe('/server/config/express', function () {
       this.sessionMock.lastCall.args[0].should.have.property('secret');
       this.sessionMock.lastCall.args[0].should.have.property('store');
       this.appMock.use.should.have.been.calledWith(this.sessionSpy);
+    });
+
+    it('should force https', function (done) {
+
+      var app = express();
+      require('./express')(app);
+
+      async.series([
+        function (next) {
+          request(app)
+            .get('/')
+            .expect(httpstatus.OK, next);
+        },
+        function (next) {
+          request(app)
+            .get('/')
+            .set('x-forwarded-proto', 'http')
+            .expect(httpstatus.FOUND)
+            .expect('location', /^https/, next);
+        }
+      ], done);
     });
 
   });
