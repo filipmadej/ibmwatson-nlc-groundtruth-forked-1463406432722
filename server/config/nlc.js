@@ -19,7 +19,7 @@
 var env = require('./environment');
 var cfenv = require('cfenv');
 
-var appenv = cfenv.getAppEnv();
+var appenv = cfenv.getAppEnv({vcap : env.vcap});
 
 var service = appenv.getService(env.classifierServiceName);
 
