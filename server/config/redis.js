@@ -62,7 +62,7 @@ module.exports = function createClient() {
     }, 'Connecting to redis db');
 
     // Create the client
-    client = redis.createClient(serviceConfig.credentials.port, serviceConfig.host, createOptions(serviceConfig));
+    client = redis.createClient(serviceConfig.credentials.port, serviceConfig.credentials.host, createOptions(serviceConfig));
 
     client.on('error', function(err) {
         log.error({
