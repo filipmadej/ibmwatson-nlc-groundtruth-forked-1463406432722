@@ -89,6 +89,15 @@ describe('/server/api/import', function () {
         });
     });
 
+    it('should error if content-type not text/csv', function (done) {
+      request(app)
+        .post(ENDPOINTBASE)
+        .auth(nlc.username, nlc.password)
+        .set('Content-Type', 'text/plain')
+        .send('Text 1,Class 1')
+        .expect(415, done);
+    });
+
     it('should parse multi-line CSV input', function (done) {
       request(app)
         .post(ENDPOINTBASE)
