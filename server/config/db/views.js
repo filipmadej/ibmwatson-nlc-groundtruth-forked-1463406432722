@@ -31,10 +31,6 @@ var makeArray = require('make-array');
 var log = require('../log');
 var dberrors = require('./errors');
 
-function defaultMapFn (row) {
-    return row.doc;
-}
-
 function noopMapFn (row) {
     return row;
 }
@@ -64,9 +60,7 @@ function countDocumentsUsingView (db, designdoc, view, options, callback) {
         }, 'Counted docs using view');
 
         var count = 0;
-        if (resp.value) {
-            count = resp.value;
-        } else if (resp.rows && resp.rows.length > 0) {
+        if (resp.rows && resp.rows.length > 0) {
             count = resp.rows[0].value;
         }
 
@@ -107,11 +101,11 @@ function getSingleResultFn (callback) {
         }
 
         if (results.length > 1) {
-            return callback(dberrors.toomanyresults('Expected single reference for profile'));
+            return callback(dberrors.toomanyresults('Expected single reference'));
         }
 
         if (results.length === 0) {
-            return callback(dberrors.notfound('No reference for profile found'));
+            return callback(dberrors.notfound('No reference found'));
         }
 
         callback(err, results[0]);
@@ -252,15 +246,4 @@ module.exports.getTextByValue = function getTenantByName (db, tenant, value, cal
     };
 
     getDocumentsUsingView(db, designdoc, viewname, req, noopMapFn, getSingleResultFn(callback));
-};
-
-module.exports.getProfileByUsername = function getProfileByUsername (db, username, callback) {
-    var designdoc = 'profile';
-    var viewname = 'by-username';
-    var req = {
-        keys : [username],
-        'include_docs' : true
-    };
-
-    getDocumentsUsingView(db, designdoc, viewname, req, defaultMapFn, getSingleResultFn(callback));
 };

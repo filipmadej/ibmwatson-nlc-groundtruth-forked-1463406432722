@@ -179,28 +179,6 @@ var tenantViews = {
     }
 };
 
-var profileViews = {
-    views: {
-        'by-username': {
-
-          map: function (doc) {
-            if (doc.schema === 'profile' && doc.username) {
-                emit(doc.username, doc._id);
-            }
-        }
-    }
-  }
-};
-
-var basicProfileIndex = {
-    index : {
-        fields : ['schema', 'username']
-    },
-    version : 1,
-    name : 'profile-search',
-    type : 'json'
-};
-
 var classConfig = {
     name : 'class',
     ddocs : [classViews]
@@ -231,14 +209,4 @@ var tenantConfig = {
     ddocs : [tenantViews]
 };
 
-var profileConfig = {
-    name : 'profile',
-    ddocs : [profileViews]
-};
-
-var profileSearchConfig = {
-    name : 'search-profile',
-    indexes : [basicProfileIndex]
-};
-
-module.exports = [tenantConfig, classConfig, classSearchConfig, textConfig, textSearchConfig, textWithClassSearchConfig, profileConfig, profileSearchConfig];
+module.exports = [tenantConfig, classConfig, classSearchConfig, textConfig, textSearchConfig, textWithClassSearchConfig];

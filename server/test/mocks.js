@@ -29,11 +29,14 @@ chai.use(sinonChai);
 function DBMock () {
 
   this.view = sinon.stub();
+  this.list = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
     this.view.reset();
     this.view.callsArgWith(3, null, {'total_rows' : 0, offset : 0, rows : []});
+    this.list.reset();
+    this.list.callsArgWith(1, null, {'total_rows' : 0, offset : 0, rows : []});
   };
 
   this.reset();
@@ -58,10 +61,6 @@ function StoreMock () {
   this.countTexts = sinon.stub();
   this.getText = sinon.stub();
   this.deleteTenant = sinon.stub();
-  this.createProfile = sinon.stub();
-  this.getProfile = sinon.stub();
-  this.deleteProfile = sinon.stub();
-  this.getProfileByUsername = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
@@ -98,14 +97,6 @@ function StoreMock () {
     this.getText.callsArgWith(2, null, {});
     this.deleteTenant.reset();
     this.deleteTenant.callsArgWith(2, null, {});
-    this.createProfile.reset();
-    this.createProfile.callsArgWith(1, null, {_id : uuid.v1(), _rev : uuid.v1()});
-    this.getProfile.reset();
-    this.getProfile.callsArgWith(1, null, {});
-    this.deleteProfile.reset();
-    this.deleteProfile.callsArgWith(2, null, {});
-    this.getProfileByUsername.reset();
-    this.getProfileByUsername.callsArgWith(1, null, {id : uuid.v1(), tenants : [uuid.v1()]});
   };
 
   this.reset();

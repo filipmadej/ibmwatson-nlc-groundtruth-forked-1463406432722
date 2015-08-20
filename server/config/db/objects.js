@@ -44,7 +44,7 @@
  *
  *
  *
- * @module ibmwatson-nlc-store/lib/db/objects
+ * @module ibmwatson-nlc-groundtruth/config/db/objects
  * @author Andy Stoneberg
  */
 
@@ -95,21 +95,4 @@ module.exports.prepareTextInfo = function prepareTextInfo (tenant, attrs) {
     }
 
     return text;
-};
-
-/**
- * Creates an object to represent a profile for storing in Cloudant.
- *
- * @param {Object} attrs - attributes of the profile to store
- * @returns {Object} profile object
- */
-module.exports.prepareProfileInfo = function prepareProfileInfo (attrs) {
-
-    var profile = {
-        _id : attrs.id ? attrs.id : uuid.v1(),
-        schema : 'profile',
-        username : attrs.username
-    };
-
-    return profile;
 };

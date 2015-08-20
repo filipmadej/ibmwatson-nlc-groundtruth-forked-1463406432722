@@ -26,7 +26,7 @@ function hideImplementationDetails (object) {
   delete object._rev;
   delete object.schema;
   delete object.tenant;
-  delete object.password; // For profile objects
+  delete object.password;
   return object;
 }
 

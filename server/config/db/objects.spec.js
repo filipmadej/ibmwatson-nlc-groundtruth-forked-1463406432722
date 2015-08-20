@@ -118,38 +118,4 @@ describe('/server/config/db/objects', function () {
 
   });
 
-  describe('#prepareProfileInfo()', function () {
-    it('should return object with only supported properties', function () {
-
-      var attrs = {
-        username : 'test@email.com',
-        ignored : true
-      };
-
-      var sanitized = objects.prepareProfileInfo(attrs);
-      sanitized.should.have.property('username', attrs.username);
-      sanitized.should.have.property('_id');
-      sanitized.should.have.property('schema', 'profile');
-      sanitized.should.not.have.property('ignored');
-    });
-
-    it('should use id if provided', function () {
-
-      var attrs = {
-        id : 'test-id',
-        _id : 'ignored',
-        username : 'test@email.com',
-        ignored : true
-      };
-
-      var sanitized = objects.prepareProfileInfo(attrs);
-      sanitized.should.have.property('username', attrs.username);
-      sanitized.should.have.property('_id', attrs.id);
-      sanitized.should.have.property('schema', 'profile');
-      sanitized.should.not.have.property('ignored');
-    });
-
-  });
-
-
 });

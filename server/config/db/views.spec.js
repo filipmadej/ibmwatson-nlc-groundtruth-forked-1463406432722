@@ -193,6 +193,16 @@ describe('/server/config/db/views', function () {
       }.bind(this));
     });
 
+    it('should return 0 if no results found', function (done) {
+
+      this.dbMock.view.callsArgWith(3, null, {rows : []});
+
+      views.countClasses(this.dbMock, TENANT, function (err, result) {
+        result.should.equal(0);
+        done();
+      }.bind(this));
+    });
+
 
     it('should return cloudant error', function (done) {
 
@@ -201,6 +211,79 @@ describe('/server/config/db/views', function () {
       this.dbMock.view.callsArgWith(3, error);
 
       views.countClasses(this.dbMock, TENANT, function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+describe('#lookupClasses()', function () {
+
+    function generateLookupClassesResults (length) {
+      var data = [];
+      for (var i=0; i<length; i++) {
+        var id = uuid.v1();
+        data.push({
+          'id' : id,
+          'key' : id,
+          'value' : {
+            rev : uuid.v1()
+          }
+        });
+      }
+
+      return data;
+    }
+
+    it('should return existing classes', function (done) {
+
+      var data = {
+        'total_rows' : 125,
+        'offset' : 10,
+        'rows' : generateLookupClassesResults(2)
+      };
+
+      this.dbMock.list.callsArgWith(1, null, data);
+
+      var ids = ['doesnotexist', data.rows[0].id, data.rows[1].id];
+
+      views.lookupClasses(this.dbMock, ids, function (err, results) {
+        var options = this.dbMock.list.lastCall.args[0];
+        should.exist(options);
+        options.should.have.property('keys').that.deep.equals(ids);
+        results.should.deep.equal(data.rows);
+        done();
+      }.bind(this));
+    });
+
+    it('should not require array', function (done) {
+
+      var data = {
+        'total_rows' : 125,
+        'offset' : 10,
+        'rows' : generateLookupClassesResults(1)
+      };
+
+      this.dbMock.list.callsArgWith(1, null, data);
+
+      views.lookupClasses(this.dbMock, data.rows[0].id, function (err, results) {
+        var options = this.dbMock.list.lastCall.args[0];
+        should.exist(options);
+        options.should.have.property('keys').that.deep.equals([data.rows[0].id]);
+        results.should.deep.equal(data.rows);
+        done();
+      }.bind(this));
+    });
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.list.callsArgWith(1, error);
+
+      views.lookupClasses(this.dbMock, [], function (err, results) {
         should.not.exist(results);
         should.exist(err);
         done();
@@ -361,6 +444,295 @@ describe('/server/config/db/views', function () {
       this.dbMock.view.callsArgWith(3, error);
 
       views.countTexts(this.dbMock, TENANT, function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+  describe('#getDocumentsInTenant()', function () {
+
+    function generateTenantDocResults (length) {
+      var data = [];
+      for (var i=0; i<length; i++) {
+        var id = uuid.v1();
+        var value = ('testtext' + i);
+        data.push({
+          'id' : id,
+          'key' : TENANT,
+          'value' : {
+            '_id' : id,
+            '_rev' : uuid.v1()
+          }
+        });
+      }
+
+      return data;
+
+    }
+
+    it('should return docs', function (done) {
+
+      var data = {
+        'total_rows' : 5,
+        'offset' : 0,
+        'rows' : generateTenantDocResults(3)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.getDocumentsInTenant(this.dbMock, TENANT, {}, function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('key').that.equals(TENANT);
+        options.should.have.property('skip', 0);
+        options.should.have.property('limit', 1000);
+        options.should.have.property('reduce', false);
+        results.should.be.an('array').with.length(data.rows.length);
+        results.should.deep.equal([
+          {
+              _id : data.rows[0].value._id,
+              _rev : data.rows[0].value._rev
+          },
+          {
+              _id : data.rows[1].value._id,
+              _rev : data.rows[1].value._rev
+          },
+          {
+              _id : data.rows[2].value._id,
+              _rev : data.rows[2].value._rev
+          }
+        ]);
+        done();
+      }.bind(this));
+    });
+
+    it('should allow skip/limit overrides', function (done) {
+
+      var data = {
+        'total_rows' : 2150,
+        'offset' : 100,
+        'rows' : generateTenantDocResults(3)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      var overrides = {
+        skip : 100,
+        limit : 2000
+      };
+
+      views.getDocumentsInTenant(this.dbMock, TENANT, overrides, function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('skip', overrides.skip);
+        options.should.have.property('limit', overrides.limit);
+        options.should.have.property('reduce', false);
+        results.should.be.an('array').with.length(data.rows.length);
+        done();
+      }.bind(this));
+    });
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.view.callsArgWith(3, error);
+
+      views.getDocumentsInTenant(this.dbMock, TENANT, {}, function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+  describe('#countDocumentsInTenant()', function () {
+
+    function generateTenantDocCountResult (count) {
+      var result = {
+        'rows' : [
+          {
+            'key' : TENANT,
+            'value' : count
+          }
+        ]
+      };
+      return result;
+    }
+
+    it('should return count', function (done) {
+
+      var count = 100;
+
+      this.dbMock.view.callsArgWith(3, null, generateTenantDocCountResult(count));
+
+      views.countDocumentsInTenant(this.dbMock, TENANT, function (err, result) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('key').that.equals(TENANT);
+        options.should.have.property('group', true);
+        options.should.have.property('reduce', true);
+        result.should.equal(count);
+        done();
+      }.bind(this));
+    });
+
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.view.callsArgWith(3, error);
+
+      views.countDocumentsInTenant(this.dbMock, TENANT, function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+  describe('#getClassByName()', function () {
+
+    function generateClassByNameResults (length, expected) {
+      var data = [];
+      for (var i=0; i<length; i++) {
+        var id = uuid.v1();
+        var name = ((i === 0) ? expected : ('testclass' + i));
+        data.push({
+          'id' : id,
+          'key' : [TENANT, name],
+          'value' : id
+        });
+      }
+
+      return data;
+
+    }
+
+    it('should return single class', function (done) {
+
+      var expectedName = 'testing';
+
+      var data = {
+        'total_rows' : 5,
+        'offset' : 0,
+        'rows' : generateClassByNameResults(1, expectedName)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.getClassByName(this.dbMock, TENANT, expectedName, function (err, result) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('key').that.deep.equals([TENANT, expectedName]);
+        options.should.have.property('reduce', false);
+        result.should.deep.equal(data.rows[0]);
+        done();
+      }.bind(this));
+    });
+
+    it('should return error if too many results found', function (done) {
+
+      var data = {
+        'total_rows' : 5,
+        'offset' : 0,
+        'rows' : generateClassByNameResults(2, 'nonunique')
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.getClassByName(this.dbMock, TENANT, 'nonunique', function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+    it('should return error if no results found', function (done) {
+
+      var data = {
+        'total_rows' : 5,
+        'offset' : 0,
+        'rows' : []
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.getClassByName(this.dbMock, TENANT, 'doesnotexist', function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.view.callsArgWith(3, error);
+
+      views.getClassByName(this.dbMock, TENANT, 'testing', function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+  describe('#getTextByValue()', function () {
+
+    function generateTextByValueResults (length, expected) {
+      var data = [];
+      for (var i=0; i<length; i++) {
+        var id = uuid.v1();
+        var value = ((i === 0) ? expected : ('testtext' + i));
+        data.push({
+          'id' : id,
+          'key' : [TENANT, value],
+          'value' : id
+        });
+      }
+
+      return data;
+
+    }
+
+    it('should return single text', function (done) {
+
+      var expectedValue = 'testing';
+
+      var data = {
+        'total_rows' : 5,
+        'offset' : 0,
+        'rows' : generateTextByValueResults(1, expectedValue)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.getTextByValue(this.dbMock, TENANT, expectedValue, function (err, result) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('key').that.deep.equals([TENANT, expectedValue]);
+        options.should.have.property('reduce', false);
+        result.should.deep.equal(data.rows[0]);
+        done();
+      }.bind(this));
+    });
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.view.callsArgWith(3, error);
+
+      views.getTextByValue(this.dbMock, TENANT, 'testing', function (err, results) {
         should.not.exist(results);
         should.exist(err);
         done();
