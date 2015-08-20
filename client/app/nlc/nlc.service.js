@@ -196,13 +196,32 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             for (var j = 0; j < text[i].classes.length; j += 1) {
               csvString += ',' + text[i].classes[j];
             }
-            csvString += '<br>';
+            csvString += '\n';
           }
-          for (i = 0; i < classes.length; i += 1) {
-            csvString += ',' + classes[i].label;
-          }
-          var w = window.open('');
-          w.document.write(csvString);
+
+          // convert the CSV to a data URL
+          // export the data url
+          var contentType = 'text/csv;charset=utf-8';
+          var outputFile = 'export.csv';
+
+          window.URL = window.URL || window.webkitURL;
+          var csvFile = new Blob([csvString], {type: contentType});
+
+          // var uri = 'data:text/csv;charset=utf-8,' + escape(csvString);
+          var link = document.createElement('a');
+          // link.href = uri;
+          link.href = window.URL.createObjectURL(csvFile);
+
+          link.style.visibility = 'hidden';
+          link.download = outputFile;
+          link.dataset.downloadurl = [contentType, link.download, link.href].join(':');
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          // var w = window.open('');
+          // w.document.write(csvString);
         }
       };
 
