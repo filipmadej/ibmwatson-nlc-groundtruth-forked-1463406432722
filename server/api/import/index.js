@@ -23,8 +23,12 @@ var rest = require('../../config/rest');
 
 var router = express.Router();
 
-router.use(bodyParser.text({ limit : '10mb' }));
+var ENDPOINTS = {
+    csv : '/:tenantid/import'
+};
 
-router.post('/csv', rest.ensureAuthenticated ,controller.importCsv);
+router.use(bodyParser.text({ type : 'text/*', limit : '10mb' }));
+
+router.post(ENDPOINTS.csv, rest.ensureAuthenticated ,controller.import);
 
 module.exports = router;

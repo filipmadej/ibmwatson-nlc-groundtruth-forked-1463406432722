@@ -59,7 +59,10 @@ var vcapTest = '{\
 
 describe('/server/api/classifier', function () {
 
-  var classifierId = 'nlc-test';
+  var TENANT = 'test-tenant';
+  var ENDPOINTBASE = '/api/' + TENANT + '/classifiers';
+  var CLASSIFIER = 'nlc-test';
+  var LOCATION = ENDPOINTBASE + '/' + CLASSIFIER;
 
   var error = {
     error : 'test-generated',
@@ -91,7 +94,7 @@ describe('/server/api/classifier', function () {
     }.bind(this));
   });
 
-  after(function(){
+  after(function () {
     process.env.VCAP_SERVICES = this.originalVcapServices;
   });
 
@@ -99,11 +102,11 @@ describe('/server/api/classifier', function () {
     nlcMock.reset();
   });
 
-  describe('GET /api/classifier/list', function () {
+  describe('GET /api/:tenantid/classifiers', function () {
 
     it('should return a 200 response', function (done) {
       request(app)
-        .get('/api/classifier/list')
+        .get(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
         .end(function (err, resp) {
@@ -116,7 +119,7 @@ describe('/server/api/classifier', function () {
     it('should respond a 400 response on error', function (done) {
       nlcMock.list.callsArgWith(1, error);
       request(app)
-        .get('/api/classifier/list')
+        .get(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
         .end(function (err, resp) {
@@ -128,7 +131,7 @@ describe('/server/api/classifier', function () {
 
   });
 
-  describe('POST /api/classifier/train', function () {
+  describe('POST /api/:tenantid/classifiers', function () {
 
     var data = {
       language : 'en',
@@ -138,7 +141,7 @@ describe('/server/api/classifier', function () {
 
     it('should return a 200 response', function (done) {
       request(app)
-        .post('/api/classifier/train')
+        .post(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .send(data)
         .expect(httpstatus.OK)
@@ -152,7 +155,7 @@ describe('/server/api/classifier', function () {
     it('should respond a 400 response on error', function (done) {
       nlcMock.create.callsArgWith(1, error);
       request(app)
-        .post('/api/classifier/train')
+        .post(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .send(data)
         .expect(httpstatus.BAD_REQUEST)
@@ -165,16 +168,16 @@ describe('/server/api/classifier', function () {
 
   });
 
-  describe('GET /api/classifier/:id/status', function () {
+  describe('GET /api/:tenantid/classifiers/:id', function () {
 
     it('should return a 200 response', function (done) {
       request(app)
-        .get('/api/classifier/' + classifierId + '/status')
+        .get(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
         .end(function (err, resp) {
           nlcMock.status.should.have.been.calledOnce;
-          nlcMock.status.should.have.been.calledWith(sinon.match({classifier : classifierId}), sinon.match.func);
+          nlcMock.status.should.have.been.calledWith(sinon.match({classifier : CLASSIFIER}), sinon.match.func);
           done(err);
         });
     });
@@ -182,28 +185,28 @@ describe('/server/api/classifier', function () {
     it('should respond a 400 response on error', function (done) {
       nlcMock.status.callsArgWith(1, error);
       request(app)
-        .get('/api/classifier/' + classifierId + '/status')
+        .get(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
         .end(function (err, resp) {
           nlcMock.status.should.have.been.calledOnce;
-          nlcMock.status.should.have.been.calledWith(sinon.match({classifier : classifierId}), sinon.match.func);
+          nlcMock.status.should.have.been.calledWith(sinon.match({classifier : CLASSIFIER}), sinon.match.func);
           done(err);
         });
     });
 
   });
 
-  describe('DELETE /api/classifier/:id', function () {
+  describe('DELETE /api/:tenantid/classifiers/:id', function () {
 
     it('should return a 200 response', function (done) {
       request(app)
-        .delete('/api/classifier/' + classifierId)
+        .delete(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
         .end(function (err, resp) {
           nlcMock.remove.should.have.been.called;
-          nlcMock.remove.should.have.been.calledWith(sinon.match({classifier : classifierId}), sinon.match.func);
+          nlcMock.remove.should.have.been.calledWith(sinon.match({classifier : CLASSIFIER}), sinon.match.func);
           done(err);
         });
     });
@@ -211,32 +214,32 @@ describe('/server/api/classifier', function () {
     it('should respond a 400 response on error', function (done) {
       nlcMock.remove.callsArgWith(1, error);
       request(app)
-        .delete('/api/classifier/' + classifierId)
+        .delete(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
         .end(function (err, resp) {
           nlcMock.remove.should.have.been.calledOnce;
-          nlcMock.remove.should.have.been.calledWith(sinon.match({classifier : classifierId}), sinon.match.func);
+          nlcMock.remove.should.have.been.calledWith(sinon.match({classifier : CLASSIFIER}), sinon.match.func);
           done(err);
         });
     });
 
   });
 
-  describe('POST /api/classifier/:id/classify', function () {
+  describe('POST /api/:tenantid/classifiers/:id/classify', function () {
 
     var body = {text : 'example text'};
 
     it('should return a 200 response', function (done) {
       request(app)
-        .post('/api/classifier/' + classifierId + '/classify')
+        .post(LOCATION + '/classify')
         .set('Cookie', [this.sessionCookie])
         .send(body)
         .expect(httpstatus.OK)
         .end(function (err, resp) {
           nlcMock.classify.should.have.been.called;
           nlcMock.classify.should.have.been.calledWith(
-            sinon.match({classifier : classifierId, text : body.text}),
+            sinon.match({classifier : CLASSIFIER, text : body.text}),
             sinon.match.func);
           done(err);
         });
@@ -245,14 +248,14 @@ describe('/server/api/classifier', function () {
     it('should respond a 400 response on error', function (done) {
       nlcMock.classify.callsArgWith(1, error);
       request(app)
-        .post('/api/classifier/' + classifierId + '/classify')
+        .post(LOCATION + '/classify')
         .set('Cookie', [this.sessionCookie])
         .send(body)
         .expect(httpstatus.BAD_REQUEST)
         .end(function (err, resp) {
           nlcMock.classify.should.have.been.calledOnce;
           nlcMock.classify.should.have.been.calledWith(
-            sinon.match({classifier : classifierId, text : body.text}),
+            sinon.match({classifier : CLASSIFIER, text : body.text}),
             sinon.match.func);
           done(err);
         });

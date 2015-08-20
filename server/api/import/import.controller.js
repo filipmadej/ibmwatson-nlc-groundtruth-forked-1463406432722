@@ -16,10 +16,25 @@
 
 'use strict';
 
+// external dependencies
 var csv = require('fast-csv');
+var httpstatus = require('http-status');
 
-exports.importCsv = function importCsv (req, res) {
+// local dependencies
+var restutils = require('../../components/restutils');
+
+var responses = restutils.res;
+
+exports.import = function handleImport (req, res) {
   var result = [];
+
+  if (!/^text\/csv/.test(req.headers['content-type'])) {
+    var err = {
+      statusCode : httpstatus.UNSUPPORTED_MEDIA_TYPE,
+      error : 'text/csv only supported media type'
+    };
+    return responses.error(res, err);
+  }
 
   csv.fromString(req.body, {headers : false, ignoreEmpty : true})
     .transform(function format (data) {

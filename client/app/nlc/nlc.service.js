@@ -17,8 +17,16 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('nlc', ['$http', '$q', '$log', '$interval', 'authentication',
-    function init ($http, $q, $log, $interval, authentication) {
+  .factory('nlc', ['$http', '$q', '$log', '$interval', 'authentication', 'endpoints', 'session',
+    function init ($http, $q, $log, $interval, authentication, endpoints, session) {
+
+      function classifierEndpoint () {
+        return endpoints.classifier + '/' + session.tenant + '/classifiers';
+      }
+
+      function importEndpoint () {
+        return endpoints.classifier + '/' + session.tenant + '/import';
+      }
 
       function processClasses (processedContent, classes) {
         classes.forEach(function forEach (clazz) {
@@ -68,7 +76,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $q(function get (resolve, reject) {
             $http({
               method: 'GET',
-              url: '/api/classifier/list'
+              url: classifierEndpoint()
             }).then(function success (response){
               resolve(response.data);
             }, function fail (error) {
@@ -83,7 +91,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $q(function post (resolve, reject) {
             $http({
               method: 'POST',
-              url: '/api/classifier/train',
+              url: classifierEndpoint(),
               data: {
                 language: language,
                 name: name,
@@ -104,7 +112,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $q(function get (resolve, reject) {
             $http({
               method: 'GET',
-              url: '/api/classifier/' + id + '/status'
+              url: classifierEndpoint() + '/' + id
             }).then(function success (response) {
               resolve(response.data);
             }, function fail (error) {
@@ -118,7 +126,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             if (authentication.isAuthenticated()) {
               $http({
                 method: 'GET',
-                url: '/api/classifier/' + id +'/status'
+                url: classifierEndpoint() + '/' + id
               }).then(function success (response) {
                 handleResponse(response.data);
               }, function fail (error) {
@@ -135,7 +143,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $q(function post (resolve, reject) {
             $http({
               method: 'POST',
-              url: '/api/classifier/' + id + '/classify',
+              url: classifierEndpoint() + '/' + id + '/classify',
               data: {
                 text: text
               }
@@ -152,7 +160,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $q(function(resolve, reject) {
             $http({
               method: 'DELETE',
-              url: '/api/classifier/' + id
+              url: classifierEndpoint() + '/' + id
             }).then(function success (response) {
               resolve(response.data);
             }, function fail (error) {
@@ -172,10 +180,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             } else {
               $http({
                 method: 'POST',
-                url: '/api/import/csv',
+                url: importEndpoint(),
                 data: fileContent,
                 headers: {
-                  'Content-Type': 'text/plain',
+                  'Content-Type': 'text/csv;charset=utf-8',
                   'Accept': 'application/json'
                 }
               }).then(function success (response) {

@@ -47,7 +47,12 @@ var vcapTest = '{\
 
 describe('/server/api/import', function () {
 
-  before(function(){
+  var TENANT = 'TEST';
+  var ENDPOINTBASE = '/api/' + TENANT + '/import';
+
+  before(function () {
+
+    this.timeout(5000);
 
     this.originalVcapServices = process.env.VCAP_SERVICES;
 
@@ -61,20 +66,21 @@ describe('/server/api/import', function () {
     });
   });
 
-  after(function(){
+  after(function () {
     process.env.VCAP_SERVICES = this.originalVcapServices;
   });
 
-  describe('POST /api/import/csv', function () {
+  describe('POST /api/:tenantid/import', function () {
 
     it('should parse CSV input', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text 1,Class 1')
         .expect(200)
         .end(function (err, res) {
+          if (err) done(err);
           res.should.have.property('body').that.is.an('array').with.length(1);
           res.should.have.deep.property('body[0].text', 'Text 1');
           res.should.have.deep.property('body[0].classes').that.is.an('array').with.length(1);
@@ -85,9 +91,9 @@ describe('/server/api/import', function () {
 
     it('should parse multi-line CSV input', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text 1,Class 1\nText 2,Class 2')
         .expect(200)
         .end(function (err, res) {
@@ -101,9 +107,9 @@ describe('/server/api/import', function () {
 
     it('should not require classes', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text 1')
         .expect(200)
         .end(function (err, res) {
@@ -116,9 +122,9 @@ describe('/server/api/import', function () {
 
     it('should handle multiple classes', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text 1,Class 1,Class 2,Class 3')
         .expect(200)
         .end(function (err, res) {
@@ -134,9 +140,9 @@ describe('/server/api/import', function () {
 
     it('should skip empty fields', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text 1,Class 1,,Class 2')
         .expect(200)
         .end(function (err, res) {
@@ -151,9 +157,9 @@ describe('/server/api/import', function () {
 
     it('should handle inline quoting', function (done) {
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('"Te,,xt, 1",Class 1,Class 2\n"Text "" "" 2",Class 1')
         .expect(200)
         .end(function (err, res) {
@@ -173,9 +179,9 @@ describe('/server/api/import', function () {
       // Inline line breaks must be escaped right now (\\n) since it breaks CSV parsing
       // as line breaks are the record delimiter
       request(app)
-        .post('/api/import/csv')
+        .post(ENDPOINTBASE)
         .auth(nlc.username, nlc.password)
-        .set('Content-Type', 'text/plain')
+        .set('Content-Type', 'text/csv')
         .send('Text\t1,Class 1,Class\t2\t')
         .expect(200)
         .end(function (err, res) {

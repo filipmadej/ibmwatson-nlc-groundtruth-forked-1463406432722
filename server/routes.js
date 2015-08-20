@@ -30,9 +30,8 @@ module.exports = function configure (app) {
 
   // Insert routes below
   app.use('/api/authenticate', require('./api/authenticate'));
-  app.use('/api/import', require('./api/import'));
-  app.use('/api/classifier', require('./api/classifier'));
-
+  app.use('/api', require('./api/import'));
+  app.use('/api', require('./api/classifier'));
   app.use('/api', require('./api/text'));
   app.use('/api', require('./api/class'));
 

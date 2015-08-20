@@ -16,7 +16,9 @@
 
 angular.module('config', [])
   .constant('endpoints', {
-    'auth': '/api/authenticate',
-    'texts': '/api',
-    'classes': '/api',
+    'auth' : '/api/authenticate',
+    'texts' : '/api',
+    'classes' : '/api',
+    'import' : '/api',
+    'classifier' : '/api'
   });
