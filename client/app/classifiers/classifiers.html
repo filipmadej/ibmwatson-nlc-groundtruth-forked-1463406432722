@@ -4,7 +4,6 @@
     <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
     <div ng-if="classifiers.length === 0" class="ibm-nlc-nodata-message">
       <h2>Watson needs your data.</h2>
-        <p>You have no trained classifiers.</p>
       <p>You have no classifiers for this instance of the Natural Language Classifier service.<br>Create a classifier on the <b ui-sref="training" style="cursor:pointer">Training</b> page.</p>
     </div>
       <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true" ng-class="classifier.status">
@@ -13,7 +12,7 @@
           <span>
             {{ classifier.name }} ({{ classifier.status }})
           </span>
-          <div class="inline" style="margin-left:10px" ng-click="deleteClassifier(classifier.classifier_id)">
+          <div class="inline" style="margin-left:10px" ng-click="deleteClassifier(classifier)">
             <span class="ibm-icon ibm-icon-delete"></span>
           </div>
           <div class="ibm-nlc-classifier-id">

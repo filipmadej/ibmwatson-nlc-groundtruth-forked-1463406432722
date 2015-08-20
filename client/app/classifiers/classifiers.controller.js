@@ -61,10 +61,15 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }, interval);
       };
 
-      $scope.deleteClassifier = function deleteClassifier (id) {
-        $scope.loading = true;
-        nlc.remove(id).then(function reload () {
-          $scope.loadClassifiers();
+      $scope.deleteClassifier = function deleteClassifier (classifier) {
+        /*jshint camelcase: false */
+        var msg = $scope.question('Are you sure you want to delete the ' + classifier.name + ' classifier?', 'Delete');
+        ngDialog.openConfirm({template: msg, plain: true
+        }).then(function remove () {  // ok
+           $scope.loading = true;
+          nlc.remove(classifier.classifier_id).then(function reload () {
+            $scope.loadClassifiers();
+          });
         });
       };
 
@@ -95,6 +100,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         contents += '<br>';
         contents += '<form class="ngdialog-buttons">';
         contents += '<input type="submit" value="OK" class="ngdialog-button ngdialog-button-primary" ng-click="closeThisDialog(' + 'Cancel' + ')">';
+        contents += '</form>';
+        return contents;
+      };
+
+      // construct html for ngDialog used to ask question in string <aString>
+      $scope.question = function question (aString, confirmStr) {
+        var contents = '<div>' + aString + '</div>';
+        contents += '<br>';
+        contents += '<form class="ngdialog-buttons" ng-submit="confirm(' + 'OK' + ')">';
+        contents += '<input type="submit" value="'+(confirmStr || 'OK')+'" class="ngdialog-button ngdialog-button-primary" ng-click="confirm('+ 'OK'+ ')">';
+        contents += '<input type="button" value="Cancel" class="ngdialog-button ngdialog-button-secondary" ng-click="closeThisDialog(' + 'Cancel' + ')">';
         contents += '</form>';
         return contents;
       };
