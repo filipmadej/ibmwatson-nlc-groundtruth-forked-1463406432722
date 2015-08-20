@@ -82,6 +82,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         classifier.logs.unshift({
           text: text
         });
+        $('#'+classifier.classifier_id).collapse('show');
         nlc.classify(classifier.classifier_id, text).then(function logResults (data) {
           classifier.logs.splice(1, 0, { classes: data.classes });
         });
