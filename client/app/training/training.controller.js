@@ -337,9 +337,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           if ($scope.containsLabel(allObjects, newLabel)) {
             var msg;
             if (type === 'class') {
-              msg = $scope.inform('The ' + newLabel + ' ' + type + ' already exists.');
+              msg = $scope.inform('The ' + newLabel + ' class already exists.');
             } else {
-              msg = $scope.inform('The "' + newLabel + '" ' + type + ' already exists.');
+              msg = $scope.inform('The "' + newLabel + '" text already exists.');
             }
             ngDialog.open({template: msg, plain: true});
           } else {
@@ -429,7 +429,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         // if an object already exists with this label
         var existingObject = $scope.getFromLabel($scope.getScopeArray(type), label);
         if (existingObject) {
-          var msg = $scope.inform('The ' + type + ' "' + existingObject.label + '" already exists.');
+          var msg;
+          if (type === 'class') {
+            msg = $scope.inform('The ' + existingObject.label + ' class already exists.');
+          } else {
+            msg = $scope.inform('The "' + existingObject.label + '" text already exists.');
+          }
           ngDialog.open({template: msg, plain: true});
           deferred.resolve();
           return deferred.promise;
@@ -482,7 +487,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         if ($scope.numberTextsInClass(clazz) === 0) {
           msg = $scope.question('Delete ' + label + ' class?', 'Delete');
         } else {
-          msg = $scope.question($scope.numberTextsInClass(clazz) + ' text(s) are tagged with the '  + label + ' class. If you delete this class, it will be removed from those texts.', 'Delete');
+          msg = $scope.question($scope.numberTextsInClass(clazz) + ' text(s) are tagged with the ' + label + ' class. If you delete this class, it will be removed from those texts.', 'Delete');
         }
         ngDialog.openConfirm({template: msg, plain: true
         }).then(function remove () {  // ok
@@ -524,10 +529,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         var msg;
         if (classesInUse.length === 1) {
-          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse[0].name + ' class. If you delete this class, the tags will be deleted from those texts.', 'Delete');
+          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' class(es). ' + textsInUse + ' text(s) are tagged with the ' + classesInUse[0].name + ' class. If you delete this class, the tags will be deleted from those texts.', 'Delete');
         }
         else if (classesInUse.length > 1) {
-          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' classes. ' + textsInUse + ' text(s) are tagged with ' + classesInUse.length + ' different checked classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
+          msg = $scope.question('You are about to delete ' + checkedClasses.length + ' class(es). ' + textsInUse + ' text(s) are tagged with the ' + classesInUse.length + ' different checked classes. If you delete these classes, the tags will be deleted from those texts.', 'Delete');
         } else {
           msg = $scope.question('Are you sure that you want to delete the ' + checkedClasses.length + ' class(es) that you have checked?', 'Delete');
         }
@@ -550,17 +555,18 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // delete all class in <classArray>
-      $scope.deleteClasses = function deleteClasses (classArray) {
-        var i, j, classLength, textLength, index;
-        for (i = 0, classLength = classArray.length; i < classLength; i++) {
-          for (j = 0, textLength = $scope.texts.length; j < textLength; j++) {
-            index = $scope.texts[j].classes.indexOf(classArray[i].label);
+      // delete all class in <classes>
+      $scope.deleteClasses = function deleteClasses (classes) {
+        var index;
+        for (var i = 0, classLength = classes.length; i < classLength; i++) {
+          var clazz = classes[i];
+          for (var j = 0, textLength = $scope.texts.length; j < textLength; j++) {
+            var textClasses = $scope.texts[j].classes;
+            index = textClasses.indexOf(clazz.label);
             if (index >= 0) {
-              $scope.texts[j].classes.splice(index, 1);
+              textClasses.splice(index, 1);
             }
           }
-          var clazz = classArray[i];
           index = $scope.classes.indexOf(clazz);
           $scope.classes.splice(index, 1);
           $scope.removeClass(clazz.id);
@@ -568,31 +574,31 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // removes a class from the database with the given id
-      $scope.removeClass = function (id) {
+      $scope.removeClass = function removeClass (id) {
         classes.remove(id, function remove (err) {
           if (err) {
             $log.error('error removing class ' + id + ': ' + JSON.stringify(err));
+            // TODO: revert change and alert user.
           } else {
             $log.debug('success removing class ' + id);
           }
         });
       };
 
-      // delete all texts in <textArray>
-      $scope.deleteTexts = function (textArray) {
-        var i, index;
-        for (i = 0; i < textArray.length; i++) {
-          var text = textArray[i];
-          index = $scope.texts.indexOf(text);
+      // delete all texts in <texts>
+      $scope.deleteTexts = function deleteTexts (texts) {
+        texts.forEach(function forEach (text) {
+          var index = $scope.texts.indexOf(text);
           $scope.texts.splice(index, 1);
           $scope.removeText(text.id);
-        }
+        });
       };
 
-      $scope.removeText = function (id) {
+      $scope.removeText = function removeText (id) {
         texts.remove(id, function remove (err) {
           if (err) {
             $log.error('error removing text ' + id + ': ' + JSON.stringify(err));
+            // TODO: revert change and alert user.
           } else {
             $log.debug('success removing text ' + id);
           }
@@ -603,32 +609,29 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // return array of classes filtered by label substring match with newClassString field
       // (this matches interactive behavior of text filter so not just based on leading characters e.g.)
-      $scope.filteredClasses = function () {
-        var i, results = [];
+      $scope.filteredClasses = function filteredClasses () {
         if (!$scope.newClassString) {
           return $scope.classes;
         }
-        for (i = 0; i < $scope.classes.length; i++) {
-          if ($scope.classes[i].label.toLowerCase().indexOf($scope.newClassString.toLowerCase()) >= 0) {
-            results.push($scope.classes[i]);
-          }
-        }
-        return results;
+        return _.filter($scope.classes, function filter (clazz) {
+          return clazz.label.toLowerCase().indexOf($scope.newClassString.toLowerCase()) >= 0;
+        });
       };
 
       // return array of texts filtered by class inclusion and further filtered by label substring match with newTextString field
-      $scope.filteredTexts = function () {
-        var i, j, selectedClasses = $scope.getSelectedClasses(), firstFilteredResults = [], results = [];
+      $scope.filteredTexts = function filteredTexts () {
+        var selectedClasses = $scope.getSelectedClasses();
+        var textsFilteredByClasses = [];
         if (selectedClasses.length === 0) {
           // no class filters present
-          firstFilteredResults = $scope.texts;
-        }
-        else {
+          textsFilteredByClasses = $scope.texts;
+        } else {
           // filter first by class inclusion
-          for (i = 0; i < $scope.texts.length; i++) {
-            for (j = 0; j < selectedClasses.length; j++) {
-              if ($scope.texts[i].classes.indexOf(selectedClasses[j].label) >= 0) {
-                firstFilteredResults.push($scope.texts[i]);
+          for (var i = 0, textsLen = $scope.texts.length; i < textsLen; i++) {
+            var text = $scope.texts[i];
+            for (var j = 0, classesLen = selectedClasses.length; j < classesLen; j++) {
+              if (text.classes.indexOf(selectedClasses[j].label) >= 0) {
+                textsFilteredByClasses.push(text);
                 break;
               }
             }
@@ -636,23 +639,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
         // filter further by newTextString string if not empty
         if ($scope.newTextString) {
-          for (i = 0; i < firstFilteredResults.length; i++) {
-            if (firstFilteredResults[i].label.toLowerCase().indexOf($scope.newTextString.toLowerCase()) >= 0) {
-              results.push(firstFilteredResults[i]);
-            }
-          }
+          return _.filter(textsFilteredByClasses, function filter (text) {
+            return text.label.toLowerCase().indexOf($scope.newTextString.toLowerCase()) >= 0;
+          });
+        } else {
+          return textsFilteredByClasses;
         }
-        else {
-          results = firstFilteredResults;
-        }
-        return results;
       };
 
       // ---------------------------------------------------------------------------------------------
 
-      // uncheck class <aClass> removing it from the collection of class filters for the texts list
-      $scope.removeClassFromView = function (aClass) {
-        aClass.selected = false;
+      // uncheck class <clazz> removing it from the collection of class filters for the texts list
+      $scope.removeClassFromView = function removeClassFromView (clazz) {
+        clazz.selected = false;
       };
 
       // -------------------------------------------------------------------------------------------------
@@ -662,97 +661,95 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // -------------------------------------------------------------------------------------------------
 
       // return boolean indicating whether text <text> has any class tags
-      $scope.isTagged = function (text) {
+      $scope.isTagged = function isTagged (text) {
         return text.classes.length > 0;
       };
 
       // remove class tag with label <label> from text <text> if confirmed
-      $scope.removeTag = function (text, label) {
+      $scope.removeTag = function removeTag (text, label) {
         var msg;
-        if (text.classes.indexOf(label) >= 0) {
-          msg = $scope.question('Remove class "' + label + '" from this text?', 'Remove');
+        var index = text.classes.indexOf(label);
+        if (index >= 0) {
+          msg = $scope.question('Remove the ' + label + ' class from this text?', 'Remove');
           ngDialog.openConfirm({template: msg, plain: true
-          }).then(function() {
-            text.classes = text.classes.filter($scope.doesNotMatch(label));
+          }).then(function remove () {
+            text.classes.splice(index, 1);
             var clazz = $scope.getFromLabel($scope.classes, label);
-            texts.removeClasses(text.id, [{id: clazz.id}], function (err) {
+            texts.removeClasses(text.id, [{id: clazz.id}], function error (err) {
               if (err) {
                 $log.error('error removing class ' + label + ' from text ' + text.label + ': ' + JSON.stringify(err));
+                // TODO: revert change, alert user
               } else {
                 $log.debug('success removing class ' + label + ' from text ' + text.label);
               }
             });
           });
         } else {
-          msg = $scope.inform('This text is not classified with class "' + label + '".');
+          msg = $scope.inform('This text is not classified with the ' + label + ' class.');
           ngDialog.openConfirm({template: msg, plain: true});
         }
       };
 
       // mark text <text> as being tagged or dismiss tag field if already being tagged
-      $scope.beginTaggingText = function (text) {
-        //var field;
+      $scope.beginTaggingText = function beginTaggingText (text) {
         if (!text.beingTagged) {
           $scope.newTagStrings[text.$$hashKey] = '';
           text.beingTagged = true;
-        }
-        else {
+        } else {
           text.beingTagged = false;
         }
       };
 
       // handle keyup events from new tag field
-      $scope.newTagFieldKeyUp = function (event, text) {
+      $scope.newTagFieldKeyUp = function newTagFieldKeyUp (event, text) {
         var keyCode = event.keyCode;
         switch (keyCode) {
           case 13:
-          $scope.tagText($scope.newTagStrings[text.$$hashKey], text);
-          break;
+            $scope.tagText($scope.newTagStrings[text.$$hashKey], text);
+            break;
           case 27:
-          $scope.newTagStrings[text.$$hashKey] = '';
-          text.beingTagged = false;
-          break;
+            $scope.newTagStrings[text.$$hashKey] = '';
+            text.beingTagged = false;
+            break;
         }
       };
 
       $scope.tagTextByLabels = function tagTextByLabels (text, classes) {
         var classObjects = [];
-        for (var i = 0, len = classes.length; i < len; i++) {
-          var classObj = $scope.getFromLabel($scope.classes, classes[i]);
+        classes.forEach(function forEach (clazz) {
+          var classObj = $scope.getFromLabel($scope.classes, clazz);
           if (classObj) {
             classObjects.push(classObj);
           }
-        }
-
+        });
         if (classObjects.length > 0) {
           $scope.tagTexts([text], classObjects);
         }
       };
 
       // add a class tag with label <classLabel> to text <text>
-      $scope.tagText = function (classLabel, text) {
-        var i, msg, classObj;
-
+      $scope.tagText = function tagText (classLabel, text) {
         $scope.newTagStrings[text.$$hashKey] = '';
         text.beingTagged = false;
 
+        var msg;
         if (classLabel) {
-          classObj = $scope.getFromLabel($scope.classes, classLabel);
+          var classObj = $scope.getFromLabel($scope.classes, classLabel);
           if (!classObj) {
             msg = $scope.question('The ' + classLabel + ' class doesn\'t yet exist. Do you want to create it?', 'Create');
             ngDialog.openConfirm({template: msg, plain: true
-            }).then(function() {
-              $scope.add('class', classLabel).then(function (classObj) {
-                return $scope.tagTexts([text], [classObj]);
-              }, function (err) {
-                $log.error('error creating new class: ' + JSON.stringify(err));
-              });
+            }).then(function create () {
+              return $scope.add('class', classLabel);
+            }).then(function tag (classObj) {
+              return $scope.tagTexts([text], [classObj]);
+            }, function error (err) {
+              $log.error('error creating new class: ' + JSON.stringify(err));
+              // TODO: revert and alert user
             });
-          }
-          else {
-            for (i = 0; i < text.classes.length; i++) {
-              if (text.classes[i].toLowerCase() === classLabel.toLowerCase()) {
-                msg = $scope.inform('This text has already been tagged with ' + text.classes[i] + '.');
+          } else {
+            for (var i = 0, len = text.classes.length; i < len; i++) {
+              if (text.classes[i] === classLabel) {
+                msg = $scope.inform('This text has already been tagged with the ' + text.classes[i] + ' class.');
                 ngDialog.openConfirm({template: msg, plain: true});
                 return;
               }
@@ -763,39 +760,36 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // prepare to add class tags for all checked classes to all checked texts
-      $scope.tagCheckedTexts = function () {
-        var msg;
+      $scope.tagCheckedTexts = function tagCheckedTexts () {
         if (!$scope.getChecked($scope.classes).length) {
-          msg = $scope.inform('Please select one or more classes first');
+          var msg = $scope.inform('Please select one or more classes first');
           ngDialog.openConfirm({template: msg, plain: true});
+          return;
         }
         $scope.tagTexts($scope.getChecked($scope.texts), $scope.getChecked($scope.classes));
       };
 
       // add class tags in array <classesArray> to all texts in array <textsArray>
-      $scope.tagTexts = function (textsArray, classesArray) {
-        var i, j;
-        var textsLength = textsArray.length;
-        var classesLength = classesArray.length;
-        var classIds;
-        for (i = 0; i < textsLength; i++) {
-          classIds = [];
-          for (j = 0; j < classesLength; j++) {
-            if (textsArray[i].classes.indexOf(classesArray[j].label) < 0) {
-              textsArray[i].classes.push(classesArray[j].label);
-              classIds.push({ id : classesArray[j].id });
+      $scope.tagTexts = function tagTexts (texts, classes) {
+        texts.forEach(function forEach (text) {
+          var classIds = [];
+          classes.forEach(function forEach (clazz) {
+            if (text.classes.indexOf(clazz.label) < 0) {
+              text.classes.push(clazz.label);
+              classIds.push({ id: clazz.id });
             }
-          }
+          });
           if (classIds.length > 0) {
-            $scope.addClassesToText(textsArray[i].id, classIds);
+            $scope.addClassesToText(text.id, classIds);
           }
-        }
+        });
       };
 
-      $scope.addClassesToText = function (id, classIds) {
-        return texts.addClasses(id, classIds, function (err) {
+      $scope.addClassesToText = function addClassesToText (id, classIds) {
+        return texts.addClasses(id, classIds, function error (err) {
           if (err) {
             $log.error('error adding classes: ' + JSON.stringify(err));
+            // TODO: revert and alert user.
           } else {
             $log.debug('success adding classes');
           }
@@ -809,9 +803,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // -------------------------------------------------------------------------------------------------
 
       // construct html for ngDialog used to inform string <aString>
-      $scope.inform = function (aString) {
-        var contents;
-        contents = '<div>' + aString + '</div>';
+      $scope.inform = function inform (aString) {
+        var contents = '<div>' + aString + '</div>';
         contents += '<br>';
         contents += '<form class="ngdialog-buttons">';
         contents += '<input type="submit" value="OK" class="ngdialog-button ngdialog-button-primary" ng-click="closeThisDialog(' + 'Cancel' + ')">';
@@ -820,9 +813,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // construct html for ngDialog used to ask question in string <aString>
-      $scope.question = function (aString, confirmStr) {
-        var contents;
-        contents = '<div>' + aString + '</div>';
+      $scope.question = function question (aString, confirmStr) {
+        var contents = '<div>' + aString + '</div>';
         contents += '<br>';
         contents += '<form class="ngdialog-buttons" ng-submit="confirm(' + 'OK' + ')">';
         contents += '<input type="submit" value="'+(confirmStr || 'OK')+'" class="ngdialog-button ngdialog-button-primary" ng-click="confirm('+ 'OK'+ ')">';
@@ -833,26 +825,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // -------------------------------------------------------------------------------------------------
       //
-      // --------------------------------------- general functions ---------------------------------------
-      //
-      // -------------------------------------------------------------------------------------------------
-
-      // return all elements in array that do not match string <aString>
-      $scope.doesNotMatch = function (aString) {
-        return function (element) {
-          return element !== aString;
-        };
-      };
-
-      // -------------------------------------------------------------------------------------------------
-      //
       // --------------------------------------- API/Service functions -----------------------------------
       //
       // -------------------------------------------------------------------------------------------------
 
-      $scope.train = function () {
+      $scope.train = function train () {
         var i, msg;
-        var unclassified = 0, validationIssues = 0;
+        var unclassified = 0;
+        var validationIssues = 0;
 
         // var trainingData = $scope.toCsv();
 
@@ -929,24 +909,24 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
       };
 
-      $scope.exportToFile = function () {
+      $scope.exportToFile = function exportToFile () {
         nlc.download($scope.texts, $scope.classes);
       };
 
       $scope.addClass = function addClass (label) {
-        return $scope.add('class', label).then(function (data) {
+        return $scope.add('class', label).then(function success (data) {
           return data;
-        }, function (err) {
+        }, function error (err) {
           $log.error('error adding class: ' + JSON.stringify(err));
           return null;
         });
       };
 
       $scope.addText = function addText (label, classes) {
-        return $scope.add('text', label).then(function (data) {
+        return $scope.add('text', label).then(function success (data) {
           $scope.tagTextByLabels(data, classes);
           return data;
-        }, function (err) {
+        }, function error (err) {
           $log.error('error adding text: ' + JSON.stringify(err));
           return null;
         });
@@ -954,11 +934,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.importClasses = function importClasses (classes) {
         var promises = [];
-        for (var i = 0, len = classes.length; i < len; i++) {
-          if (!$scope.containsLabel($scope.classes, classes[i])) {
-            promises.push($scope.addClass(classes[i]));
+        classes.forEach(function forEach (clazz) {
+          if (!$scope.containsLabel($scope.classes, clazz)) {
+            promises.push($scope.addClass(clazz));
           }
-        }
+        });
         return $q.all(promises);
       };
 
@@ -975,18 +955,18 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return $q.all(promises);
       };
 
-      $scope.importFile = function (fileContent) {
+      $scope.importFile = function importFile (fileContent) {
         var uploadResult = {};
-        nlc.upload(fileContent).then(function (data) {
+        nlc.upload(fileContent).then(function importClasses (data) {
           uploadResult = data;
           return $scope.importClasses(uploadResult.classes);
-        }).then(function () {
+        }).then(function importTexts () {
           return $scope.importTexts(uploadResult.text);
         });
       };
 
       // set language by dropdown selection
-      $scope.setLanguageOption = function (option) {
+      $scope.setLanguageOption = function setLanguageOption (option) {
         $scope.languageOption = option;
       };
 
