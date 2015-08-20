@@ -461,7 +461,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                 } else {
                   id = data.id;
                   var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                  $scope.tagTexts([newText], $scope.getSelectedClasses());
+                  $scope.tagTexts([newText], $scope.getChecked($scope.classes));
                   $scope.texts.push(newText);
                   $scope.newTextString = '';
                   deferred.resolve(newText);
