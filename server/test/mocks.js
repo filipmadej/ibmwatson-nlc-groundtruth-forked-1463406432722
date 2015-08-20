@@ -82,11 +82,11 @@ function StoreMock () {
     this.createText.reset();
     this.createText.callsArgWith(2, null, {_id : uuid.v1(), _rev : uuid.v1()});
     this.addClassesToText.reset();
-    this.addClassesToText.callsArgWith(2, null, {});
+    this.addClassesToText.callsArgWith(3, null, {});
     this.removeClassesFromText.reset();
-    this.removeClassesFromText.callsArgWith(2, null, {});
+    this.removeClassesFromText.callsArgWith(3, null, {});
     this.updateTextMetadata.reset();
-    this.updateTextMetadata.callsArgWith(2, null, {});
+    this.updateTextMetadata.callsArgWith(3, null, {});
     this.deleteText.reset();
     this.deleteText.callsArgWith(3, null, {});
     this.getTexts.reset();

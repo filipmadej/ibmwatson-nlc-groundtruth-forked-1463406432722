@@ -28,6 +28,7 @@ var log = require('../log');
 
 var CONFLICT = 'conflict';
 var NOT_FOUND = 'not_found';
+var FORBIDDEN = 'forbidden';
 var REQUIRED_FIELD_MISSING = 'required_field_missing';
 var UNEXPECTED_OBJECT_TYPE = 'unexpected_object_type';
 var TOO_MANY_RESULTS = 'too_many_results';
@@ -37,6 +38,7 @@ var UNKNOWN = 'unknown';
 
 module.exports.CONFLICT = CONFLICT;
 module.exports.NOT_FOUND = NOT_FOUND;
+module.exports.FORBIDDEN = FORBIDDEN;
 module.exports.REQUIRED_FIELD_MISSING = REQUIRED_FIELD_MISSING;
 module.exports.UNEXPECTED_OBJECT_TYPE = UNEXPECTED_OBJECT_TYPE;
 module.exports.TOO_MANY_RESULTS = TOO_MANY_RESULTS;
@@ -100,6 +102,20 @@ function notfound (description) {
 }
 
 module.exports.notfound = notfound;
+
+/**
+ * Helper function used when an object is accessed without
+ * appropriate permission. It creates an error that looks like something we
+ *  would have gotten from Cloudant
+ *
+ * @param {String} description details about the error
+ * @returns {Error} forbidden error
+ */
+function forbidden (description) {
+    return new DatabaseError(FORBIDDEN, description, 403);
+}
+
+module.exports.forbidden = forbidden;
 
 /**
  * Helper function used when an object is missing required
@@ -194,6 +210,9 @@ module.exports.asError = function asError (category, description, code) {
             break;
         case NOT_FOUND:
             error = notfound(description);
+            break;
+        case FORBIDDEN:
+            error = forbidden(description);
             break;
         case REQUIRED_FIELD_MISSING:
             error = missingrequired(description);

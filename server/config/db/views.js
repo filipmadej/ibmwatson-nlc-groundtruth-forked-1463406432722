@@ -223,18 +223,23 @@ module.exports.getClassByName = function getTenantByName (db, tenant, name, call
     getDocumentsUsingView(db, designdoc, viewname, req, noopMapFn, getSingleResultFn(callback));
 };
 
-module.exports.lookupClasses = function lookupClasses (db, ids, callback) {
+module.exports.lookupClasses = function lookupClasses (db, tenant, ids, callback) {
+    var keys = makeArray(ids).map(function makeKey (elem) {
+      return [tenant, elem];
+    });
+
+    log.debug({keys : keys}, 'Looking up classes');
+
+    var designdoc = 'class';
+    var viewname = 'by-id';
     var req = {
-        keys : makeArray(ids)
+        keys : keys,
+        reduce : false
     };
 
-    db.list(req, function mapResults (err, results) {
-        if (err) {
-            return callback(err);
-        }
 
-        callback(null, results.rows);
-    });
+    getDocumentsUsingView(db, designdoc, viewname, req, noopMapFn, callback);
+
 };
 
 module.exports.getTextByValue = function getTenantByName (db, tenant, value, callback) {

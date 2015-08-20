@@ -29,6 +29,14 @@ var classViews = {
                 }
             },
             reduce : '_count'
+        },
+        'by-id' : {
+            version : 1,
+            map : function (doc) {
+                if (doc.schema === 'class' && doc.tenant) {
+                    emit([doc.tenant, doc._id], doc._id);
+                }
+            }
         }
     }
 };
@@ -69,9 +77,15 @@ var textViews = {
 
             var parameters = JSON.parse(req.body);
 
+            var tenant = parameters.tenant;
             var additions = parameters.classes;
-            if (!additions) {
+            if (!tenant || !additions) {
                 return [null, '{ \"error\" : \"required_field_missing\", \"code\" : 400 }'];
+            }
+
+
+            if (doc.tenant !== tenant) {
+                return [null, '{ \"error\" : \"forbidden\", \"code\" : 403 }'];
             }
 
             if (!doc.classes) {
@@ -98,9 +112,14 @@ var textViews = {
 
             var parameters = JSON.parse(req.body);
 
+            var tenant = parameters.tenant;
             var deletions = parameters.classes;
-            if (!deletions) {
+            if (!tenant || !deletions) {
                 return [null, '{ \"error\" : \"required_field_missing\", \"code\" : 400 }'];
+            }
+
+            if (doc.tenant !== tenant) {
+                return [null, '{ \"error\" : \"forbidden\", \"code\" : 403 }'];
             }
 
             var classes = doc.classes;
@@ -126,9 +145,14 @@ var textViews = {
 
             var parameters = JSON.parse(req.body);
 
+            var tenant = parameters.tenant;
             var metadata = parameters.metadata;
-            if (!metadata) {
+            if (!tenant || !metadata) {
                 return [null, '{ \"error\" : \"required_field_missing\", \"code\" : 400 }'];
+            }
+
+            if (doc.tenant !== tenant) {
+                return [null, '{ \"error\" : \"forbidden\", \"code\" : 403 }'];
             }
 
             Object.keys(metadata).forEach(function (attribute) {

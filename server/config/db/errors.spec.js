@@ -64,6 +64,12 @@ describe('/server/config/db/errors', function () {
         verifyError(error, dberrors.NOT_FOUND, httpstatus.NOT_FOUND, message);
     });
 
+    it('should create a forbidden error', function () {
+        var message = 'custom';
+        var error = dberrors.forbidden(message);
+        verifyError(error, dberrors.FORBIDDEN, httpstatus.FORBIDDEN);
+    });
+
     it('should create a required field missing error', function () {
         var message = 'custom';
         var error = dberrors.missingrequired(message);
@@ -102,6 +108,9 @@ describe('/server/config/db/errors', function () {
 
         var notfound = dberrors.asError(dberrors.NOT_FOUND, message);
         verifyError(notfound, dberrors.NOT_FOUND, httpstatus.NOT_FOUND, message);
+
+        var forbidden = dberrors.asError(dberrors.FORBIDDEN, message);
+        verifyError(forbidden, dberrors.FORBIDDEN, httpstatus.FORBIDDEN, message);
 
         var missingrequired = dberrors.asError(dberrors.REQUIRED_FIELD_MISSING, message);
         verifyError(missingrequired, dberrors.REQUIRED_FIELD_MISSING, httpstatus.BAD_REQUEST, message);

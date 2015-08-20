@@ -159,7 +159,7 @@ module.exports.replaceClass = function replaceClass (tenant, attrs, rev, callbac
     function getCurrentClass (next) {
       getClass(tenant, classification._id, function getCallback (err, current) {
         if (err) {
-          return callback(err);
+          return next(err);
         }
 
         // check that we have the right version (or a wildcard)
@@ -167,7 +167,7 @@ module.exports.replaceClass = function replaceClass (tenant, attrs, rev, callbac
         if (rev === '*') {
           rev = current._rev;
         } else if (rev !== current._rev) {
-          return callback(dberrors.rev());
+          return next(dberrors.rev());
         }
 
         classification._rev = rev;
@@ -175,10 +175,19 @@ module.exports.replaceClass = function replaceClass (tenant, attrs, rev, callbac
         next();
       });
     },
+    function uniqueCheck (next) {
+      checkIfClassExists(tenant, classification.name, function handleExisting (err, result) {
+        if (result && result.id !== classification._id) {
+          return next(dberrors.nonunique(util.format('Class [%s] already exists', classification.name)));
+        }
+
+        return next(err);
+      });
+    },
     function replaceClass (next) {
       db.insert(classification, function checkResponse (err, docstatus) {
         if (err) {
-          return callback(err);
+          return next(err);
         }
 
         // store the rev to return to the caller
@@ -358,20 +367,20 @@ function getText (tenant, id, callback) {
 /**
  * Adds classes to an existing text (if that class is not already present on the text).
  *
- *
+ * @param {String} tenant - ID of the tenant the owns the data
  * @param {String} text - ID of the text to update
  * @param {String[]} classes - IDs of the classes to add
  * @param {Function} callback - called once complete
  * @returns {void}
  */
-function addClassesToText (text, classes, callback) {
+function addClassesToText (tenant, text, classes, callback) {
 
   log.debug({
     text : text,
     classes : classes
   }, 'Adding classes to text');
 
-  dbhandlers.addClassesToText(db, text, makeArray(classes), callback);
+  dbhandlers.addClassesToText(db, tenant, text, makeArray(classes), callback);
 
 }
 
@@ -381,25 +390,41 @@ module.exports.addClassesToText = addClassesToText;
  * Removes classes from an existing text (if that class is present on the text).
  *
  *
+ * @param {String} tenant - ID of the tenant the owns the data
  * @param {String} text - ID of the text to update
  * @param {String[]} classes - IDs of the classes to remove
  * @param {Function} callback - called once complete
  * @returns {void}
  */
-function removeClassesFromText (text, classes, callback) {
+function removeClassesFromText (tenant, text, classes, callback) {
 
   log.debug({
     text : text,
     classes : classes
   }, 'Removing classes from text');
 
-  dbhandlers.removeClassesFromText(db, text, makeArray(classes), callback);
+  dbhandlers.removeClassesFromText(db, tenant, text, makeArray(classes), callback);
 }
 
 module.exports.removeClassesFromText = removeClassesFromText;
 
-module.exports.updateTextMetadata = function updateTextMetadata (id, metadata, callback) {
-  dbhandlers.updateTextMetadata(db, id, metadata, callback);
+module.exports.updateTextMetadata = function updateTextMetadata (tenant, id, metadata, callback) {
+
+  async.waterfall([
+    function uniqueCheck (next) {
+      checkIfTextExists(tenant, metadata.value, function handleExisting (err, result) {
+        if (result && result.id !== id) {
+          return next(dberrors.nonunique(util.format('Text [%s] already exists', metadata.value)));
+        }
+
+        return next(err);
+      });
+    },
+    function doPatch (next) {
+      dbhandlers.updateTextMetadata(db, tenant, id, metadata, next);
+    }], callback)
+
+
 };
 
 /**

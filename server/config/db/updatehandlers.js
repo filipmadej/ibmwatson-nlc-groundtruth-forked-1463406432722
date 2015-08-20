@@ -40,7 +40,7 @@ function getErrorMessage (updatename) {
     return util.format('Failed to %s classes on text', op)
 }
 
-function handleTextClasses ( db, update, textid, classes, callback ) {
+function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
 
     log.debug({
         classes : classes,
@@ -55,7 +55,7 @@ function handleTextClasses ( db, update, textid, classes, callback ) {
 
     async.series([
         function verifyClasses (done) {
-            dbviews.lookupClasses(db, classes, function verifyClasses (err, results) {
+            dbviews.lookupClasses(db, tenantid, classes, function verifyClasses (err, results) {
 
                 var invalid = results.some(function validateClass (cls) {
                     return (classes.indexOf(cls.id) === -1);
@@ -69,7 +69,10 @@ function handleTextClasses ( db, update, textid, classes, callback ) {
             });
         },
         function applyChanges (done) {
-            var parameters = { classes : classes };
+            var parameters = {
+              tenant : tenantid,
+              classes : classes
+            };
 
             db.atomic('text', update, textid, parameters, function checkResponse (err, resp) {
                 if (err) {
@@ -87,16 +90,16 @@ function handleTextClasses ( db, update, textid, classes, callback ) {
 }
 
 
-module.exports.addClassesToText = function addClassesToText (db, textid, classes, callback) {
-    handleTextClasses(db, 'add-classes', textid, classes, callback);
+module.exports.addClassesToText = function addClassesToText (db, tenantid, textid, classes, callback) {
+    handleTextClasses(db, 'add-classes', tenantid, textid, classes, callback);
 };
 
 
-module.exports.removeClassesFromText = function removeClassesFromText (db, textid, classes, callback) {
-    handleTextClasses(db, 'remove-classes', textid, classes, callback);
+module.exports.removeClassesFromText = function removeClassesFromText (db, tenantid, textid, classes, callback) {
+    handleTextClasses(db, 'remove-classes', tenantid, textid, classes, callback);
 };
 
-module.exports.updateTextMetadata = function updateTextMetadata (db, textid, metadata, callback) {
+module.exports.updateTextMetadata = function updateTextMetadata (db, tenantid, textid, metadata, callback) {
     log.debug({
         metadata : metadata,
         text : textid
@@ -107,7 +110,10 @@ module.exports.updateTextMetadata = function updateTextMetadata (db, textid, met
         return callback();
     }
 
-    var parameters = { metadata : metadata };
+    var parameters = {
+      tenant : tenantid,
+      metadata : metadata
+    };
 
     db.atomic('text', 'update-metadata', textid, parameters, function checkResponse (err, resp) {
 

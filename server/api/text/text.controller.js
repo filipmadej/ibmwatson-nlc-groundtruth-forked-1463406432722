@@ -53,7 +53,7 @@ function getClassesToPatch (values) {
   });
 }
 
-function patchTextClasses (textid, patchoperation, callback) {
+function patchTextClasses (tenantid, textid, patchoperation, callback) {
   switch (patchoperation.op) {
     case 'add':
       log.debug({
@@ -65,7 +65,7 @@ function patchTextClasses (textid, patchoperation, callback) {
         return callback(dberrors.invalid('Invalid value array'));
       }
 
-      db.addClassesToText(textid, tenantsToAdd, callback);
+      db.addClassesToText(tenantid, textid, tenantsToAdd, callback);
       break;
     case 'remove':
       log.debug({
@@ -77,7 +77,7 @@ function patchTextClasses (textid, patchoperation, callback) {
         return callback(dberrors.invalid('Invalid value array'));
       }
 
-      db.removeClassesFromText(textid, tenantsToRemove, callback);
+      db.removeClassesFromText(tenantid, textid, tenantsToRemove, callback);
       break;
     default:
       log.debug({
@@ -87,7 +87,7 @@ function patchTextClasses (textid, patchoperation, callback) {
   }
 }
 
-function patchTextMetadata (textid, patchoperation, callback) {
+function patchTextMetadata (tenantid, textid, patchoperation, callback) {
   switch (patchoperation.op) {
     case 'replace':
       log.debug({
@@ -98,7 +98,7 @@ function patchTextMetadata (textid, patchoperation, callback) {
       if (!metadata) {
         return callback(dberrors.invalid('Invalid value'));
       }
-      db.updateTextMetadata(textid, metadata, callback);
+      db.updateTextMetadata(tenantid, textid, metadata, callback);
       break;
     default:
       log.debug({
@@ -196,15 +196,16 @@ module.exports.editText = function editText (req, res) {
     params : req.params
   }, 'Patching text');
 
+  var tenantid = req.params.tenantid;
   var textid = req.params.textid;
 
   var patchoperations = requests.verifyObjectsList(makeArray(req.body));
 
   async.eachSeries(patchoperations, function applyPatch (patchoperation, nextop) {
     if (patchoperation.path === '/classes') {
-      return patchTextClasses(textid, patchoperation, nextop);
+      return patchTextClasses(tenantid, textid, patchoperation, nextop);
     } else if (patchoperation.path === '/metadata') {
-      return patchTextMetadata(textid, patchoperation, nextop);
+      return patchTextMetadata(tenantid, textid, patchoperation, nextop);
     } else {
       log.debug({operation : patchoperation}, 'Unsupported operation');
       return nextop(dberrors.invalid('Unsupported operation'));

@@ -379,7 +379,7 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.addClassesToText.should.have.been.calledWith(VALID_ID,
+                storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id, patch[0].value[1].id, patch[0].value[2].id],
                    sinon.match.func);
                 next(err);
@@ -402,7 +402,7 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.removeClassesFromText.should.have.been.calledWith(VALID_ID,
+                storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id, patch[0].value[1].id],
                    sinon.match.func);
                 next(err);
@@ -432,10 +432,10 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.addClassesToText.should.have.been.calledWith(VALID_ID,
+                storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[1].value[0].id, patch[1].value[1].id],
                    sinon.match.func);
-                storeMock.removeClassesFromText.should.have.been.calledWith(VALID_ID,
+                storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id],
                    sinon.match.func);
                 next(err);
@@ -504,7 +504,7 @@ describe('/server/api/text', function () {
           .send(patch)
           .expect(httpstatus.NO_CONTENT)
           .end(function (err) {
-            storeMock.updateTextMetadata.should.have.been.calledWith(VALID_ID, sinon.match(patch[0].value), sinon.match.func);
+            storeMock.updateTextMetadata.should.have.been.calledWith(TENANT, VALID_ID, sinon.match(patch[0].value), sinon.match.func);
             done(err);
           });
       });

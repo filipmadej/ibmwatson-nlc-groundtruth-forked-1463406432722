@@ -227,10 +227,8 @@ describe('#lookupClasses()', function () {
         var id = uuid.v1();
         data.push({
           'id' : id,
-          'key' : id,
-          'value' : {
-            rev : uuid.v1()
-          }
+          'key' : [TENANT, id],
+          'value' : id
         });
       }
 
@@ -245,14 +243,15 @@ describe('#lookupClasses()', function () {
         'rows' : generateLookupClassesResults(2)
       };
 
-      this.dbMock.list.callsArgWith(1, null, data);
+      this.dbMock.view.callsArgWith(3, null, data);
 
       var ids = ['doesnotexist', data.rows[0].id, data.rows[1].id];
 
-      views.lookupClasses(this.dbMock, ids, function (err, results) {
-        var options = this.dbMock.list.lastCall.args[0];
+      views.lookupClasses(this.dbMock, TENANT, ids, function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
         should.exist(options);
-        options.should.have.property('keys').that.deep.equals(ids);
+        options.should.have.property('keys').that.deep.equals(ids.map(function (elem) {return [TENANT, elem]}));
+        options.should.have.property('reduce', false);
         results.should.deep.equal(data.rows);
         done();
       }.bind(this));
@@ -266,12 +265,12 @@ describe('#lookupClasses()', function () {
         'rows' : generateLookupClassesResults(1)
       };
 
-      this.dbMock.list.callsArgWith(1, null, data);
+      this.dbMock.view.callsArgWith(3, null, data);
 
-      views.lookupClasses(this.dbMock, data.rows[0].id, function (err, results) {
-        var options = this.dbMock.list.lastCall.args[0];
+      views.lookupClasses(this.dbMock, TENANT, data.rows[0].id, function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
         should.exist(options);
-        options.should.have.property('keys').that.deep.equals([data.rows[0].id]);
+        options.should.have.property('keys').that.deep.equals([[TENANT, data.rows[0].id]]);
         results.should.deep.equal(data.rows);
         done();
       }.bind(this));
@@ -281,9 +280,9 @@ describe('#lookupClasses()', function () {
 
       var error = {error : 'test-generated', statusCode : 500};
 
-      this.dbMock.list.callsArgWith(1, error);
+      this.dbMock.view.callsArgWith(3, error);
 
-      views.lookupClasses(this.dbMock, [], function (err, results) {
+      views.lookupClasses(this.dbMock, TENANT, [], function (err, results) {
         should.not.exist(results);
         should.exist(err);
         done();
