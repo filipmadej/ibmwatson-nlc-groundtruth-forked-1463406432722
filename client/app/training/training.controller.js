@@ -94,12 +94,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // language options
       $scope.languageOptions = [
-        { label: 'Brazilian Portuguese', value: 'pt-br' },
-        { label: 'English', value: 'en' },
-        { label: 'Japanese', value: 'ja' },
-        { label: 'Spanish', value: 'es' }
+        // { label: 'Brazilian Portuguese', value: 'pt-br' },
+        { label: 'English', value: 'en' }//,
+        // { label: 'Japanese', value: 'ja' },
+        // { label: 'Spanish', value: 'es' }
       ];
-      $scope.languageOption = $scope.languageOptions[1];
+      $scope.languageOption = $scope.languageOptions[0];//1];
 
       // training related elements
       $scope.showTrainConfirm = false;
