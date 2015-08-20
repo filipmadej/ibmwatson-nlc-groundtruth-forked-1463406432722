@@ -18,9 +18,12 @@
   display: inline-block;
   vertical-align: middle;
 }
-.right {
-  float: right;
-}
+.right { float: right; }
+.left { float: left; }
+
+.in4 { margin-left: 4px; }
+.up3 { margin-top: -3px; }
+
 .ibm-nlc-data-row {
   min-height: 44px;
   background-color: rgb(221, 221, 221);
@@ -34,8 +37,8 @@
     text-overflow: ellipsis;
   }
   .ibm-nlc-row-options {
-    padding: 0px 8px 0px 0px;
-    line-height: 44px;
+    padding: 6px 8px 0px 0px;
+    line-height: 40px;
   }
   .ibm-nlc-row-options-padded {
     padding: 8px;
@@ -77,6 +80,9 @@
   background-color: #ccc;
 }
 .ibm-nlc-data-row:hover .ibm-icon-delete,
+.ibm-nlc-data-row:hover .ibm-icon--edit,
+.ibm-nlc-data-row:hover .ibm-icon--remove-trash,
+.ibm-nlc-data-row:hover .ibm-icon--filter,
 .ibm-nlc-data-row:hover .ibm-icon-edit,
 .ibm-nlc-data-row:hover .ibm-icon-filter {
   visibility: visible;
@@ -163,10 +169,12 @@
   color: black;
   background-color: #ccc;
 }
-.ibm-nlc-table tr:hover .ibm-icon-delete {
+.ibm-nlc-table tr:hover .ibm-icon-delete,
+.ibm-nlc-table tr:hover .ibm-icon--remove-trash {
   visibility: visible;
 }
-.ibm-nlc-table tr:hover .ibm-icon-edit {
+.ibm-nlc-table tr:hover .ibm-icon-edit,
+.ibm-nlc-table tr:hover .ibm-icon--edit {
   visibility: visible;
 }
 .ibm-nlc-table td {
@@ -249,7 +257,8 @@
 }
 .ibm-nlc-checkall {
   position: relative;
-  padding: 10px;
+  padding: 10px 10px 10px 12px;
+  margin-top: -12px;
 }
 .ibm-nlc-icon-header {
   position: relative;
@@ -272,10 +281,19 @@
 
 /* quick hack until text layout is changed */
 .table > tbody > tr > td.ibm-left-icon {
-  padding: 0;
-  text-align: right;
+  padding: 10px 0 0 0;
+  font-size:20px;
 }
 .table > tbody > tr > td.ibm-right-icon {
-  padding: 0 10px 0 0;
+  padding: 10px 10px 0 6px;
   text-align: left;
+  font-size:20px;
+}
+
+.ico-span { color: rgb(70, 70, 70);}
+.ico-span:hover [class^="ibm-icon--"], [class*=" ibm-icon--"] { color: #5596E6; }
+.ico-span:hover { color: #5596E6; cursor: pointer; }
+.ibm-nlc-table {
+  [class^="ibm-icon--"], [class*=" ibm-icon--"] { visibility: hidden; }
+  .ico-span { font-size: 18px; line-height: 2em; }
 }
