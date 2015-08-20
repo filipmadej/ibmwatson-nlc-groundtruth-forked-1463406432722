@@ -188,16 +188,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         },
 
         /* export the classes & texts from the UI into a JSON file */
-        download: function download (text, classes) {
-          var i;
+        download: function download (texts, classes) {
           var csvString = '';
-          for (i = 0; i < text.length; i += 1) {
-            csvString += '"' + text[i].label.replace(/"/g, '""') + '"';
-            for (var j = 0; j < text[i].classes.length; j += 1) {
-              csvString += ',' + text[i].classes[j];
-            }
+          texts.forEach(function forEach (text) {
+            csvString += '"' + text.label.replace(/"/g, '""') + '"';
+            text.classes.forEach(function forEach (clazz) {
+              csvString += ',' + clazz;
+            });
             csvString += '\n';
-          }
+          });
+          classes.forEach(function forEach (clazz) {
+            csvString += ',' + clazz.label;
+          });
+          csvString += '\n';
 
           // convert the CSV to a data URL
           // export the data url
