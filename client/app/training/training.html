@@ -201,10 +201,8 @@
   </div>
   <div ng-if="classes.length + texts.length === 0 && (!loading.classes || !loading.texts)" class="ibm-nlc-nodata-message">
     <h2>Watson needs your data.</h2>
-    <p>Train NL Classifier by providing examples of how you want text to be labelled.</p>
-    <p>- Enter your texts and labels manually.</p>
-    <p>or</p>
-    <p>- Import JSON or CSV data using the "Import" Option</p>
+    <p>The Natural Language Classifier service is trained from your example data.</p>
+    <p>Import your JSON or CSV training data or enter classes and texts manually</p>
   </div>
-  <watson-loading ng-show="loading.savingClassifier" loading-message="'Saving & Training Classifier...'"></watson-loading>
+  <watson-loading ng-show="loading.savingClassifier" loading-message="'Creating a classifier for you...'"></watson-loading>
 </div>
