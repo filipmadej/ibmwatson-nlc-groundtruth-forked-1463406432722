@@ -33,14 +33,14 @@ When you click the **Deploy to Bluemix** button, the following steps take place:
 3. The `ibmwatson-nlc-groundtruth` project is cloned into the Git repository.
 4. Your copy of the application is built.
 5. The required Bluemix services are created.
-6. The tookit application is deployed to Bluemix.
+6. The toolkit application is deployed to Bluemix.
 
 The entire process takes several minutes to complete, and the final step of deploying typically is the longest step. When the process completes, you'll see a confirmation message and a link to your running application. 
 
 **Tip**: Your new DevOps Services project is set up to deploy changes to Bluemix immediately when you commit new changes to your Git repository.
 
 
-## Log in to the tookit application
+## Log in to the toolkit application
 
 Log in to your toolkit app with the service credentials of the Natural Language Classifier that is bound to your toolkit app. Here's how to find the service credentials: 
 
@@ -49,7 +49,7 @@ Log in to your toolkit app with the service credentials of the Natural Language 
 3. Copy the values of the `username` and `password` parameters.
 
 
-## What to do next ##
+## What to do next
 
 - Read about the app and the Natural Language Classifier service in the [docs](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/nl-classifier/tool_overview.shtml). 
 - Review the [App gallery](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/gallery.html) for Natural Language Classifier applications.
@@ -62,11 +62,11 @@ Submit comments or ask questions in the [Watson forum](https://developer.ibm.com
 
 ## Upgrading your app
 
-When we update the application, fix bugs, and add features, you'll want to update along with us. You can update your instance of the toolkit app by using the **Deploy to Bluemix** button earlier in this readme. 
+When we update the application, fix bugs, and add features, you'll want to update along with us. You can update your instance of the toolkit app by using the **Deploy to Bluemix** button described earlier in this readme. 
 
 **Important**: Make sure that you deploy the app to the same organization and Bluemix space as your earlier version. 
 
-By using the **Deploy to Bluemix** button with the same organization and Bluemix space, your updated app gets a new URL and uses new login information. But the toolkit works with your existing data and classifiers. 
+By using the **Deploy to Bluemix** button with the same organization and Bluemix space, your updated app gets a new URL and uses new login information but will continue to work with your existing data and classifiers. 
 
 When you're happy with the new app, delete your original instance of the application from your Bluemix dashboard.
 
