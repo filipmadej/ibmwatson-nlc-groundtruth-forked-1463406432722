@@ -32,19 +32,25 @@ When you click this button, the application will
 
 Your new DevOps Services project will be set up to automatically deploy changes to Bluemix when you commit new changes to your Git repository.
 
-The entire process will take several minutes to complete. The final deploying step typically takes the longest. When it completes, you'll see a confirmation message and link to the running app. 
+The entire process will take several minutes to complete. The final deploying step typically takes the longest. When it completes, you'll see a confirmation message and link to the running application. 
 
 ## Using the App
 
-For information on using the app to customize the NL Classifier see [documentation link]. You can bring your own data or check out sample NL Classifier applications and data at our [App Gallery](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/gallery.html).
+The first thing that you'll need is the username and password required to access your application. For the beta release these are the same as the credentials of the Natural Language Classifier Service bound to your instance of the application. You can find these credentials with these three easy steps:
+
+1. Log in to Bluemix and navigate to your new instance of the application.
+2. Click "Show Credentials" for the Natural Language Classifier service that is bound to your application.
+3. The username and password for the application are shown in the `credentials` section.
+
+For information on using the app to customize the Natural Language Classifier see [documentation link]. You can bring your own data or check out sample Natural Language Classifier applications and data at our [App Gallery](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/gallery.html).
 
 ## Getting Help and Providing Feedback
 
-If you have questions, would like to report a problem, or otherwise provide feedback, please visit us in the [Watson Space at dW Answers](https://developer.ibm.com/answers/smartspace/watson/). If [Stack Oveflow](http://stackoverflow.com/questions/tagged/ibm-watson) is your preference, we'd be glad to chat there too.
+If you have questions, would like to report a problem, or otherwise provide feedback, please visit us in the [Watson Space at dW Answers](https://developer.ibm.com/answers/smartspace/watson/). If [Stack Overflow](http://stackoverflow.com/questions/tagged/ibm-watson) is your preference, we'd be glad to chat there too.
 
 ## Upgrading your App
 
-We will be updating the application, fixing bugs, adding capability, and otherwise responding to your feedback. Stay tuned. We'll have information on future releases and instructions for upgrading.
+We will be updating the application, fixing bugs, adding capability, and responding to your feedback. You can upgrade your personal instance of the application by using the Deploy to Bluemix button above. You'll need to make sure that you deploy to the same organization and Bluemix space. After the deployment is successful you'll have a new URL, username, and password, but you'll have access to your existing data and classifiers. You can go into your Bluemix dashboard and delete your original instance of the application.
 
 Congratulations and happy classifying!
 
