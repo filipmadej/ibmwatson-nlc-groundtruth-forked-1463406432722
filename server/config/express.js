@@ -72,9 +72,9 @@ module.exports = function init (app) {
       next();
     });
 
-    app.use(favicon(path.join(config.root, 'dist', 'public', 'favicon.ico')));
-    app.use(express.static(path.join(config.root, 'dist', 'public')));
-    app.set('appPath', path.join(config.root, 'dist', 'public'));
+    app.use(favicon(path.join(config.root, 'public', 'favicon.ico')));
+    app.use(express.static(path.join(config.root, 'public')));
+    app.set('appPath', path.join(config.root, 'public'));
     app.use(morgan('dev'));
   }
 

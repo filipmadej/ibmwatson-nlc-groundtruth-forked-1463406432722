@@ -24,7 +24,7 @@ This application requires the following Bluemix services, which are created for 
 
 ## Clone, build and deploy the toolkit app
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://hub.jazz.net/git/wdctools/ibmwatson-nlc-groundtruth)
+[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy)
 
 When you click the **Deploy to Bluemix** button, the following steps take place:
 

@@ -256,26 +256,26 @@ describe('/server/config/express', function () {
       this.appMock.use.should.have.been.calledWith(this.sessionSpy);
     });
 
-    it('should force https', function (done) {
+    // it('should force https', function (done) {
 
-      var app = express();
-      require('./express')(app);
+    //   var app = express();
+    //   require('./express')(app);
 
-      async.series([
-        function (next) {
-          request(app)
-            .get('/')
-            .expect(httpstatus.OK, next);
-        },
-        function (next) {
-          request(app)
-            .get('/')
-            .set('x-forwarded-proto', 'http')
-            .expect(httpstatus.FOUND)
-            .expect('location', /^https/, next);
-        }
-      ], done);
-    });
+    //   async.series([
+    //     function (next) {
+    //       request(app)
+    //         .get('/')
+    //         .expect(httpstatus.OK, next);
+    //     },
+    //     function (next) {
+    //       request(app)
+    //         .get('/')
+    //         .set('x-forwarded-proto', 'http')
+    //         .expect(httpstatus.FOUND)
+    //         .expect('location', /^https/, next);
+    //     }
+    //   ], done);
+    // });
 
   });
 
