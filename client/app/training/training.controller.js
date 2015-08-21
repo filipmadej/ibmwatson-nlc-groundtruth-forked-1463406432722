@@ -40,12 +40,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.loadClasses = function loadClasses () {
         var deferred = $q.defer();
-        classes.query({}, function query (err, data) {
-          if (err) {
-            $log.error('error getting classes: ' + JSON.stringify(err));
-            deferred.reject(err);
-            return deferred.promise;
-          }
+        classes.query({}).then(function success (data) {
           data.forEach(function forEach (element) {
             element.$$hashKey = data.id;
             element.seq = $scope.sequenceNumber++;
@@ -57,18 +52,18 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           deferred.resolve(data);
           $scope.loading.classes = false;
           $scope.classes = data;
+        }, function error (err) {
+          if (err) {
+            $log.error('error getting classes: ' + JSON.stringify(err));
+            deferred.reject(err);
+          }
         });
         return deferred.promise;
       };
 
       $scope.loadTexts = function loadTexts () {
         var deferred = $q.defer();
-        texts.query({}, function query (err, data) {
-          if (err) {
-            $log.error('error loading texts: ' + JSON.stringify(err));
-            deferred.reject(err);
-            return deferred.promise;
-          }
+        texts.query({}).then(function success (data) {
           data.forEach(function forEach (element) {
             element.$$hashKey = data.id;
             element.seq = $scope.sequenceNumber++;
@@ -83,6 +78,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           deferred.resolve(data);
           $scope.loading.texts = false;
           $scope.texts = data;
+        }, function error (err) {
+          if (err) {
+            $log.error('error loading texts: ' + JSON.stringify(err));
+            deferred.reject(err);
+          }
         });
         return deferred.promise;
       };
@@ -369,25 +369,30 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }
         });
 
-        classes.update(object.id, { name: newLabel }, function error (err) {
-          if (err) {
+        return $q(function update (resolve, reject) {
+          classes.update(object.id, { name: newLabel }).then(function success (data) {
+            $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel + '. new object: ' + JSON.stringify(data));
+            resolve(data);
+          }, function error (err) {
             $log.error('error changing class label from ' + oldLabel + ' to ' + newLabel);
+            $log.error(JSON.stringify(err));
             // TODO: need to revert other changes? alert user of error?
-          } else {
-            $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel);
-          }
+            reject(err);
+          });
         });
       };
 
       // persist the change to the text label
       $scope.textLabelChanged = function textLabelChanged (object, oldLabel, newLabel) {
-        texts.update(object.id, { value: newLabel }, function error (err) {
-          if (err) {
-            $log.error('error changing text label from ' + oldLabel + ' to ' + newLabel);
-            // TODO: need to revert change, alert user of error.
-          } else {
+        return $q(function update (resolve, reject) {
+          texts.update(object.id, { value: newLabel }).then(function success () {
             $log.debug('success changing text label from ' + oldLabel + ' to ' + newLabel);
-          }
+            resolve();
+          }, function error (err) {
+            $log.error('error changing text label from ' + oldLabel + ' to ' + newLabel + '. err: ' + JSON.stringify(err));
+            // TODO: need to revert change, alert user of error.
+            reject(err);
+          });
         });
       };
 
@@ -442,30 +447,30 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           var id = '';
           switch (type) {
             case 'class' :
-              classes.post({ name : label }, function post (err, data) {
-                if (err) {
-                  deferred.reject(err);
-                } else {
-                  id = data.id;
-                  var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
-                  $scope.classes.push(newClass);
-                  $scope.newClassString = '';
-                  deferred.resolve(newClass);
-                }
+              classes.post({ name : label }).then(function success (data) {
+                id = data.id;
+                var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
+                $scope.classes.push(newClass);
+                $scope.newClassString = '';
+                deferred.resolve(newClass);
+                return deferred.promise;
+              }, function error (err) {
+                deferred.reject(err);
+                return deferred.promise;
               });
               return deferred.promise;
             case 'text' :
-              texts.post({ value : label }, function post (err, data) {
-                if (err) {
-                  deferred.reject(err);
-                } else {
-                  id = data.id;
-                  var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                  $scope.tagTexts([newText], $scope.getChecked($scope.classes));
-                  $scope.texts.push(newText);
-                  $scope.newTextString = '';
-                  deferred.resolve(newText);
-                }
+              texts.post({ value : label }).then(function success (data) {
+                id = data.id;
+                var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
+                $scope.tagTexts([newText], $scope.getChecked($scope.classes));
+                $scope.texts.push(newText);
+                $scope.newTextString = '';
+                deferred.resolve(newText);
+                return deferred.promise;
+              }, function error (err) {
+                deferred.reject(err);
+                return deferred.promise;
               });
               return deferred.promise;
           }
@@ -490,7 +495,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           msg = $scope.question($scope.numberTextsInClass(clazz) + ' text(s) are tagged with the ' + label + ' class. If you delete this class, it will be removed from those texts.', 'Delete');
         }
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function remove () {  // ok
+        }).then(function remove () {
           $scope.deleteClasses([clazz]);
         });
       };
@@ -575,13 +580,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // removes a class from the database with the given id
       $scope.removeClass = function removeClass (id) {
-        classes.remove(id, function remove (err) {
-          if (err) {
-            $log.error('error removing class ' + id + ': ' + JSON.stringify(err));
-            // TODO: revert change and alert user.
-          } else {
-            $log.debug('success removing class ' + id);
-          }
+        classes.remove(id).then(function success () {
+          $log.debug('success removing class ' + id);
+        }, function error (err) {
+          $log.error('error removing class ' + id + ': ' + JSON.stringify(err));
+          // TODO: revert change and alert user.
         });
       };
 
@@ -595,13 +598,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       $scope.removeText = function removeText (id) {
-        texts.remove(id, function remove (err) {
-          if (err) {
-            $log.error('error removing text ' + id + ': ' + JSON.stringify(err));
-            // TODO: revert change and alert user.
-          } else {
-            $log.debug('success removing text ' + id);
-          }
+        texts.remove(id).then(function success () {
+          $log.debug('success removing text ' + id);
+        }, function error (err) {
+          $log.error('error removing text ' + id + ': ' + JSON.stringify(err));
+          // TODO: revert change and alert user.
         });
       };
 
@@ -675,13 +676,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }).then(function remove () {
             text.classes.splice(index, 1);
             var clazz = $scope.getFromLabel($scope.classes, label);
-            texts.removeClasses(text.id, [{id: clazz.id}], function error (err) {
-              if (err) {
-                $log.error('error removing class ' + label + ' from text ' + text.label + ': ' + JSON.stringify(err));
-                // TODO: revert change, alert user
-              } else {
-                $log.debug('success removing class ' + label + ' from text ' + text.label);
-              }
+            texts.removeClasses(text.id, [{id: clazz.id}]).then(function success () {
+              $log.debug('success removing class ' + label + ' from text ' + text.label);
+            }, function error (err) {
+              $log.error('error removing class ' + label + ' from text ' + text.label + ': ' + JSON.stringify(err));
+              // TODO: revert change, alert user
             });
           });
         } else {
@@ -786,13 +785,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       $scope.addClassesToText = function addClassesToText (id, classIds) {
-        return texts.addClasses(id, classIds, function error (err) {
-          if (err) {
-            $log.error('error adding classes: ' + JSON.stringify(err));
-            // TODO: revert and alert user.
-          } else {
-            $log.debug('success adding classes');
-          }
+        return texts.addClasses(id, classIds).then(function success () {
+          $log.debug('success adding classes');
+        }, function error (err) {
+          $log.error('error adding classes: ' + JSON.stringify(err));
+          // TODO: revert and alert user.
         });
       };
 

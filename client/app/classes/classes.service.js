@@ -17,9 +17,9 @@
 'use strict';
 
 /**
- * Retrieve the etag metadata in the form of an 'If-Match' Header
- * @returns {object} The If-Match header
- */
+* Retrieve the etag metadata in the form of an 'If-Match' Header
+* @returns {object} The If-Match header
+*/
 function getMetadataEtag() {
   return {
     'If-Match': '*'
@@ -27,68 +27,76 @@ function getMetadataEtag() {
 }
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('classes', ['$http', 'endpoints', 'session', function init ($http, endpoints, session) {
+.factory('classes', ['$http', '$q', 'endpoints', 'session', function init ($http, $q, endpoints, session) {
 
-    function classesEndpoint () {
-      return endpoints.classes + '/' + session.tenant + '/classes';
-    }
+  function classesEndpoint () {
+    return endpoints.classes + '/' + session.tenant + '/classes';
+  }
 
-    function query (/*Object*/ config, /*function*/ callback) {
-      config = config || {};
-      _.set(config, 'headers.Range', 'items=0-9999');
+  function query (/*Object*/ config) {
+    config = config || {};
+    _.set(config, 'headers.Range', 'items=0-9999');
+    return $q(function query (resolve, reject) {
       $http.get(classesEndpoint(), config)
-        .success(function success (data) {
-          callback(null, data);
-        })
-        .error(function error (data) {
-          callback(data);
-        });
-    }
+      .success(function success (data) {
+        resolve(data);
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-    function post (/*Object*/ params, /*function*/ callback) {
-      // retrieve etag header
-      var config = {};
-      _.set(config, 'headers', getMetadataEtag());
+  function post (/*Object*/ params) {
+    // retrieve etag header
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function post (resolve, reject) {
       $http.post(classesEndpoint(), params, config)
-        .success(function success (data, status, headers, config) {
-          callback(null, data, status, headers, config);
-        })
-        .error(function error (data, status, headers, config) {
-          callback(data, null, status, headers, config);
-        });
-    }
+      .success(function success (data) {
+        resolve(data);
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-    function remove (/*String*/ id, /*function*/ callback) {
-      // retrieve etag header
-      var config = {};
-      _.set(config, 'headers', getMetadataEtag());
+  function remove (/*String*/ id) {
+    // retrieve etag header
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function remove (resolve, reject) {
       $http.delete(classesEndpoint() + '/' + id, config)
-        .success(function success (data, status, headers, config) {
-          callback(null, data, status, headers, config);
-        })
-        .error(function error (data, status, headers, config) {
-          callback(data, null, status, headers, config);
-        });
-    }
+      .success(function success () {
+        resolve();
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-    function update (/*String*/ id, /*Object*/ params, /*function*/ callback) {
-      var config = {};
-      _.set(config, 'headers', getMetadataEtag());
+  function update (/*String*/ id, /*Object*/ params) {
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function update (resolve, reject) {
       $http.put(classesEndpoint() + '/' + id, params, config)
-        .success(function success (data, status, headers, config) {
-          callback(null, data, status, headers, config);
-        })
-        .error(function error (data, status, headers, config) {
-          callback(data, null, status, headers, config);
-        });
-    }
+      .success(function success (data) {
+        resolve(data);
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-    // Public API here
-    return {
-      'query' : query,
-      'post' : post,
-      'remove' : remove,
-      'update' : update
-    };
+  // Public API here
+  return {
+    'query' : query,
+    'post' : post,
+    'remove' : remove,
+    'update' : update
+  };
 
-  }]);
+}]);

@@ -17,9 +17,9 @@
 'use strict';
 
 /**
- * Retrieve the etag metadata in the form of an 'If-Match' Header
- * @returns {object} The If-Match header
- */
+* Retrieve the etag metadata in the form of an 'If-Match' Header
+* @returns {object} The If-Match header
+*/
 function getMetadataEtag() {
   return {
     'If-Match': '*'
@@ -27,106 +27,124 @@ function getMetadataEtag() {
 }
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('texts', ['$http', 'endpoints', 'session', function init ($http, endpoints, session) {
+.factory('texts', ['$http', '$q', 'endpoints', 'session', function init ($http, $q, endpoints, session) {
 
-      function textsEndpoint () {
-        return endpoints.texts + '/' + session.tenant + '/texts';
-      }
+  function textsEndpoint () {
+    return endpoints.texts + '/' + session.tenant + '/texts';
+  }
 
-      function query (/*Object*/ config, /*function*/ callback) {
-        config = config || {};
-        _.set(config, 'headers.Range', 'items=0-9999');
-        $http.get(textsEndpoint(), config)
-          .success(function success (data) {
-            callback(null, data);
-          })
-          .error(function error (data) {
-            callback(data, null);
-          });
-      }
+  function query (/*Object*/ config) {
+    config = config || {};
+    _.set(config, 'headers.Range', 'items=0-9999');
+    return $q(function query (resolve, reject) {
+      $http.get(textsEndpoint(), config)
+      .success(function success (data) {
+        resolve(data);
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      function post (/*Object*/ params, /*function*/ callback) {
-        var config = {};
-        _.set(config, 'headers', getMetadataEtag());
-        $http.post(textsEndpoint(), params, config)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
-          })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
-          });
-      }
+  function post (/*Object*/ params) {
+    // retrieve etag header
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function post (resolve, reject) {
+      $http.post(textsEndpoint(), params, config)
+      .success(function success (data) {
+        resolve(data);
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      function remove (/*String*/ id, /*function*/ callback) {
-        var config = {};
-        _.set(config, 'headers', getMetadataEtag());
-        $http.delete(textsEndpoint() + '/' + id, config)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
-          })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
-          });
-      }
+  function remove (/*String*/ id) {
+    // retrieve etag header
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function remove (resolve, reject) {
+      $http.delete(textsEndpoint() + '/' + id, config)
+      .success(function success () {
+        resolve();
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      function addClasses (/*String*/ id, /*Object*/ params, /*function*/ callback) {
-        var config = {};
-        _.set(config, 'headers', getMetadataEtag());
-        $http.patch(textsEndpoint() + '/' + id, [
-          {
-            op : 'add',
-            path : '/classes',
-            value : params
-          }
-        ], config)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
-          })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
-          });
-      }
+  function addClasses (/*String*/ id, /*Object*/ params) {
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function addClasses (resolve, reject) {
+      $http.patch(textsEndpoint() + '/' + id, [
+        {
+          op : 'add',
+          path : '/classes',
+          value : params
+        }
+      ], config)
+      .success(function success () {
+        resolve();
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      function removeClasses (/*String*/ id, /*Object*/ params, /*function*/ callback) {
-        var config = {};
-        _.set(config, 'headers', getMetadataEtag());
-        $http.patch(textsEndpoint() + '/' + id, [{
+  function removeClasses (/*String*/ id, /*Object*/ params) {
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function removeClasses (resolve, reject) {
+      $http.patch(textsEndpoint() + '/' + id, [
+        {
           op : 'remove',
           path : '/classes',
           value : params
-        }], config)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
-          })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
-          });
-      }
+        }
+      ], config)
+      .success(function success () {
+        resolve();
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      function update (/*String*/ id, /*Object*/ params, /*function*/ callback) {
-        var config = {};
-        _.set(config, 'headers', getMetadataEtag());
-        $http.patch(textsEndpoint() + '/' + id, [{
+  function update (/*String*/ id, /*Object*/ params) {
+    var config = {};
+    _.set(config, 'headers', getMetadataEtag());
+    return $q(function update (resolve, reject) {
+      $http.patch(textsEndpoint() + '/' + id, [
+        {
           op : 'replace',
           path : '/metadata',
           value : params
-        }], config)
-          .success(function success (data, status, headers, config) {
-            callback(null, data, status, headers, config);
-          })
-          .error(function error (data, status, headers, config) {
-            callback(data, null, status, headers, config);
-          });
-      }
+        }
+      ], config)
+      .success(function success () {
+        resolve();
+      })
+      .error(function error (err) {
+        reject(err);
+      });
+    });
+  }
 
-      // Public API here
-      return {
-        'query': query,
-        'post': post,
-        'addClasses': addClasses,
-        'removeClasses': removeClasses,
-        'remove': remove,
-        'update': update
-      };
-    }
-  ]);
+  // Public API here
+  return {
+    'query': query,
+    'post': post,
+    'addClasses': addClasses,
+    'removeClasses': removeClasses,
+    'remove': remove,
+    'update': update
+  };
+}
+]);
