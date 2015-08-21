@@ -1,5 +1,5 @@
 {
-  "name": "ibmwatson-nlc-groundtruth-ui",
+  "name": "ibmwatson-nlc-groundtruth",
   "version": "0.0.0",
   "main": "server/app.js",
   "dependencies": {

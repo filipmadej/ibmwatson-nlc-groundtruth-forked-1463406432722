@@ -34,10 +34,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               if (!versions.informed && !isCurrent) {
                 alerts.add({
                   level: 'info',
-                  title: 'Pssst',
+                  title: 'Pssst!',
                   text: 'A new version of this tool is available',
                   dismissable: true
-                })
+                });
                 versions.informed = true;
               }
             });
