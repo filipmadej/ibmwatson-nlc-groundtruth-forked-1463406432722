@@ -24,8 +24,10 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('TrainingCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors',
-    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors) {
+  .controller('TrainingCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors', 'alerts',
+    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors, alertsSvc) {
+
+      $scope.alerts = alertsSvc.alerts;
 
       // Page Loading Variables
       $scope.loading = {
