@@ -1,6 +1,6 @@
 {
-  "name": "ibmwatson-nlc-groundtruth-ui",
-  "version": "0.0.0",
+  "name": "ibmwatson-nlc-groundtruth",
+  "version": "0.0.1",
   "dependencies": {
     "angular": ">=1.2.*",
     "json3": "~3.3.1",

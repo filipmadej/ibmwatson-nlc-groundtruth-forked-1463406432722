@@ -36,9 +36,6 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
         $urlRouterProvider.otherwise('/classifiers');
         $locationProvider.html5Mode(true);
 
-        // by default, cross-site requests (to our services) should have credentials
-        $httpProvider.defaults.withCredentials = true;
-
         // set up a http interceptor to listen out for 401 (Unauthorizes) responses
         $httpProvider.interceptors.push(['$q', '$location', function($q, $location) {
           return {

@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-
-angular.module('config', [])
-  .constant('endpoints', {
-    'auth': '/api/authenticate',
-    'texts': '/api',
-    'classes': '/api',
-    'import': '/api',
-    'classifier': '/api',
-    'versions': 'https://ibmwatson-nlc-status.mybluemix.net/api/v1/versions'
-  })
-  .constant('versionInfo', {
-    'version': '0.0.1',
-    'state': 'beta',
-    'scope': 'Initial Beta',
-    'download': 'https://hub.jazz.net/project/wdctools/ibmwatson-nlc-groundtruth'
-  });
+ 
+.container-alerts{
+	padding-left:0px;
+	padding-right:0px;
+}

@@ -14,18 +14,23 @@
  * limitations under the License.
  **/
 
-angular.module('config', [])
-  .constant('endpoints', {
-    'auth': '/api/authenticate',
-    'texts': '/api',
-    'classes': '/api',
-    'import': '/api',
-    'classifier': '/api',
-    'versions': 'https://ibmwatson-nlc-status.mybluemix.net/api/v1/versions'
-  })
-  .constant('versionInfo', {
-    'version': '0.0.1',
-    'state': 'beta',
-    'scope': 'Initial Beta',
-    'download': 'https://hub.jazz.net/project/wdctools/ibmwatson-nlc-groundtruth'
+/**
+ * Error responses
+ */
+
+'use strict';
+
+module.exports[404] = function pageNotFound (req, res) {
+  var viewFilePath = '404';
+  var statusCode = 404;
+  var result = {
+    status : statusCode
+  };
+
+  res.status(result.status);
+  res.render(viewFilePath, function handleResult (err) {
+    if (err) { return res.json(result, result.status); }
+
+    res.render(viewFilePath);
   });
+};

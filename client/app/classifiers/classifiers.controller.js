@@ -17,8 +17,11 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClassifiersCtrl', ['$scope', 'nlc', 'ngDialog',
-    function init ($scope, nlc, ngDialog) {
+  .controller('ClassifiersCtrl', ['$scope', 'nlc', 'ngDialog', 'alerts',
+    function init ($scope, nlc, ngDialog, alertsSvc) {
+
+      $scope.alerts = alertsSvc.alerts;
+
       $scope.loading = true;
 
       $scope.classifiers = [];
