@@ -38,11 +38,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     _.set(config, 'headers.Range', 'items=0-9999');
     return $q(function query (resolve, reject) {
       $http.get(textsEndpoint(), config)
-      .success(function success (data) {
-        resolve(data);
+      .then(function success (response) {
+        resolve(response.data);
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
@@ -53,11 +53,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     _.set(config, 'headers', getMetadataEtag());
     return $q(function post (resolve, reject) {
       $http.post(textsEndpoint(), params, config)
-      .success(function success (data) {
-        resolve(data);
+      .then(function success (response) {
+        resolve(response.data);
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
@@ -68,11 +68,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     _.set(config, 'headers', getMetadataEtag());
     return $q(function remove (resolve, reject) {
       $http.delete(textsEndpoint() + '/' + id, config)
-      .success(function success () {
+      .then(function success () {
         resolve();
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
@@ -88,11 +88,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           value : params
         }
       ], config)
-      .success(function success () {
+      .then(function success () {
         resolve();
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
@@ -108,11 +108,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           value : params
         }
       ], config)
-      .success(function success () {
+      .then(function success () {
         resolve();
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
@@ -128,11 +128,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           value : params
         }
       ], config)
-      .success(function success () {
+      .then(function success () {
         resolve();
       })
-      .error(function error (err) {
-        reject(err);
+      .catch(function error (response) {
+        reject(response);
       });
     });
   }
