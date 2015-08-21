@@ -75,5 +75,7 @@ By using the **Deploy to Bluemix** button with the same organization and Bluemix
 
 When you're happy with the new app, delete your original instance of the application from your Bluemix dashboard.
 
+If you're a developer and you'd like to modify the source code of the tool to fit your needs, we've open sourced the [complete source code and build scripts for this application](https://hub.jazz.net/project/wdctools/ibmwatson-nlc-groundtruth-dev/overview).
+
 Congratulations and happy classifying.
 
