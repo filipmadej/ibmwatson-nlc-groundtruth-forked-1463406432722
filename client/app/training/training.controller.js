@@ -42,7 +42,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var deferred = $q.defer();
         classes.query({}).then(function success (data) {
           data.forEach(function forEach (element) {
-            element.$$hashKey = data.id;
+            element.$$hashKey = element.id;
             element.seq = $scope.sequenceNumber++;
             element.label = element.name;
             element.edit = false;
@@ -65,7 +65,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var deferred = $q.defer();
         texts.query({}).then(function success (data) {
           data.forEach(function forEach (element) {
-            element.$$hashKey = data.id;
+            element.$$hashKey = element.id;
             element.seq = $scope.sequenceNumber++;
             element.label = element.value;
             element.classes = element.classes || [];
@@ -368,12 +368,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             text.classes[index] = newLabel;
           }
         });
-
         return $q(function update (resolve, reject) {
           classes.update(object.id, { name: newLabel }).then(function success (data) {
             $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel + '. new object: ' + JSON.stringify(data));
             resolve(data);
-          }, function error (err) {
+          }, function updateError (err) {
             $log.error('error changing class label from ' + oldLabel + ' to ' + newLabel);
             $log.error(JSON.stringify(err));
             // TODO: need to revert other changes? alert user of error?
