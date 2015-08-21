@@ -16,8 +16,11 @@ Ensure that you have a Bluemix account. If you don't have one, [sign up](https:/
 ### Required Bluemix services
 This application requires the following Bluemix services, which are created for you when you use the **Deploy to Bluemix** button: 
 
-- Cloudant
+- Cloudant NoSQL DB
 - Natural Language Classifier
+
+If you have instances of those services that you do not need, delete them before you deploy the toolkit so that you're not charged for them.
+
 
 ***
 
@@ -32,12 +35,14 @@ When you click the **Deploy to Bluemix** button, the following steps take place:
 2. A Bluemix DevOps Services project is created, and a Git repository is initialized.
 3. The `ibmwatson-nlc-groundtruth` project is cloned into the Git repository.
 4. Your copy of the application is built.
-5. The required Bluemix services are created.
+5. The Cloudant NoSQL DB service and Natural Language Classifier Bluemix services are created.
 6. The toolkit application is deployed to Bluemix.
 
 The entire process takes several minutes to complete, and the final step of deploying typically is the longest step. When the process completes, you'll see a confirmation message and a link to your running application. 
 
-**Tip**: Your new DevOps Services project is set up to deploy changes to Bluemix immediately when you commit new changes to your Git repository.
+**Tip**: If you have instances of the Cloudant NoSQL DB or Natural Language Classifier Bluemix services that you created manually and do not need, delete them so that you're not charged for them.
+
+Your new DevOps Services project is set up to deploy changes to Bluemix immediately when you commit new changes to your Git repository.
 
 
 ## Log in to the toolkit application
