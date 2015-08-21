@@ -78,3 +78,8 @@ display: none;
 /*.ibm-list-group-item-disabled {
 opacity: 0.5;
 }*/
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus {
+  color: #ddd;
+  background-color: transparent;
+}
