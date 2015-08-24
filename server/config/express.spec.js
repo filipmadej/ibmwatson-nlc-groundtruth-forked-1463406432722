@@ -25,10 +25,13 @@ var async = require('async');
 var chai = require('chai');
 var express = require('express');
 var httpstatus = require('http-status');
-var proxyquire = require('proxyquire').noPreserveCache();
+var proxyquire = require('proxyquire').noPreserveCache().noCallThru();
 var request = require('supertest');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
+
+// test dependencies
+var mocks = require('../test/mocks');
 
 var should = chai.should();
 chai.use(sinonChai);
@@ -256,26 +259,45 @@ describe('/server/config/express', function () {
       this.appMock.use.should.have.been.calledWith(this.sessionSpy);
     });
 
-    // it('should force https', function (done) {
+     it('should force https', function (done) {
 
-    //   var app = express();
-    //   require('./express')(app);
+       this.timeout(5000);
 
-    //   async.series([
-    //     function (next) {
-    //       request(app)
-    //         .get('/')
-    //         .expect(httpstatus.OK, next);
-    //     },
-    //     function (next) {
-    //       request(app)
-    //         .get('/')
-    //         .set('x-forwarded-proto', 'http')
-    //         .expect(httpstatus.FOUND)
-    //         .expect('location', /^https/, next);
-    //     }
-    //   ], done);
-    // });
+       var app = express();
+
+       var noop = function (req, res, next) {
+         next();
+       }
+
+       this.faviconMock.returns(noop);
+       this.sessionMock.returns(noop);
+
+       proxyquire('./express', {
+          'serve-favicon' : this.faviconMock,
+          'express-session' : this.sessionMock,
+          './redis' : this.redisLibMock,
+          './log' : new mocks.LogMock()
+        })(app);
+
+       app.get('/', function (req, res) {
+          res.status(httpstatus.OK).json({ok : true});
+       });
+
+       async.series([
+         function (next) {
+           request(app)
+             .get('/')
+             .expect(httpstatus.OK, next);
+         },
+         function (next) {
+           request(app)
+             .get('/')
+             .set('x-forwarded-proto', 'http')
+             .expect(httpstatus.FOUND)
+             .expect('location', /^https/, next);
+         }
+       ], done);
+     });
 
   });
 
