@@ -1,0 +1,171 @@
+/* Style guide styles only
+======================================== */
+.ibm-styleguide h2.ibm-border--bottom {font-size: 2.441em; margin-top: 3em;}
+.ibm-styleguide h3 {font-size: 1.563em; margin-top: 2em;}
+.ibm-styleguide h2 + h3 {font-size: 1em; margin: .5em 0;}
+.ibm-styleguide-example img {display: block; width: 100%; border: 1px solid #E0E0E0; box-shadow: 1px 1px 1px 0px #AEAEAE;}
+.ibm-styleguide .ibm-animation--typing {margin-bottom: 1em;}
+
+/* General styles
+======================================== */
+html {position: relative; min-height: 100%; font-size: .9em;}
+body {margin-bottom: 60px; padding-top: 0; font-family: "HelvNeueRomanforIBM", Helvetica, Arial, "Roboto", sans-serif; color: #464646; line-height: 1.45;}
+section {margin-bottom: 2em;}
+
+/* Layout */
+.ibm-wrapper {padding: 1em 3%;} /* Padding for styleguide */
+.ibm-wrapper--white {background-color: #fff;}
+.ibm-wrapper--neutral3 {background-color: #F4F4F4;}
+.ibm-wrapper--gray10 {background-color: #E0E0E0;}
+.ibm-wrapper--gray50 {background-color: #777677;}
+.ibm-wrapper--gray80 {background-color: #323232;}
+.ibm-wrapper--blue60 {background-color: #325C80;}
+.ibm-wrapper--blue50 {background-color: #4178BE;}
+.ibm-wrapper--yellow30 {background-color: #8CD211;}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {margin: .5em 0; font-family: "HelvNeueMediumforIBM"; line-height: 1.2; color: #464646;}
+h1 {font-size: 1.953em; font-family: "HelvNeueLightforIBM";}
+h2 {font-size: 1.563em;}
+h3 {font-size: 1.25em;}
+h4 {font-size: 1em;}
+h5 {font-size: 1em;}
+h6 {font-size: 1em;}
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {font-family: "HelvNeueLightforIBM"; font-size: .5em; color: #777677;}
+
+a, a:visited {color: #4178BE;}
+a:hover, a:focus {color: #325C80; cursor: pointer;}
+ul {list-style: none; margin: 0; padding: 0;}
+p {margin-bottom: 1.3em;}
+strong, b, .ibm-text--strong {font-family: "HelvNeueBoldforIBM";}
+em, .ibm-text--em {font-family: "HelvNeueLightItalicforIBMRegular";}
+small, .ibm-text--small {font-size: 0.8em;}
+del, .ibm-text--del {text-decoration: line-through;}
+mark {background-color: #E0E0E0;}
+.ibm-text--highlight {padding: .2em; background-color: rgba(253,214,0,.5); color: #323232;}
+code, .ibm-text--code {background-color: transparent; font-family: 'Source Code Pro', "Lucida Console", "Andale Mono", monospace; color: #d74108; font-size: .8em;}
+.ibm-text--code--inverse {border-radius: 3px; padding: .2em .5em .3em; background-color: #000; color: #8CD211;}
+
+.ibm-text--large {font-size: 1.25em;}
+.ibm-text--base {font-size: 1em;}
+.ibm-text--small {font-size: 0.8em;}
+
+.ibm-text--dark {color: #121212;}
+.ibm-text--medium {color: #464646;}
+.ibm-text--light {color: #777677;}
+.ibm-text--white {color: #fff;}
+
+.ibm-text--normal {font-family: "HelvNeueRomanforIBM";}
+.ibm-text--helper {font-family: "HelvNeueLightItalicforIBMRegular"; font-size: 0.8em; color: #777677;}
+.ibm-text--uppercase {text-transform: uppercase; letter-spacing: .05em;}
+
+.ibm-text--error {color: #E71D32;}
+.ibm-text--warning {}
+
+/* Links */
+.ibm-link, .ibm-link:visited {color: #4178BE; font-family: "HelvNeueRomanforIBM";}
+.ibm-link:hover {border-bottom: 2px solid #325C80; text-decoration: none; cursor: pointer; color: #325C80;}
+.ibm-link:active {border-bottom: 2px solid #008571; text-decoration: none; cursor: pointer; color: #008571;}
+.ibm-link:focus {text-decoration: none;}
+
+
+/* Buttons */
+.ibm-btn, .ibm-btn:visited {border-radius: 2px; border-width: 0; margin: 0 .5em 1em 0; padding: .6em 1em .4em; box-shadow: 1px 1px 1px 0px #AEAEAE; background-color: #325C80; color: #fff; font-family: "HelvNeueRomanforIBM"; line-height: 1.6em; transition: all 0.2s ease;}
+.ibm-btn:hover, .ibm-btn:focus {border-radius: 2px; background-color: #264A60; color: #fff;}
+
+.ibm-btn--large, .ibm-btn--large:visited {font-size: 1.25em;}
+.ibm-btn--large:hover, .ibm-btn--large:focus {font-size: 1.25em;}
+
+.ibm-btn--small, .ibm-btn--small:visited {padding: .5em .8em .1em; font-size: 0.8em;}
+.ibm-btn--small:hover, .ibm-btn--small:focus {font-size: 0.8em;}
+
+.ibm-btn--default, .ibm-btn--default:visited {}
+.ibm-btn--default:hover, .ibm-btn--default:focus {}
+
+.ibm-btn--primary, .ibm-btn--primary:visited {background-color: #4178BE;}
+.ibm-btn--primary:hover, .ibm-btn--primary:focus {background-color: #325C80;}
+
+.ibm-btn--secondary, .ibm-btn--secondary:visited {background-color: #E0E0E0; color: #5A5A5A;}
+.ibm-btn--secondary:hover, .ibm-btn--secondary:focus {background-color: #C7C7C7; color: #464646;}
+
+.ibm-btn--accent, .ibm-btn--accent:visited {background-color: #8CD211; color: #323232;}
+.ibm-btn--accent:hover, .ibm-btn--accent:focus {background-color: #5AA700; color: #323232;}
+
+.ibm-btn--error, .ibm-btn--error:visited {background-color: #AD1625;}
+.ibm-btn--error:hover, .ibm-btn--error:focus {background-color: #8C101C;}
+
+.ibm-btn--disabled, .ibm-btn--disabled:visited {background: repeating-linear-gradient(-55deg, rgba(199,199,199,.5), rgba(199,199,199,.5) 10px, rgba(199,199,199,.4) 10px, rgba(199,199,199,.4) 20px); color: #AEAEAE; box-shadow: none;}
+.ibm-btn--disabled:hover, .ibm-btn--disabled:focus {background-color: #E0E0E0; box-shadow: none; cursor: default; outline: none !important;}
+
+.ibm-btn--link, .ibm-btn--link:visited {padding-left: 0; background-color: transparent; box-shadow: none; color: #4178BE;}
+.ibm-btn--link:hover, .ibm-btn--link:focus {background-color: transparent; box-shadow: none; color: #777677;}
+	.ibm-btn--link [class^="ibm-icon--"], .ibm-btn--link [class*=" ibm-icon--"] {color: inherit;}
+	.ibm-btn--link [class^="ibm-icon--"]:before, .ibm-btn--link [class*=" ibm-icon--"]:before {vertical-align: middle;}
+
+.ibm-btn--full-width {width: 100%; margin: 0; border-radius: 0;}
+
+[class*="ibm-btn--outline"], [class*="ibm-btn--outline"]:visited {border-radius: 3px; background-color: transparent; box-shadow: inset 0 0 0 1px #E0E0E0; font-family: "HelvNeueMediumforIBM"; color: rgb(118,119,118);}
+[class*="ibm-btn--outline"]:hover, [class*="ibm-btn--outline"]:focus {background-color: rgba(118,119,118,.2); box-shadow: inset 0 0 0 1px rgb(118,119,118); color: rgb(118,119,118);}
+
+.ibm-btn--outline-primary, .ibm-btn--outline-primary:visited {box-shadow: inset 0 0 0 1px #E0E0E0; color: #4178BE;}
+.ibm-btn--outline-primary:hover, .ibm-btn--outline-primary:focus {background-color: rgba(90,170,250,.2); box-shadow: inset 0 0 0 1px rgb(65,120,190); color: rgb(65,120,190);}
+
+/* Borders */
+.ibm-border {border: 1px solid #E0E0E0;}
+.ibm-border--horizontal {border: 0; border-top: 1px solid #E0E0E0; border-bottom: 1px solid #E0E0E0;}
+.ibm-border--vertical {border: 0; border-left: 1px solid #E0E0E0; border-right: 1px solid #E0E0E0;}
+.ibm-border--top {border: 0; border-top: 1px solid #E0E0E0;}
+.ibm-border--right {border: 0; border-right: 1px solid #E0E0E0;}
+.ibm-border--bottom {border: 0; border-bottom: 1px solid #E0E0E0;}
+.ibm-border--left {border: 0; border-left: 1px solid #E0E0E0;}
+.ibm-border--none {border: 0;}
+
+	/* Borders - large */
+	.ibm-border--large--horizontal {border: 0; border-top: 6px solid #E0E0E0; border-bottom: 6px solid #E0E0E0;}
+	.ibm-border--large--vertical {border: 0; border-left: 6px solid #E0E0E0; border-right: 6px solid #E0E0E0;}
+	.ibm-border--large--top {border: 0; border-top: 6px solid #E0E0E0;}
+	.ibm-border--large--right {border: 0; border-right: 6px solid #E0E0E0;}
+	.ibm-border--large--bottom {border: 0; border-bottom: 6px solid #E0E0E0;}
+	.ibm-border--large--left {border: 0; border-left: 6px solid #E0E0E0;}
+
+/* Radio */
+.ibm-radio__input {display: none; margin-right: 2em;}
+.ibm-radio__label {display: inline-block; margin-bottom: .5em; padding-left: 1.5em; background: url(../assets/images/inputRadio.png) no-repeat 0 -200px; cursor: pointer;}
+.ibm-radio__input:checked + .ibm-radio__label {background-position: -350px -50px;}
+
+/* Checkbox */
+.ibm-checkbox__input {display: none; margin-right: 2em;}
+.ibm-checkbox__label {margin-bottom: .7em; padding-left: 1.5em; background: url(../assets/images/inputCheckbox.png) no-repeat 0 -150px; cursor: pointer;}
+.ibm-checkbox__input:checked + .ibm-checkbox__label {background-position: -350px -50px;}
+
+/* Dropdown */
+.ibm-dropdown {display: inline-block; margin-right: 2em;}
+	.ibm-dropdown__label {margin-right: .3em; font-size: .8em; color: #777677;}
+	.ibm-dropdown__button, .ibm-dropdown__button:visited {padding: .4em 1em .2em; background-color: transparent; border-color: #E0E0E0; border-radius: 0; color: #777677; line-height: 1.6em;}
+	.ibm-dropdown .ibm-dropdown__button:hover, .ibm-dropdown .ibm-dropdown__button:focus {background-color: transparent; color: #323232;}
+		.ibm-dropdown__button [class^="ibm-icon--"], .ibm-dropdown__button:visited [class^="ibm-icon--"] {display: inline-block; vertical-align: middle;}
+	.ibm-dropdown__menu {border-radius: 0; box-shadow: 1px 1px 1px 0px #E0E0E0;}
+		.ibm-dropdown__menu li a, .ibm-dropdown__menu li a:visited {color: #777677;}
+		.ibm-dropdown__menu li a:hover, .ibm-dropdown__menu li a:focus {border: 0; background-color: #ECECEC; color: #464646;}
+		.ibm-dropdown__menu .ibm-active a, .ibm-dropdown__menu .ibm-active a:hover {background-color: #E0E0E0; color: #777677; cursor: default;}
+
+	/* Dropdown group */
+	.ibm-dropdown-group {}
+		.ibm-dropdown-group .ibm-btn {margin: 0; padding: .4em 1em .2em; background-color: transparent; border-radius: 0; box-shadow: none; border: 1px solid #E0E0E0; border-right: 0; color: #777677;}
+		.ibm-dropdown-group .ibm-btn:hover {border-color: #adadad; background-color: #E0E0E0; color: #323232; box-shadow: inset -1px 0 0 0 #adadad;}
+			.ibm-dropdown-group .ibm-dropdown__button {padding: .4em .5em .2em;}
+				.ibm-dropdown-group .ibm-dropdown__button [class^="ibm-icon--"] {margin-right: 0;}
+			.ibm-dropdown__button--icon {border: 0;}
+
+/* Tags and labels */
+.ibm-tag, .ibm-label {border: 1px solid #E0E0E0; border-radius: 30em; margin: 0 .2em 1em 0; padding: .6em 1.2em .4em; position: relative; background-color: transparent; font-size: .8em; color: #5A5A5A;}
+	.ibm-tag, .ibm-tag span {transition: all .3s ease;}
+	.ibm-tag [class^="ibm-icon--"] {margin-right: 0; padding-left: .5em; position: relative; top: .25em; line-height: 0;}
+	.ibm-tag:hover {border-color: rgba(231,29,50,.5); background-color: rgba(231,29,50,.1); color: rgb(231,29,50)}
+	.ibm-tag:hover span {color: #E71D32;}
+.ibm-label:hover, .ibm-label--selected:hover {cursor: default;}
+.ibm-label--success, .ibm-alert--success {border-color: rgba(140,210,17,1); background-color: rgba(140,210,17,.1);}
+.ibm-label--selected, .ibm-tag--selected, .ibm-alert--info {border-color: rgba(124,199,255,1); background-color: rgba(124,199,255,.2);}
+.ibm-label--warning, .ibm-alert--warning {border-color: rgba(239,193,0,1); background-color: rgba(239,193,0,.1);}
+.ibm-label--error, .ibm-alert--error {border-color: rgba(231,29,50,.8); background-color: rgba(231,29,50,.1);}
+
