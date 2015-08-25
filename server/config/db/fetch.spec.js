@@ -21,9 +21,7 @@
 var util = require('util');
 
 // external dependencies
-var async = require('async');
 var chai = require('chai');
-var httpstatus = require('http-status');
 var proxyquire = require('proxyquire').noPreserveCache();
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
