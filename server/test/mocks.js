@@ -49,6 +49,8 @@ function DBMock () {
   this.get = sinon.stub();
   this.find = sinon.stub();
   this.bulk = sinon.stub();
+  this.insert = sinon.stub();
+  this.destroy = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
@@ -62,6 +64,10 @@ function DBMock () {
     this.find.callsArgWith(1, null, {docs : []});
     this.bulk.reset();
     this.bulk.callsArgWith(1, null, []);
+    this.insert.reset();
+    this.insert.callsArgWith(1, null, {'_id' : uuid.v1(), '_rev' : uuid.v1()}, {});
+    this.destroy.reset();
+    this.destroy.callsArgWith(1, null, {'id' : uuid.v1(), 'rev' : uuid.v1()}, {});
   };
 
   this.reset();
