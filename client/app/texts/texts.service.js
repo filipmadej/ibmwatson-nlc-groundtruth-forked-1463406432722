@@ -77,6 +77,25 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     });
   }
 
+  function removeAll (/*Array*/ ids) {
+    var headers = getMetadataEtag();
+    _.set(headers, 'Content-Type', 'application/json;charset=utf-8');
+    var config = {
+      url: textsEndpoint(),
+      method: 'DELETE',
+      data: ids,
+      headers: headers
+    };
+    return $q(function removeAll (resolve, reject) {
+      $http(config).then(function success (data) {
+        resolve(data);
+      })
+      .catch(function error (response) {
+        reject(response);
+      });
+    });
+  }
+
   function addClasses (/*String*/ id, /*Object*/ params) {
     var config = {};
     _.set(config, 'headers', getMetadataEtag());
@@ -88,8 +107,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           value : params
         }
       ], config)
-      .then(function success () {
-        resolve();
+      .then(function success (response) {
+        resolve(response.data);
       })
       .catch(function error (response) {
         reject(response);
@@ -144,6 +163,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     'addClasses': addClasses,
     'removeClasses': removeClasses,
     'remove': remove,
+    'removeAll': removeAll,
     'update': update
   };
 }

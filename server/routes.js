@@ -34,6 +34,7 @@ module.exports = function configure (app) {
   app.use('/api', require('./api/classifier'));
   app.use('/api', require('./api/text'));
   app.use('/api', require('./api/class'));
+  app.use('/api', require('./api/content'));
 
   // All undefined asset or api routes should return a 404
   app.route('/:url(api|auth|components|app|bower_components|assets)/*')

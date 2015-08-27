@@ -27,6 +27,7 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'ngFileUpload',
     'config',
     'angular-multi-check',
+    'btford.socket-io',
     'ibmwatson-common-ui-components'
   ])
   .config(
@@ -62,31 +63,31 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
         });
       }
     ]
-  )
-  .directive('onReadFile',
-    ['$parse', function($parse) {
-      return {
-        restrict: 'A',
-        scope: false,
-        link: function(scope, element, attrs) {
-          var fn = $parse(attrs.onReadFile);
-
-          element.on('change', function(onChangeEvent) {
-            var reader = new FileReader();
-
-            reader.onload = function(onLoadEvent) {
-              scope.$apply(function() {
-                fn(scope, {
-                  $fileContent: onLoadEvent.target.result
-                });
-              });
-            };
-            reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
-          });
-        }
-      };
-    }]
   );
+  // .directive('onReadFile',
+  //   ['$parse', function($parse) {
+  //     return {
+  //       restrict: 'A',
+  //       scope: false,
+  //       link: function(scope, element, attrs) {
+  //         var fn = $parse(attrs.onReadFile);
+  //
+  //         element.on('change', function(onChangeEvent) {
+  //           var reader = new FileReader();
+  //
+  //           reader.onload = function(onLoadEvent) {
+  //             scope.$apply(function() {
+  //               fn(scope, {
+  //                 $fileContent: onLoadEvent.target.result
+  //               });
+  //             });
+  //           };
+  //           reader.readAsText((onChangeEvent.srcElement || onChangeEvent.target).files[0]);
+  //         });
+  //       }
+  //     };
+  //   }]
+  // );
 
 app.controller('AppController',
   ['$rootScope', '$scope',
@@ -106,31 +107,31 @@ app.controller('AppController',
         $scope.currentTenant = tenant;
       };
 
-      $rootScope.export = function() {
-        $rootScope.$broadcast('appAction', {
-          name: 'export'
-        });
-      };
-
-      $rootScope.train = function() {
-        $rootScope.$broadcast('appAction', {
-          name: 'train'
-        });
-      };
-
-      $rootScope.getFileContent = function() {
-        var files = $scope.files;
-        if (files && files.length>0) {
-          var reader = new FileReader();
-          var text;
-          reader.onload = function() {
-            text = reader.result;
-            $scope.files = null;
-            $rootScope.$broadcast('appAction', {name: 'import', data: text});
-          };
-          reader.readAsText(files[0]);
-        }
-      };
+      // $rootScope.export = function() {
+      //   $rootScope.$broadcast('appAction', {
+      //     name: 'export'
+      //   });
+      // };
+      //
+      // $rootScope.train = function() {
+      //   $rootScope.$broadcast('appAction', {
+      //     name: 'train'
+      //   });
+      // };
+      //
+      // $rootScope.getFileContent = function() {
+      //   var files = $scope.files;
+      //   if (files && files.length>0) {
+      //     var reader = new FileReader();
+      //     var text;
+      //     reader.onload = function() {
+      //       text = reader.result;
+      //       $scope.files = null;
+      //       $rootScope.$broadcast('appAction', {name: 'import', data: text});
+      //     };
+      //     reader.readAsText(files[0]);
+      //   }
+      // };
     }
   ]
 );

@@ -16,7 +16,7 @@
 
 'use strict';
 
-describe('Controller: TrainingCtrl', function() {
+describe('Controller: TrainingController', function() {
 
   // load the controller's module
   beforeEach(module('ibmwatson-nlc-groundtruth-app'));
@@ -26,7 +26,7 @@ describe('Controller: TrainingCtrl', function() {
     $urlRouterProvider.deferIntercept();
   }));
 
-  var TrainingCtrl, scope;
+  var TrainingController, scope;
   var CLASSES, TEXTS, SCOPECLASSES, SCOPETEXTS;
 
   function resetClasses() {
@@ -224,7 +224,7 @@ describe('Controller: TrainingCtrl', function() {
     resetTexts();
 
     scope = $rootScope.$new();
-    TrainingCtrl = $controller('TrainingCtrl', {
+    TrainingController = $controller('TrainingController', {
       $scope: scope,
       nlc: nlcMock,
       classes: classesMock,

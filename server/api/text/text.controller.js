@@ -16,6 +16,8 @@
 
 'use strict';
 
+// core dependencies
+var util = require('util');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
@@ -28,7 +30,25 @@ var log = require('../../config/log');
 
 var responses = restutils.res;
 var requests = restutils.req;
+var socket;
 
+/**
+ * Constructor for a new Error object specific to database patch operations
+ *
+ * @param {Error} databaseError - root error
+ * @param {Object} operation - patch operation
+ * @returns {void} this is a constructor meant to be called via 'new'
+ */
+function PatchError (databaseError, operation) {
+    dberrors.DatabaseError.call(this, databaseError.category, databaseError.message, databaseError.code); //super constructor
+    Error.captureStackTrace(this, this.constructor);
+    this.operation = operation;
+}
+util.inherits(PatchError, dberrors.DatabaseError);
+
+module.exports.getSocket = function getSocket(socket_io) {
+  socket = socket_io;
+};
 
 function sanitizeMetadata (value) {
   if (value && (value.value || value.metadata) ) {
@@ -171,6 +191,7 @@ module.exports.createText = function createText (req, res) {
 
   db.createText(tenantid, textattrs, function returnNewTest (err, text) {
     if (err) {
+      socket.emit('text:create', { textattrs: textattrs, err: err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create text.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -180,6 +201,7 @@ module.exports.createText = function createText (req, res) {
       text : text
     }, 'Created text');
 
+    socket.emit('text:create', text);
     responses.newitem(
       text,
       req.baseUrl + req.route.path, {
@@ -189,6 +211,41 @@ module.exports.createText = function createText (req, res) {
       res);
   });
 };
+
+function errorWrapper (patchoperation, callback) {
+  return function (err, result) {
+    if (err) {
+      log.debug(err, 'Patch error: ' + JSON.stringify(patchoperation));
+      return callback(null, new PatchError(err, patchoperation));
+    } else {
+      return callback(null, result);
+    }
+  };
+}
+
+function socketMessageNameBuilder (operation) {
+  return (operation.path[0] === '/' ? operation.path.substring(1) : operation.path) + ':' + operation.op;
+}
+
+function socketResponseBuilder (textid, data) {
+  var response = {};
+  response.id = textid;
+  if (data instanceof PatchError) {
+    response.err = data;
+    if (data.operation.value) {
+      response.classes = data.operation.value;
+    } else if (data.operation.metadata.value) {
+      response.value = data.operation.metadata.value;
+    }
+  } else {
+    if (data.classes) {
+      response.classes = data.classes;
+    } else if (data.metadata.value) {
+      response.value = data.metadata.value;
+    }
+  }
+  return response;
+}
 
 module.exports.editText = function editText (req, res) {
   log.debug({
@@ -201,23 +258,22 @@ module.exports.editText = function editText (req, res) {
 
   var patchoperations = requests.verifyObjectsList(makeArray(req.body));
 
-  async.eachSeries(patchoperations, function applyPatch (patchoperation, nextop) {
+  async.mapLimit(patchoperations, 10, function applyPatch (patchoperation, nextop) {
     if (patchoperation.path === '/classes') {
-      return patchTextClasses(tenantid, textid, patchoperation, nextop);
+      return patchTextClasses(tenantid, textid, patchoperation, errorWrapper(patchoperation, nextop));
     } else if (patchoperation.path === '/metadata') {
-      return patchTextMetadata(tenantid, textid, patchoperation, nextop);
+      return patchTextMetadata(tenantid, textid, patchoperation, errorWrapper(patchoperation, nextop));
     } else {
       log.debug({operation : patchoperation}, 'Unsupported operation');
-      return nextop(dberrors.invalid('Unsupported operation'));
+      return nextop(null, new PatchError(dberrors.invalid('Unsupported operation'), patchoperation));
     }
-  }, function handlePatchResponse (err) {
-    if (err) {
-      return responses.error(res, err);
-    }
+  }, function handlePatchResponse (err, data) {
+    data.forEach(function forEach (result) {
+      socket.emit('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
+    });
     responses.edited(res);
   });
 };
-
 
 module.exports.deleteText = function deleteText (req, res) {
   log.debug({params : req.params}, 'Deleting text');
@@ -232,13 +288,40 @@ module.exports.deleteText = function deleteText (req, res) {
 
   db.deleteText(tenantid, textid, etag, function deletedText (err) {
     if (err) {
+      socket.emit('text:delete', { id: textid, err: err });
       return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
         return responses.error(res, err);
       });
     }
 
     log.debug({text : textid}, 'Deleted text');
-
+    socket.emit('text:delete', { id: textid });
     responses.del(res);
   });
+};
+
+module.exports.deleteTexts = function deleteTexts (req, res) {
+  log.debug({params : req.params}, 'Deleting text');
+
+  var tenantid = req.params.tenantid;
+  var ids = req.body;
+  var etag = req.headers['if-match'];
+
+  if (!etag) {
+    return responses.missingEtag(res);
+  }
+
+  ids.forEach(function forEach (textid) {
+    db.deleteText(tenantid, textid, etag, function deletedText (err) {
+      if (err) {
+        socket.emit('text:delete', { id: textid, err: err });
+        return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
+          return responses.error(res, err);
+        });
+      }
+      log.debug({text : textid}, 'Deleted text');
+      socket.emit('text:delete', { id: textid });
+    });
+  });
+  responses.del(res);
 };

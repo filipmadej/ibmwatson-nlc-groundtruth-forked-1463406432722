@@ -24,8 +24,8 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('TrainingCtrl', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'errors', 'alerts',
-    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, errors, alertsSvc) {
+  .controller('TrainingController', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'alerts', 'socket', 'content',
+    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, alertsSvc, socket, content) {
 
       $scope.alerts = alertsSvc.alerts;
 
@@ -35,6 +35,160 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         texts: true,
         savingClassifier: false
       };
+
+      // -------------------------------------------------------------------------
+      // Socket functions
+      // -------------------------------------------------------------------------
+
+      socket.on('init', function init (data) {
+        $log.debug('socket data: ' + JSON.stringify(data));
+      });
+
+      socket.on('class:delete', function deleteClass (data) {
+        $log.debug('socket:class:delete ' + JSON.stringify(data));
+        var clazz = $scope.getFromId($scope.classes, data.id);
+        if (data.err) {
+          var msg;
+          if (clazz) {
+            msg = 'Error deleting ' + clazz.label + ' class. Please refresh the page and try again.';
+          } else {
+            msg = 'Error deleting class with id ' + data.id + '. Please refresh the page and try again.';
+          }
+          alertsSvc.add({ level: 'error', text: msg });
+        } else if (clazz){
+          $log.debug('got delete class from socket ' + JSON.stringify(data));
+          $scope.classes.splice($scope.classes.indexOf(clazz), 1);
+          $scope.texts.forEach(function forEach (text) {
+            var index = text.classes.indexOf(clazz.label);
+            if (index >= 0) {
+              text.classes.splice(index, 1);
+            }
+          });
+        }
+      });
+
+      socket.on('text:delete', function deleteText (data) {
+        $log.debug('socket:text:delete ' + JSON.stringify(data));
+        $log.debug('got delete text from socket ' + JSON.stringify(data));
+        var text = $scope.getFromId($scope.texts, data.id);
+        if (data.err) {
+          var msg;
+          if (text) {
+            msg = 'Error deleting "' + text.label + '" text. Please refresh the page and try again.';
+          } else {
+            msg = 'Error deleting text with id ' + data.id + '. Please refresh the page and try again.';
+          }
+          alertsSvc.add({ level: 'error', text: msg });
+        } else if (text){
+          $scope.texts.splice($scope.texts.indexOf(text), 1);
+        }
+      });
+
+      socket.on('class:create', function createClass (data) {
+        $log.debug('socket:class:create ' + JSON.stringify(data));
+        if (data.err) {
+          var msg = 'Error adding ' + data.label + ' class. Please refresh the page and try again.';
+          alertsSvc.add({ level: 'error', text: msg });
+        } else {
+          var element = data;
+          element.$$hashKey = element._id;
+          element.id = element._id;
+          element.seq = $scope.sequenceNumber++;
+          element.label = element.name;
+          element.edit = false;
+          element.checked = false;
+          element.selected = false;
+          $scope.classes.push(element);
+        }
+      });
+
+      socket.on('text:create', function createText (data) {
+        $log.debug('socket:text:create ' + JSON.stringify(data));
+        if (data.err) {
+          var msg = 'Error adding "' + data.label + '" text. Please refresh the page and try again.';
+          alertsSvc.add({ level: 'error', text: msg });
+        } else {
+          var element = data;
+          element.$$hashKey = element._id;
+          element.id = element._id;
+          element.seq = $scope.sequenceNumber++;
+          element.label = element.value;
+          element.classes = element.classes || [];
+          for (var i = 0, len = element.classes.length; i < len; i++) {
+            element.classes[i] = $scope.getFromId($scope.classes, element.classes[i]).label;
+          }
+          element.edit = false;
+          element.checked = false;
+          $scope.texts.push(element);
+        }
+      });
+
+      socket.on('text:update:classes:add', function addClasses (data) {
+        $log.debug('socket:text:update:classes:add ' + JSON.stringify(data));
+        var text = $scope.getFromId($scope.texts, data.id);
+        var classes = [];
+        data.classes.forEach(function forEach (clazz) {
+          classes.push($scope.getFromId($scope.classes, clazz).label);
+        });
+        if (data.err) {
+          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(classes) });
+        } else {
+          text.classes = text.classes.concat(classes);
+        }
+      });
+
+      socket.on('text:update:classes:remove', function removeClasses (data) {
+        $log.debug('socket:text:update:classes:remove ' + JSON.stringify(data));
+        var text = $scope.getFromId($scope.texts, data.id);
+        var classes = [];
+        data.classes.forEach(function forEach (clazz) {
+          classes.push($scope.getFromId($scope.classes, clazz).label);
+        });
+        if (data.err) {
+          alertsSvc.add({ level: 'error', text: 'Failed to remove the following classes from the "' + text.label + '" text: ' + JSON.stringify(classes) });
+        } else {
+          classes.forEach(function forEach (clazz) {
+            text.classes.splice(text.classes.indexOf(clazz), 1);
+          });
+        }
+      });
+
+      socket.on('text:update:metadata:replace', function replaceMetadata (data) {
+        $log.debug('socket:text:update:metadata:replace ' + JSON.stringify(data));
+        var text = $scope.getFromId($scope.texts, data.id);
+        if (data.err) {
+          alertsSvc.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(data.value) });
+        } else {
+          text.label = data.value;
+          window.document.getElementById(text.$$hashKey).value = data.value;
+        }
+      });
+
+      socket.on('class:update', function updateClass (data) {
+        $log.debug('socket:class:update ' + JSON.stringify(data));
+        var clazz = $scope.getFromId($scope.classes, data._id);
+        $log.debug(JSON.stringify(clazz));
+        var oldLabel = clazz.label;
+        var newLabel = data.name;
+        if (data.err) {
+          alertsSvc.add({ level: 'error', text: 'Failed to change the ' + oldLabel + ' class to ' + newLabel });
+        } else {
+          clazz.label = newLabel;
+        }
+
+        $scope.texts.forEach(function forEach (text) {
+          var index = text.classes.indexOf(oldLabel);
+          if (index >= 0) {
+            text.classes[index] = newLabel;
+          }
+        });
+      });
+
+      $scope.$on('$destroy', function () {
+        $log.debug('socket:destroy');
+        socket.removeAllListeners();
+        // socket.removeListener(this);
+      });
 
       // -------------------------------------------------------------------------
       // Load functions
@@ -137,10 +291,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return $scope.loadTexts();
       }, function error (err) {
         $log.error('error loading classes: ' + JSON.stringify(err));
+        alertsSvc.add({ level: 'error', text: 'Error loading classes from database. Please refresh to try again.' });
       }).then(function afterLoadTexts () {
         $log.debug('success loading classes and texts');
       }, function error (err) {
         $log.error('error loading texts: ' + JSON.stringify(err));
+        alertsSvc.add({ level: 'error', text: 'Error loading texts from database. Please refresh to try again.' });
       });
 
       // watch for appActions from the UI
@@ -346,55 +502,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             ngDialog.open({template: msg, plain: true});
           } else {
             object.edit = false;  // turn editing back off before saving state
-            object.label = newLabel;
-            field.value = newLabel;
+            field.value = oldLabel;
             switch (type) {
               case 'class':
-                $scope.classLabelChanged(object, oldLabel, newLabel);
+                classes.update(object.id, { name: newLabel });
                 break;
               case 'text':
-                $scope.textLabelChanged(object, oldLabel, newLabel);
+                texts.update(object.id, { value: newLabel });
                 break;
             }
           }
         }
-      };
-
-      // ---------------------------------------------------------------------------------------------
-
-      // propagate label <newLabel> to all texts tagged with label <oldLabel>
-      $scope.classLabelChanged = function classLabelChanged (object, oldLabel, newLabel) {
-        $scope.texts.forEach(function forEach (text) {
-          var index = text.classes.indexOf(oldLabel);
-          if (index >= 0) {
-            text.classes[index] = newLabel;
-          }
-        });
-        return $q(function update (resolve, reject) {
-          classes.update(object.id, { name: newLabel }).then(function success (data) {
-            $log.debug('success changing class label from ' + oldLabel + ' to ' + newLabel + '. new object: ' + JSON.stringify(data));
-            resolve(data);
-          }, function updateError (err) {
-            $log.error('error changing class label from ' + oldLabel + ' to ' + newLabel);
-            $log.error(JSON.stringify(err));
-            // TODO: need to revert other changes? alert user of error?
-            reject(err);
-          });
-        });
-      };
-
-      // persist the change to the text label
-      $scope.textLabelChanged = function textLabelChanged (object, oldLabel, newLabel) {
-        return $q(function update (resolve, reject) {
-          texts.update(object.id, { value: newLabel }).then(function success () {
-            $log.debug('success changing text label from ' + oldLabel + ' to ' + newLabel);
-            resolve();
-          }, function error (err) {
-            $log.error('error changing text label from ' + oldLabel + ' to ' + newLabel + '. err: ' + JSON.stringify(err));
-            // TODO: need to revert change, alert user of error.
-            reject(err);
-          });
-        });
       };
 
       // ---------------------------------------------------------------------------------------------
@@ -424,13 +542,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // ---------------------------------------------------------------------------------------------
 
       // adds a new object
-      $scope.add = function add (type, label) {
+      $scope.add = function add (type, label, optional) {
         $scope.newClassString = '';
         $scope.newTextString = '';
-        var deferred = $q.defer();
         if (!label) {
-          deferred.resolve();
-          return deferred.promise;
+          return;
         }
         // if an object already exists with this label
         var existingObject = $scope.getFromLabel($scope.getScopeArray(type), label);
@@ -442,38 +558,28 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             msg = $scope.inform('The "' + existingObject.label + '" text already exists.');
           }
           ngDialog.open({template: msg, plain: true});
-          deferred.resolve();
-          return deferred.promise;
+          return;
         } else {
-          var id = '';
           switch (type) {
             case 'class' :
-              classes.post({ name : label }).then(function success (data) {
-                id = data.id;
-                var newClass = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'edit' : false, 'checked' : false, 'selected': false};
-                $scope.classes.push(newClass);
-                $scope.newClassString = '';
-                deferred.resolve(newClass);
-                return deferred.promise;
-              }, function error (err) {
-                deferred.reject(err);
-                return deferred.promise;
-              });
-              return deferred.promise;
+              if (optional) {
+                classes.post({ name: label, textid: optional });
+              } else {
+                classes.post({ name: label });
+              }
+              return;
             case 'text' :
-              texts.post({ value : label }).then(function success (data) {
-                id = data.id;
-                var newText = {'$$hashKey' : id, 'id' : id, 'seq' : $scope.sequenceNumber++, 'label' : label, 'classes' : [], 'edit': false, 'checked' : false, 'beingTagged': false};
-                $scope.tagTexts([newText], $scope.getChecked($scope.classes));
-                $scope.texts.push(newText);
-                $scope.newTextString = '';
-                deferred.resolve(newText);
-                return deferred.promise;
-              }, function error (err) {
-                deferred.reject(err);
-                return deferred.promise;
-              });
-              return deferred.promise;
+              var checkedClasses = $scope.getChecked($scope.classes);
+              if (checkedClasses.length > 0) {
+                var classIds = [];
+                checkedClasses.forEach(function forEach (clazz) {
+                  classIds.push(clazz.id);
+                });
+                texts.post({ value: label, classes: classIds });
+              } else {
+                texts.post({ value : label });
+              }
+              return;
           }
         }
       };
@@ -561,50 +667,22 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // ---------------------------------------------------------------------------------------------
 
-      // delete all class in <classes>
-      $scope.deleteClasses = function deleteClasses (classes) {
-        var index;
-        for (var i = 0, classLength = classes.length; i < classLength; i++) {
-          var clazz = classes[i];
-          for (var j = 0, textLength = $scope.texts.length; j < textLength; j++) {
-            var textClasses = $scope.texts[j].classes;
-            index = textClasses.indexOf(clazz.label);
-            if (index >= 0) {
-              textClasses.splice(index, 1);
-            }
-          }
-          index = $scope.classes.indexOf(clazz);
-          $scope.classes.splice(index, 1);
-          $scope.removeClass(clazz.id);
-        }
+      // delete all class in <classesArray>
+      $scope.deleteClasses = function deleteClasses (classesArray) {
+        var ids = [];
+        classesArray.forEach(function forEach (clazz) {
+          ids.push(clazz.id);
+        });
+        classes.removeAll(ids);
       };
 
-      // removes a class from the database with the given id
-      $scope.removeClass = function removeClass (id) {
-        classes.remove(id).then(function success () {
-          $log.debug('success removing class ' + id);
-        }, function error (err) {
-          $log.error('error removing class ' + id + ': ' + JSON.stringify(err));
-          // TODO: revert change and alert user.
+      // delete all texts in <textsArray>
+      $scope.deleteTexts = function deleteTexts (textsArray) {
+        var ids = [];
+        textsArray.forEach(function forEach (text) {
+          ids.push(text.id);
         });
-      };
-
-      // delete all texts in <texts>
-      $scope.deleteTexts = function deleteTexts (texts) {
-        texts.forEach(function forEach (text) {
-          var index = $scope.texts.indexOf(text);
-          $scope.texts.splice(index, 1);
-          $scope.removeText(text.id);
-        });
-      };
-
-      $scope.removeText = function removeText (id) {
-        texts.remove(id).then(function success () {
-          $log.debug('success removing text ' + id);
-        }, function error (err) {
-          $log.error('error removing text ' + id + ': ' + JSON.stringify(err));
-          // TODO: revert change and alert user.
-        });
+        texts.removeAll(ids);
       };
 
       // ---------------------------------------------------------------------------------------------
@@ -675,14 +753,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           msg = $scope.question('Remove the ' + label + ' class from this text?', 'Remove');
           ngDialog.openConfirm({template: msg, plain: true
           }).then(function remove () {
-            text.classes.splice(index, 1);
             var clazz = $scope.getFromLabel($scope.classes, label);
-            texts.removeClasses(text.id, [{id: clazz.id}]).then(function success () {
-              $log.debug('success removing class ' + label + ' from text ' + text.label);
-            }, function error (err) {
-              $log.error('error removing class ' + label + ' from text ' + text.label + ': ' + JSON.stringify(err));
-              // TODO: revert change, alert user
-            });
+            texts.removeClasses(text.id, [{id: clazz.id}]);
           });
         } else {
           msg = $scope.inform('This text is not classified with the ' + label + ' class.');
@@ -739,12 +811,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             msg = $scope.question('The ' + classLabel + ' class doesn\'t yet exist. Do you want to create it?', 'Create');
             ngDialog.openConfirm({template: msg, plain: true
             }).then(function create () {
-              return $scope.add('class', classLabel);
-            }).then(function tag (classObj) {
-              return $scope.tagTexts([text], [classObj]);
-            }, function error (err) {
-              $log.error('error creating new class: ' + JSON.stringify(err));
-              // TODO: revert and alert user
+              $scope.add('class', classLabel, text.id);
             });
           } else {
             for (var i = 0, len = text.classes.length; i < len; i++) {
@@ -770,17 +837,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // add class tags in array <classesArray> to all texts in array <textsArray>
-      $scope.tagTexts = function tagTexts (texts, classes) {
-        texts.forEach(function forEach (text) {
+      $scope.tagTexts = function tagTexts (textArray, classes) {
+        textArray.forEach(function forEach (text) {
           var classIds = [];
           classes.forEach(function forEach (clazz) {
             if (text.classes.indexOf(clazz.label) < 0) {
-              text.classes.push(clazz.label);
+              // text.classes.push(clazz.label);
               classIds.push({ id: clazz.id });
             }
           });
           if (classIds.length > 0) {
-            $scope.addClassesToText(text.id, classIds);
+            texts.addClasses(text.id, classIds);
           }
         });
       };
@@ -834,7 +901,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         // var trainingData = $scope.toCsv();
 
-        function createTrainingData() {
+        function createTrainingData () {
           // create training data
           var trainingData = [];
           $scope.texts.forEach(function forEach (text) {
@@ -848,16 +915,16 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return trainingData;
         }
 
-        function submitTrainingData(trainingData) {
+        function submitTrainingData (trainingData) {
           $scope.loading.savingClassifier = true;
           // send to NLC service and then navigate to classifiers page
-          nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function(){
+          nlc.train(trainingData, $scope.languageOption.value, $scope.newClassifier.name).then(function success () {
             $scope.showTrainConfirm = false;
             $state.go('classifiers');
-          }, function(err) {
+          }, function error (err) {
             $scope.loading.savingClassifier = false;
             $scope.showTrainConfirm = false;
-            errors.publish(err);
+            alertsSvc.add({ level: 'error', text: err.message });
           });
         }
 
@@ -908,16 +975,19 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       $scope.exportToFile = function exportToFile () {
-        nlc.download($scope.texts, $scope.classes);
+        content.downloadFile();
+        // nlc.download($scope.texts, $scope.classes);
       };
 
       $scope.addClass = function addClass (label) {
-        return $scope.add('class', label).then(function success (data) {
-          return data;
-        }, function error (err) {
-          $log.error('error adding class: ' + JSON.stringify(err));
-          return null;
-        });
+      //  return
+      $scope.add('class', label);
+        // .then(function success (data) {
+        //   return data;
+        // }, function error (err) {
+        //   $log.error('error adding class: ' + JSON.stringify(err));
+        //   return null;
+        // });
       };
 
       $scope.addText = function addText (label, classes) {
@@ -934,7 +1004,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var promises = [];
         classes.forEach(function forEach (clazz) {
           if (!$scope.containsLabel($scope.classes, clazz)) {
-            promises.push($scope.addClass(clazz));
+            promises.push($scope.add('class', clazz.label));
           }
         });
         return $q.all(promises);
@@ -951,6 +1021,28 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }
         }
         return $q.all(promises);
+      };
+
+      $scope.uploading = false;
+      $scope.files = [];
+
+      function progress (evt) {
+        $scope.uploading = true;
+        $scope.uploadProgress = parseInt(100 * evt.loaded / evt.total);
+      }
+
+      function success () {
+        $scope.uploading = false;
+        $scope.uploadProgress = 0;
+      }
+
+      $scope.uploadProgress = 0;
+      $scope.uploadDocuments = function uploadDocuments () {
+        console.log('upload documents: ' + JSON.stringify($scope.files));
+        var files = $scope.files;
+        if (files && files.length > 0) {
+          content.uploadFile(files[0], progress, success);
+        }
       };
 
       $scope.importFile = function importFile (fileContent) {

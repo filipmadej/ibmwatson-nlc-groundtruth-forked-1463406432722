@@ -27,7 +27,7 @@ function getMetadataEtag() {
 }
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-.factory('classes', ['$http', '$q', 'endpoints', 'session', function init ($http, $q, endpoints, session) {
+.factory('classes', ['$http', '$q', 'endpoints', 'session', 'texts', function init ($http, $q, endpoints, session, texts) {
 
   function classesEndpoint () {
     return endpoints.classes + '/' + session.tenant + '/classes';
@@ -48,13 +48,24 @@ angular.module('ibmwatson-nlc-groundtruth-app')
   }
 
   function post (/*Object*/ params) {
-    // retrieve etag header
+    var textid = params.textid;
+    if (textid) {
+      delete params.textid;
+    }
     var config = {};
     _.set(config, 'headers', getMetadataEtag());
     return $q(function post (resolve, reject) {
       $http.post(classesEndpoint(), params, config)
       .then(function success (response) {
-        resolve(response.data);
+        if (textid) {
+          texts.addClasses(textid, [{ id: response.data.id }]).then(function success () {
+            resolve(response.data);
+          }, function error (err) {
+            reject(err);
+          });
+        } else {
+          resolve(response.data);
+        }
       })
       .catch(function error (response) {
         reject(response);
@@ -77,9 +88,27 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     });
   }
 
+  function removeAll (/*Array*/ ids) {
+    var headers = getMetadataEtag();
+    _.set(headers, 'Content-Type', 'application/json;charset=utf-8');
+    var config = {
+      url: classesEndpoint(),
+      method: 'DELETE',
+      data: ids,
+      headers: headers
+    };
+    return $q(function removeAll (resolve, reject) {
+      $http(config).then(function success (data) {
+        resolve(data);
+      })
+      .catch(function error (response) {
+        reject(response);
+      });
+    });
+  }
+
   function update (/*String*/ id, /*Object*/ params) {
-    var config = {};
-    _.set(config, 'headers', getMetadataEtag());
+    var config = { headers: getMetadataEtag() };
     return $q(function update (resolve, reject) {
       $http.put(classesEndpoint() + '/' + id, params, config)
       .then(function success (response) {
@@ -96,6 +125,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     'query' : query,
     'post' : post,
     'remove' : remove,
+    'removeAll' : removeAll,
     'update' : update
   };
 
