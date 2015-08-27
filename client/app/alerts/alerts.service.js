@@ -31,8 +31,6 @@
 angular.module('ibmwatson-nlc-groundtruth-app')
   .factory('alerts', ['$log', function init($log) {
 
-    $log.debug('init');
-
     var alerts = [];
 
     /**

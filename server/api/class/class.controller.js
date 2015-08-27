@@ -28,6 +28,11 @@ var log = require('../../config/log');
 
 var responses = restutils.res;
 var requests = restutils.req;
+var socket;
+
+module.exports.getSocket = function getSocket (socket_io) {
+  socket = socket_io;
+};
 
 module.exports.getClasses = function getClasses (req, res) {
   log.debug({
@@ -92,6 +97,7 @@ module.exports.createClass = function createClass (req, res) {
 
   db.createClass(tenantid, classattrs, function returnNewClass (err, classification) {
     if (err) {
+      socket.emit('class:create', { classattrs: classattrs, err: err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create class.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -101,6 +107,7 @@ module.exports.createClass = function createClass (req, res) {
       class : classification
     }, 'Created class');
 
+    socket.emit('class:create', classification);
     responses.newitem(
       classification,
       req.baseUrl + req.route.path, {
@@ -134,11 +141,13 @@ module.exports.replaceClass = function replaceClass (req, res) {
 
   db.replaceClass(tenantid, classattrs, etag, function replacedClass (err, replaced) {
     if (err) {
+      socket.emit('class:update', { id: classid, err: err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to replace class.', function returnResponse () {
         return responses.error(res, err);
       });
     }
     log.debug({class : classid}, 'Replaced class');
+    socket.emit('class:update', replaced);
     responses.edited(res, replaced);
   });
 };
@@ -156,11 +165,39 @@ module.exports.deleteClass = function deleteClass (req, res) {
 
   db.deleteClass(tenantid, classid, etag, function deletedClass (err) {
     if (err) {
+      socket.emit('class:delete', { id: classid, err: err });
       return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete class.', function returnResponse () {
         return responses.error(res, err);
       });
     }
     log.debug({class : classid}, 'Deleted class');
+    socket.emit('class:delete', { id: classid });
     responses.del(res);
   });
+};
+
+module.exports.deleteClasses = function deleteClasses (req, res) {
+  log.debug({params : req.params}, 'Deleting class');
+
+  var tenantid = req.params.tenantid;
+  var ids = req.body;
+  var etag = req.headers['if-match'];
+
+  if (!etag) {
+    return responses.missingEtag(res);
+  }
+
+  ids.forEach(function forEach (classid) {
+    db.deleteClass(tenantid, classid, etag, function deletedClass (err) {
+      if (err) {
+        socket.emit('class:delete', { id: classid, err: err });
+        return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete class.', function returnResponse () {
+          return responses.error(res, err);
+        });
+      }
+      log.debug({class : classid}, 'Deleted class');
+      socket.emit('class:delete', { id: classid });
+    });
+  });
+  responses.del(res);
 };

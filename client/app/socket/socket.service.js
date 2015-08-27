@@ -17,23 +17,6 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ErrorBarCtrl', ['$scope', '$log', 'errors',
-    function init ($scope, $log, errors) {
-      $scope.display = false;
-
-      $scope.$watch('errors', function display (newValue, oldValue) {
-        $log.debug('change error bar from ' + oldValue + ' to ' + newValue);
-        // when a new error comes in, display the error messsage
-        if (newValue.length > oldValue.length){
-          $scope.display = true;
-        }
-      }, true);
-
-      $scope.getErrors = function getErrors () {
-        $scope.errors = errors.get();
-      };
-
-      $scope.getErrors();
-
-    }
-  ]);
+  .factory('socket', function init (socketFactory) {
+    return socketFactory();
+  });

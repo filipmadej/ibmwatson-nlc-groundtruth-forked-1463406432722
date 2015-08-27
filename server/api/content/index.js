@@ -17,30 +17,33 @@
 'use strict';
 
 var express = require('express');
-var async = require('async');
-var httpstatus = require('http-status');
-var makeArray = require('make-array');
+var multer = require('multer');
 
 // local dependencies
-var controller = require('./text.controller');
-var log = require('../../config/log');
+var controller = require('./content.controller');
 var rest = require('../../config/rest');
 
 var router = express.Router();
 
 var ENDPOINTS = {
-    texts : '/:tenantid/texts',
-    text : '/:tenantid/texts/:textid'
+    content : '/:tenantid/content',
 };
 
-router.use(ENDPOINTS.texts, rest.ensureAuthenticated);
-router.use(ENDPOINTS.text, rest.ensureAuthenticated);
+var uploading = multer({
+  limits : {
+    // protect against people uploading files that are too large
+    fileSize : 10000000,
+    // support single file uploads only
+    files : 1
+  },
+  rename : function (fieldname, filename) {
+    // don't rename files
+    return filename;
+  }
+});
 
-router.get(ENDPOINTS.texts, controller.getTexts);
-router.get(ENDPOINTS.text, controller.getText);
-router.post(ENDPOINTS.texts, controller.createText);
-router.patch(ENDPOINTS.text, controller.editText);
-router.delete(ENDPOINTS.text, controller.deleteText);
-router.delete(ENDPOINTS.texts, controller.deleteTexts);
+router.use(ENDPOINTS.content, rest.ensureAuthenticated);
+router.post(ENDPOINTS.content, controller.handleFileUpload); // TODO: integrate multer into this endpoint
+router.get(ENDPOINTS.content, controller.handleFileDownload);
 
 module.exports = router;

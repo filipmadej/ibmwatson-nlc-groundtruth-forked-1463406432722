@@ -1,13 +1,13 @@
 <nav class="navbar navbar-default ibm-navbar ibm-nlc-navbar">
   <div style="padding-left:0px" class="container ibm-container">
-    <div ng-controller="AppController">
+    <div ng-controller="TrainingController">
       <div>
         <ul class="nav navbar-nav navbar-left ibm-nav">
           <li>
-            <a ngf-select ngf-change="getFileContent(files)" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
+            <a ngf-select ngf-change="uploadDocuments()" role="button" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
           </li>
           <li>
-            <a ng-click="export()">Export</a>
+            <a ng-click="exportToFile()">Export</a>
           </li>
         </ul>
         <ul class="nav navbar-nav navbar-right ibm-nav">

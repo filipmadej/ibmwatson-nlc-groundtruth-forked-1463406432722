@@ -22,7 +22,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       .state('training', {
         url: '/training',
         templateUrl: 'app/training/training.html',
-        controller: 'TrainingCtrl',
+        controller: 'TrainingController',
         reloadOnSearch: false,
         resolve: {
           access: function access(authentication) {
