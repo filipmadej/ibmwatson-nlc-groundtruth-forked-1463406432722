@@ -26,10 +26,31 @@ var uuid = require('node-uuid');
 var should = chai.should();
 chai.use(sinonChai);
 
+function LogMock () {
+
+  this.error = sinon.spy();
+  this.warn = sinon.spy();
+  this.info = sinon.spy();
+  this.debug = sinon.spy();
+  this['@noCallThru'] = true;
+
+  this.reset = function () {
+    this.error.reset();
+    this.warn.reset();
+    this.info.reset();
+    this.debug.reset();
+  };
+}
+
 function DBMock () {
 
   this.view = sinon.stub();
   this.list = sinon.stub();
+  this.get = sinon.stub();
+  this.find = sinon.stub();
+  this.bulk = sinon.stub();
+  this.insert = sinon.stub();
+  this.destroy = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
@@ -37,6 +58,16 @@ function DBMock () {
     this.view.callsArgWith(3, null, {'total_rows' : 0, offset : 0, rows : []});
     this.list.reset();
     this.list.callsArgWith(1, null, {'total_rows' : 0, offset : 0, rows : []});
+    this.get.reset();
+    this.get.callsArgWith(1, null, {'_id' : uuid.v1(), '_rev' : uuid.v1()});
+    this.find.reset();
+    this.find.callsArgWith(1, null, {docs : []});
+    this.bulk.reset();
+    this.bulk.callsArgWith(1, null, []);
+    this.insert.reset();
+    this.insert.callsArgWith(1, null, {'_id' : uuid.v1(), '_rev' : uuid.v1()}, {});
+    this.destroy.reset();
+    this.destroy.callsArgWith(1, null, {'id' : uuid.v1(), 'rev' : uuid.v1()}, {});
   };
 
   this.reset();
@@ -155,6 +186,8 @@ function WDCMock () {
 
   this.natural_language_classifier.returns(this.nlcMock);
 }
+
+module.exports.LogMock = LogMock;
 
 module.exports.DBMock = DBMock;
 

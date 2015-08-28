@@ -62,15 +62,11 @@ function getObject (db, tenant, objecttype, objectid, callback) {
 }
 
 module.exports.getClass = function getClass (db, tenant, id, callback) {
-    getObject(db, tenant, 'class', id, function returnClass (err, classification) {
-        callback(err, classification);
-    });
+    getObject(db, tenant, 'class', id, callback);
 };
 
 module.exports.getText = function getClass (db, tenant, id, callback) {
-    getObject(db, tenant, 'text', id, function returnText (err, text) {
-        callback(err, text);
-    });
+    getObject(db, tenant, 'text', id, callback);
 };
 
 

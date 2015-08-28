@@ -41,7 +41,6 @@ var dbviews = require('./views');
 var dbhandlers = require('./updatehandlers');
 var deleteall = require('./deletes');
 // local dependencies
-var nlc = require('../nlc');
 var log = require('../log');
 
 var db;
@@ -65,6 +64,22 @@ module.exports.stop = function stop () {
   db = null;
 };
 
+function getClassByName (tenant, name, callback) {
+  dbviews.getClassByName(db, tenant, name, callback);
+}
+
+function checkIfClassExists (tenant, name, callback) {
+  getClassByName(tenant, name, function handleExistCheck (err, existing) {
+    if (err && err.error === dberrors.NOT_FOUND) {
+      return callback(null, null);
+    } else if (err) {
+      return callback(err);
+    } else {
+      return callback(null, existing);
+    }
+  });
+}
+
 /**
  * Creates a new class.
  *
@@ -81,7 +96,6 @@ module.exports.createClass = function createClass (tenant, attrs, callback) {
   if (!attrs.name) {
     return callback(dberrors.missingrequired('Missing required class name'));
   }
-
 
   async.waterfall([
     function uniqueCheck (next) {
@@ -116,22 +130,6 @@ module.exports.createClass = function createClass (tenant, attrs, callback) {
 
 function getClass (tenant, id, callback) {
   dbfetch.getClass(db, tenant, id, callback);
-}
-
-function getClassByName (tenant, name, callback) {
-  dbviews.getClassByName(db, tenant, name, callback);
-}
-
-function checkIfClassExists (tenant, name, callback) {
-  getClassByName(tenant, name, function handleExistCheck (err, existing) {
-    if (err && err.error === dberrors.NOT_FOUND) {
-      return callback(null, null);
-    } else if (err) {
-      return callback(err);
-    } else {
-      return callback(null, existing);
-    }
-  });
 }
 
 /**
