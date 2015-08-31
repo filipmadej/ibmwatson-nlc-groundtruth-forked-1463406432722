@@ -187,6 +187,32 @@ function WDCMock () {
   this.natural_language_classifier.returns(this.nlcMock);
 }
 
+function WebSocketMock () {
+
+  this.listen = sinon.stub();
+  this['@noCallThru'] = true;
+
+  this.listen.returns({
+    sockets : {
+      on : sinon.stub()
+    }
+  });
+}
+
+function SocketUtilMock () {
+
+  this.setSocket = sinon.spy();
+  this.getSocket = sinon.spy();
+  this.send = sinon.spy();
+
+  this.reset = function () {
+    this.setSocket.reset();
+    this.getSocket.reset();
+    this.send.reset();
+  };
+
+}
+
 module.exports.LogMock = LogMock;
 
 module.exports.DBMock = DBMock;
@@ -196,3 +222,7 @@ module.exports.StoreMock = StoreMock;
 module.exports.HttpMock = HttpMock;
 
 module.exports.WDCMock = WDCMock;
+
+module.exports.WebSocketMock = WebSocketMock;
+
+module.exports.SocketUtilMock = SocketUtilMock;

@@ -72,6 +72,12 @@ module.exports.batch = function batch (objects, start, total, res) {
         .json(objects.map(hideImplementationDetails));
 };
 
+module.exports.accepted = function list (location, res) {
+    res.status(httpstatus.ACCEPTED)
+        .header('Location', location)
+        .send();
+};
+
 module.exports.del = function del (res) {
     res.status(httpstatus.NO_CONTENT)
         .send();

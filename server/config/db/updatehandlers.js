@@ -83,7 +83,7 @@ function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
                     log.error({ response : resp }, getErrorMessage(op));
                     return done(dberrors.asError(resp.error, getErrorMessage(op), resp.code));
                 }
-                return done(null, { operation: { path: 'classes', op: op}, id: textid, classes: classes });
+                return done(null, { operation : { path : 'classes', op : op}, id : textid, classes : classes });
             });
         }
     ], callback);
@@ -123,13 +123,14 @@ module.exports.updateTextMetadata = function updateTextMetadata (db, tenantid, t
 
         if (err) {
             log.error({ err : err }, errorMsg());
-            return callback(dberrors.asError(err, err.msg, err.code));
+            // TODO FIGURE OUT WHY THIS DIDN'T APPEAR TO BE STD NANO ERR
+            return callback(dberrors.asError(dberrors.UNKNOWN, err.message, err.statusCode));
         }
         if (resp.error) {
             log.error({ response : resp }, errorMsg());
             return callback(dberrors.asError(resp.error, errorMsg(), resp.code));
         }
 
-        return callback(null, { operation: { path: 'metadata', op: 'replace' }, id: textid, metadata: metadata });
+        return callback(null, { operation : { path : 'metadata', op : 'replace' }, id : textid, metadata : metadata });
     });
 };
