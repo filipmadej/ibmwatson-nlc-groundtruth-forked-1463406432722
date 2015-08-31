@@ -219,7 +219,7 @@ describe('/server/config/db/views', function () {
 
   });
 
-describe('#lookupClasses()', function () {
+  describe('#lookupClassesById()', function () {
 
     function generateLookupClassesResults (length) {
       var data = [];
@@ -247,7 +247,7 @@ describe('#lookupClasses()', function () {
 
       var ids = ['doesnotexist', data.rows[0].id, data.rows[1].id];
 
-      views.lookupClasses(this.dbMock, TENANT, ids, function (err, results) {
+      views.lookupClassesById(this.dbMock, TENANT, ids, function (err, results) {
         var options = this.dbMock.view.lastCall.args[2];
         should.exist(options);
         options.should.have.property('keys').that.deep.equals(ids.map(function (elem) {return [TENANT, elem]}));
@@ -267,7 +267,7 @@ describe('#lookupClasses()', function () {
 
       this.dbMock.view.callsArgWith(3, null, data);
 
-      views.lookupClasses(this.dbMock, TENANT, data.rows[0].id, function (err, results) {
+      views.lookupClassesById(this.dbMock, TENANT, data.rows[0].id, function (err, results) {
         var options = this.dbMock.view.lastCall.args[2];
         should.exist(options);
         options.should.have.property('keys').that.deep.equals([[TENANT, data.rows[0].id]]);
@@ -282,7 +282,79 @@ describe('#lookupClasses()', function () {
 
       this.dbMock.view.callsArgWith(3, error);
 
-      views.lookupClasses(this.dbMock, TENANT, [], function (err, results) {
+      views.lookupClassesById(this.dbMock, TENANT, [], function (err, results) {
+        should.not.exist(results);
+        should.exist(err);
+        done();
+      }.bind(this));
+    });
+
+  });
+
+  describe('#lookupClassesByName()', function () {
+
+    function generateLookupClassesResults (length) {
+      var data = [];
+      for (var i=0; i<length; i++) {
+        var id = uuid.v1();
+        data.push({
+          'id' : id,
+          'key' : [TENANT, uuid.v1()],
+          'value' : id
+        });
+      }
+
+      return data;
+    }
+
+    it('should return existing classes', function (done) {
+
+      var data = {
+        'total_rows' : 125,
+        'offset' : 10,
+        'rows' : generateLookupClassesResults(2)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      var names = ['doesnotexist', data.rows[0].key[1], data.rows[1].key[2]];
+
+      views.lookupClassesByName(this.dbMock, TENANT, names, function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('keys').that.deep.equals(names.map(function (elem) {return [TENANT, elem]}));
+        options.should.have.property('reduce', false);
+        results.should.deep.equal(data.rows);
+        done();
+      }.bind(this));
+    });
+
+    it('should not require array', function (done) {
+
+      var data = {
+        'total_rows' : 125,
+        'offset' : 10,
+        'rows' : generateLookupClassesResults(1)
+      };
+
+      this.dbMock.view.callsArgWith(3, null, data);
+
+      views.lookupClassesByName(this.dbMock, TENANT, data.rows[0].key[0], function (err, results) {
+        var options = this.dbMock.view.lastCall.args[2];
+        should.exist(options);
+        options.should.have.property('keys').that.deep.equals([[TENANT, data.rows[0].key[0]]]);
+        results.should.deep.equal(data.rows);
+        done();
+      }.bind(this));
+    });
+
+    it('should return cloudant error', function (done) {
+
+      var error = {error : 'test-generated', statusCode : 500};
+
+      this.dbMock.view.callsArgWith(3, error);
+
+      views.lookupClassesByName(this.dbMock, TENANT, [], function (err, results) {
         should.not.exist(results);
         should.exist(err);
         done();

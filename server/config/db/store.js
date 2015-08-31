@@ -29,6 +29,7 @@
 var util = require('util');
 
 // external dependencies
+var _ = require('lodash');
 var async = require('async');
 var makeArray = require('make-array');
 // db module dependencies
@@ -469,4 +470,156 @@ module.exports.getText = getText;
 
 module.exports.deleteTenant = function deleteTenant (tenant, callback) {
   deleteall(db, tenant, callback);
+};
+
+
+function handleImportClassEntries (tenant, classes, callback) {
+  if (makeArray(classes).length > 0) {
+    return async.waterfall([
+      function lookupClasses (next) {
+        dbviews.lookupClassesByName(db, tenant, classes, next);
+      },
+      function processClasses (existingClasses, next) {
+        existingClasses = makeArray(existingClasses);
+        var newClasses = classes;
+        if (existingClasses.length > 0) {
+          newClasses = classes.filter(function find (elem) {
+            return !(_.find(existingClasses, function exist (existing) {
+              return elem === existing.key[1]
+            }));
+          });
+        }
+
+        async.mapLimit(newClasses, 10, function createNew (classname, nextclass) {
+          var classification = dbobjects.prepareClassInfo(tenant, {name : classname});
+          db.insert(classification, function checkResponse (err, docstatus) {
+            if (err) {
+              return nextclass(null, {name : classname, error : err});
+            }
+
+            return nextclass(null, {id : classification._id, name : classification.name, created : true});
+
+          });
+        }, function handleResults (err, results) {
+          var classEntries = existingClasses.map(function transform (elem) {
+            return {id : elem.id, name : elem.key[1], created : false}
+          }).concat(results);
+
+          next(err, classEntries);
+        });
+      }], callback);
+  } else {
+    callback(null, []);
+  }
+}
+
+function initImportEntry (tenant, entry, callback) {
+  async.parallel([
+    function checkText (done) {
+      checkIfTextExists(tenant, entry.text, done);
+    },
+    function handleClasses (done) {
+      handleImportClassEntries(tenant, entry.classes, done)
+    }], callback);
+}
+
+function handleExistingTextEntry (tenant, text, classes, callback) {
+
+    var classesDelta = classes.filter(function filterNew (elem) {
+      return (makeArray(text.classes).indexOf(elem.id) === -1);
+    });
+
+    var result = {
+      id : text.id,
+      value : text.value,
+      created : false,
+      classes : classesDelta
+    };
+
+    var deltaArray = classesDelta.map(function convert (delta) {
+      return delta.id;
+    });
+
+    dbhandlers.addClassesToText(db, tenant, text.id, deltaArray, function handleUpdate (err, result) {
+      if (err) {
+        result.error = err;
+      }
+
+      callback(null, result);
+    });
+}
+
+function handleNewTextEntry (tenant, value, classes, callback) {
+
+    var classArray = classes.map(function convert (elem) {
+      return elem.id;
+    });
+
+    var text = dbobjects.prepareTextInfo(tenant, {value : value, classes : classArray});
+
+    var result = {
+      id : text._id,
+      value : text.value,
+      created : true,
+      classes : classes
+    };
+
+    db.insert(text, function checkResponse (err, docstatus) {
+      if (err) {
+        result.error = err;
+      }
+
+      return callback(null, result);
+
+    });
+}
+/**
+ * Processes a specific entry during import.  Ensures all referenced entities
+ * exist and are properly correlated.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} entry - import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
+module.exports.processImportEntry = function processImportEntry (tenant, entry, callback) {
+
+  var result = {};
+
+  var requestedClasses = makeArray(entry.classes);
+
+  async.waterfall([
+    function init (next) {
+      initImportEntry(tenant, entry, function handleResults (err, results) {
+        //results[0] === text ? null
+        // results[1] == classes formatted for response
+        result.classes = results[1].filter(function filterNew (elem) {
+          return elem.created;
+        });
+        next(err, results[0], results[1]);
+      });
+    },
+    function handleText (text, classes, next) {
+
+      var handleTextResult = function handleResult (err, textResult) {
+        if (err) {
+          textResult.error = err;
+        }
+        result.text = textResult;
+        next();
+      };
+
+      if (text) {
+        return handleExistingTextEntry (tenant, text, classes, handleTextResult);
+      } else {
+        return handleNewTextEntry (tenant, entry.text, classes, handleTextResult);
+      }
+    }], function handleResult (err) {
+      if (err) {
+        result.error = err;
+      }
+
+    return callback(null, result);
+
+  });
 };

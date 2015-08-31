@@ -75,7 +75,8 @@ describe('/server/config/db/store', function () {
       getClassByName : sinon.stub(),
       countClasses : sinon.stub(),
       getTextByValue : sinon.stub(),
-      countTexts : sinon.stub()
+      countTexts : sinon.stub(),
+      lookupClassesByName : sinon.stub()
     };
 
     this.fetchMock = {
@@ -1284,6 +1285,78 @@ describe('/server/config/db/store', function () {
 
       this.store.deleteTenant(TENANT, function () {
         this.deleteMock.should.have.been.calledWith(this.dbMock, TENANT, sinon.match.func);
+        done();
+      }.bind(this));
+
+    });
+
+  });
+
+  describe.only('#processImportEntry()', function () {
+
+    beforeEach( function (done) {
+      this.entry = {
+        text : 'test-text',
+        classes : ['test-class-1', 'test-class-2']
+      };
+
+      this.store.start(done);
+    });
+
+    it('should create text and all associated classes', function (done) {
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(1+this.entry.classes.length);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[0]}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[1]}), sinon.match.func);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should handle creating text with no associated classes', function (done) {
+
+      delete this.entry.classes;
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.not.have.been.called;
+        this.dbMock.insert.callCount.should.equal(1);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should handle creating text with all associated classes already existing', function (done) {
+
+      var existingClasses = this.entry.classes.map(function (elem) {
+        var id = uuid.v1();
+        return {
+          id : id,
+          key : [TENANT, elem],
+          value : id
+        };
+      });
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, existingClasses);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(1);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
         done();
       }.bind(this));
 
