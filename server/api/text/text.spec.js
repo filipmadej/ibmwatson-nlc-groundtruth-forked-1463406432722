@@ -38,9 +38,6 @@ var mocks = require('../../test/mocks');
 
 var should = chai.should();
 
-var storeMock = new mocks.StoreMock();
-storeMock['@global'] = true;
-
 var app, nlccreds;
 
 var vcapTest = '{\
@@ -76,11 +73,20 @@ describe('/server/api/text', function () {
 
     process.env.VCAP_SERVICES = vcapTest;
 
+
+    this.storeMock = new mocks.StoreMock();
+    this.storeMock['@global'] = true;
+
+    this.socketMock = new mocks.SocketUtilMock();
+    this.socketMock['@global'] = true;
+
     nlccreds = proxyquire('../../config/nlc',{});
 
     app = proxyquire('../../app', {
-      './config/db/store' : storeMock,
-      '../../config/db/store' : storeMock,
+      './config/db/store' : this.storeMock,
+      '../../config/db/store' : this.storeMock,
+      './config/socket' : this.socketMock,
+      '../../config/socket' : this.socketMock,
       'watson-developer-cloud' : new mocks.WDCMock(),
     });
 
@@ -89,17 +95,20 @@ describe('/server/api/text', function () {
       .send({username : nlccreds.username, password : nlccreds.password})
       .expect(httpstatus.OK)
       .end(function (err, res) {
-      this.sessionCookie = res.headers['set-cookie'][0];
-      done(err);
-    }.bind(this));
+        this.sessionCookie = res.headers['set-cookie'][0];
+        done(err);
+      }.bind(this));
   });
 
-  after(function(){
-    process.env.VCAP_SERVICES = this.originalVcapServices;
+  after(function () {
+    if (this.originalVcapServices) {
+      process.env.VCAP_SERVICES = this.originalVcapServices;
+    }
   });
 
   beforeEach(function () {
-    storeMock.reset();
+    this.storeMock.reset();
+    this.socketMock.reset();
   });
 
   describe('/:tenantid/texts', function () {
@@ -114,7 +123,7 @@ describe('/server/api/text', function () {
       });
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.createText.callsArgWith(2, error);
+        this.storeMock.createText.callsArgWith(2, error);
 
         request(app)
           .post(ENDPOINTBASE)
@@ -123,9 +132,10 @@ describe('/server/api/text', function () {
           .expect('Content-Type', /json/)
           .expect(httpstatus.NOT_FOUND)
           .end(function (err, resp) {
-            storeMock.createText.should.have.been.called;
+            this.storeMock.createText.should.have.been.called;
+            this.socketMock.send.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should create text without error', function (done) {
@@ -135,9 +145,9 @@ describe('/server/api/text', function () {
           .send({ value : 'test-1' })
           .expect(httpstatus.CREATED)
           .end(function (err, resp) {
-            storeMock.createText.should.have.been.called;
+            this.storeMock.createText.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should return information about created text', function (done) {
@@ -195,7 +205,7 @@ describe('/server/api/text', function () {
     describe('GET', function () {
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.countTexts.callsArgWith(1, error);
+        this.storeMock.countTexts.callsArgWith(1, error);
 
         request(app)
           .get(ENDPOINTBASE)
@@ -203,10 +213,10 @@ describe('/server/api/text', function () {
           .expect('Content-Type', /json/)
           .expect(httpstatus.NOT_FOUND)
           .end(function (err, resp) {
-            storeMock.getTexts.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
-            storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.getTexts.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
+            this.storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should fetch texts without error', function (done) {
@@ -217,12 +227,12 @@ describe('/server/api/text', function () {
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getTexts.should.have.been.calledWith(TENANT,
+            this.storeMock.getTexts.should.have.been.calledWith(TENANT,
                sinon.match.object,
                sinon.match.func);
-            storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should fetch results based on custom parameters', function (done) {
@@ -236,12 +246,12 @@ describe('/server/api/text', function () {
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getTexts.should.have.been.calledWith(TENANT,
+            this.storeMock.getTexts.should.have.been.calledWith(TENANT,
                sinon.match({skip : 2, limit : 6, fields : ['_id', 'value']}),
                sinon.match.func);
-            storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.countTexts.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });
@@ -258,7 +268,7 @@ describe('/server/api/text', function () {
     describe('GET', function () {
 
       it('should fail to return non-existent text', function (done) {
-        storeMock.getText.callsArgWith(2, error);
+        this.storeMock.getText.callsArgWith(2, error);
 
         request(app)
           .get(INVALID_LOCATION)
@@ -274,9 +284,9 @@ describe('/server/api/text', function () {
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getText.should.have.been.calledWith(TENANT, VALID_ID, sinon.match.func);
+            this.storeMock.getText.should.have.been.calledWith(TENANT, VALID_ID, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });
@@ -352,10 +362,10 @@ describe('/server/api/text', function () {
             .expect(httpstatus.UNPROCESSABLE_ENTITY)
             .end(function (err, resp) {
               resp.should.have.deep.property('body.error', 'invalid');
-              storeMock.addClassesToText.should.not.have.been.called;
-              storeMock.removeClassesFromText.should.not.have.been.called;
+              this.storeMock.addClassesToText.should.not.have.been.called;
+              this.storeMock.removeClassesFromText.should.not.have.been.called;
               next(err);
-            });
+            }.bind(this));
         }.bind(this), done);
       });
 
@@ -379,11 +389,11 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
+                this.storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id, patch[0].value[1].id, patch[0].value[2].id],
                    sinon.match.func);
                 next(err);
-              });
+              }.bind(this));
           }.bind(this),
           function removeClassesFromText (next) {
             var patch = [
@@ -402,11 +412,11 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
+                this.storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id, patch[0].value[1].id],
                    sinon.match.func);
                 next(err);
-              });
+              }.bind(this));
           }.bind(this),
           function changeClassesInText (next) {
             var patch = [
@@ -432,14 +442,14 @@ describe('/server/api/text', function () {
               .send(patch)
               .expect(httpstatus.NO_CONTENT)
               .end(function (err) {
-                storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
+                this.storeMock.addClassesToText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[1].value[0].id, patch[1].value[1].id],
                    sinon.match.func);
-                storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
+                this.storeMock.removeClassesFromText.should.have.been.calledWith(TENANT, VALID_ID,
                    [patch[0].value[0].id],
                    sinon.match.func);
                 next(err);
-              });
+              }.bind(this));
           }.bind(this)
         ], done);
       });
@@ -480,9 +490,9 @@ describe('/server/api/text', function () {
             .expect(httpstatus.UNPROCESSABLE_ENTITY)
             .end(function (err, resp) {
               resp.should.have.deep.property('body.error', 'invalid');
-              storeMock.updateTextMetadata.should.not.have.been.called;
+              this.storeMock.updateTextMetadata.should.not.have.been.called;
               next(err);
-            });
+            }.bind(this));
         }.bind(this), done);
       });
 
@@ -504,9 +514,9 @@ describe('/server/api/text', function () {
           .send(patch)
           .expect(httpstatus.NO_CONTENT)
           .end(function (err) {
-            storeMock.updateTextMetadata.should.have.been.calledWith(TENANT, VALID_ID, sinon.match(patch[0].value), sinon.match.func);
+            this.storeMock.updateTextMetadata.should.have.been.calledWith(TENANT, VALID_ID, sinon.match(patch[0].value), sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });
@@ -514,7 +524,7 @@ describe('/server/api/text', function () {
     describe('DELETE', function () {
 
       it('should fail to delete unknown text', function (done) {
-        storeMock.deleteText.callsArgWith(3, error);
+        this.storeMock.deleteText.callsArgWith(3, error);
 
         request(app)
           .del(INVALID_LOCATION)
@@ -530,9 +540,9 @@ describe('/server/api/text', function () {
           .set('Cookie', [this.sessionCookie])
           .expect(httpstatus.PRECONDITION_FAILED)
           .end(function (err) {
-            storeMock.deleteText.should.not.have.been.called;
+            this.storeMock.deleteText.should.not.have.been.called;
             done(err);
-          });
+          }.bind(this));
 
       });
 
@@ -544,9 +554,9 @@ describe('/server/api/text', function () {
           .set('If-Match', etag)
           .expect(httpstatus.NO_CONTENT)
           .end(function (err) {
-            storeMock.deleteText.should.have.been.calledWith(TENANT, VALID_ID, etag, sinon.match.func);
+            this.storeMock.deleteText.should.have.been.calledWith(TENANT, VALID_ID, etag, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });

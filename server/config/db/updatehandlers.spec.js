@@ -31,7 +31,9 @@ var uuid = require('node-uuid');
 
 // local dependencies
 var dberrors = require('./errors');
-var log = require('../log');
+
+// test dependencies
+var mocks = require('../../test/mocks');
 
 var handler ;
 
@@ -56,7 +58,7 @@ describe('/server/config/db/updatehandlers', function () {
 
     handler = proxyquire('./updatehandlers', {
       './views' : this.viewMock,
-      '../log' : log
+      '../log' : new mocks.LogMock()
     });
   });
 

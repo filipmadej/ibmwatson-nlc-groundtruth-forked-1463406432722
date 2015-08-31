@@ -18,19 +18,24 @@
 
 // core dependencies
 var util = require('util');
+
+// external dependencies
+var _ = require('lodash');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
+var cache = require('memory-cache');
+var uuid = require('node-uuid');
 
 // local dependencies
 var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
+var socketUtil = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
-var socket;
 
 /**
  * Constructor for a new Error object specific to database patch operations
@@ -45,10 +50,6 @@ function PatchError (databaseError, operation) {
     this.operation = operation;
 }
 util.inherits(PatchError, dberrors.DatabaseError);
-
-module.exports.getSocket = function getSocket(socket_io) {
-  socket = socket_io;
-};
 
 function sanitizeMetadata (value) {
   if (value && (value.value || value.metadata) ) {
@@ -191,7 +192,7 @@ module.exports.createText = function createText (req, res) {
 
   db.createText(tenantid, textattrs, function returnNewTest (err, text) {
     if (err) {
-      socket.emit('text:create', { textattrs: textattrs, err: err });
+      socketUtil.send('text:create', { textattrs : textattrs, err : err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create text.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -201,7 +202,7 @@ module.exports.createText = function createText (req, res) {
       text : text
     }, 'Created text');
 
-    socket.emit('text:create', text);
+    socketUtil.send('text:create', text);
     responses.newitem(
       text,
       req.baseUrl + req.route.path, {
@@ -224,7 +225,22 @@ function errorWrapper (patchoperation, callback) {
 }
 
 function socketMessageNameBuilder (operation) {
-  return (operation.path[0] === '/' ? operation.path.substring(1) : operation.path) + ':' + operation.op;
+  var name = '';
+  if (operation && operation.path && (typeof operation.path === 'string' || operation.path instanceof String)) {
+    name += (operation.path[0] === '/' ? operation.path.substring(1) : operation.path);
+  } else {
+    name += 'unknown';
+  }
+
+  name += ':';
+
+  if (operation && operation.op) {
+    name += operation.op;
+  } else {
+    name += 'unknown';
+  }
+
+  return name;
 }
 
 function socketResponseBuilder (textid, data) {
@@ -232,18 +248,21 @@ function socketResponseBuilder (textid, data) {
   response.id = textid;
   if (data instanceof PatchError) {
     response.err = data;
-    if (data.operation.value) {
+
+    // metadata patch
+    if (_.has(data, 'operation.value.value')) {
+      response.value = data.operation.value.value;
+    }
+    // classes path
+    else if (_.has(data, 'operation.value')) {
       response.classes = data.operation.value;
-    } else if (data.operation.metadata.value) {
-      response.value = data.operation.metadata.value;
     }
-  } else {
-    if (data.classes) {
+  } else if (data.classes) {
       response.classes = data.classes;
-    } else if (data.metadata.value) {
-      response.value = data.metadata.value;
-    }
+  } else if (data.value) {
+    response.value = data.value;
   }
+
   return response;
 }
 
@@ -269,7 +288,7 @@ module.exports.editText = function editText (req, res) {
     }
   }, function handlePatchResponse (err, data) {
     data.forEach(function forEach (result) {
-      socket.emit('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
+      socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
     });
     responses.edited(res);
   });
@@ -288,14 +307,14 @@ module.exports.deleteText = function deleteText (req, res) {
 
   db.deleteText(tenantid, textid, etag, function deletedText (err) {
     if (err) {
-      socket.emit('text:delete', { id: textid, err: err });
+      socketUtil.send('text:delete', { id : textid, err : err });
       return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
         return responses.error(res, err);
       });
     }
 
     log.debug({text : textid}, 'Deleted text');
-    socket.emit('text:delete', { id: textid });
+    socketUtil.send('text:delete', { id : textid });
     responses.del(res);
   });
 };
@@ -314,13 +333,13 @@ module.exports.deleteTexts = function deleteTexts (req, res) {
   ids.forEach(function forEach (textid) {
     db.deleteText(tenantid, textid, etag, function deletedText (err) {
       if (err) {
-        socket.emit('text:delete', { id: textid, err: err });
+        socketUtil.send('text:delete', { id : textid, err : err });
         return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
           return responses.error(res, err);
         });
       }
       log.debug({text : textid}, 'Deleted text');
-      socket.emit('text:delete', { id: textid });
+      socketUtil.send('text:delete', { id : textid });
     });
   });
   responses.del(res);

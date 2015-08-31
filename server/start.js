@@ -30,18 +30,14 @@ var log = require('./config/log');
 
 var app = require('./app');
 var db = require('./config/db/store');
-var classController = require('./api/class/class.controller');
-var textController = require('./api/text/text.controller');
-var contentController = require('./api/content/content.controller');
-var socket = require('./config/socket');
+var socketUtil = require('./config/socket');
 
 // Setup server
 var server = require('http').createServer(app);
+
 var io = require('socket.io').listen(server);
 io.sockets.on('connection', function connect (socket) {
-  classController.getSocket(socket);
-  textController.getSocket(socket);
-  contentController.getSocket(socket);
+  socketUtil.setSocket(socket);
 });
 
 // start db then start the server
