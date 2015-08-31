@@ -55,7 +55,7 @@ function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
 
     async.waterfall([
         function verifyClasses (done) {
-            dbviews.lookupClasses(db, tenantid, classes, function verifyClasses (err, results) {
+            dbviews.lookupClassesById(db, tenantid, classes, function verifyClasses (err, results) {
 
                 var invalid = results.some(function validateClass (cls) {
                     return (classes.indexOf(cls.id) === -1);
