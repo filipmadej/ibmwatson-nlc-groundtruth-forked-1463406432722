@@ -178,10 +178,7 @@ module.exports.getText = function getText (req, res) {
 };
 
 module.exports.createText = function createText (req, res) {
-  log.debug({
-    body : req.body,
-    params : req.params
-  }, 'Creating text');
+  log.debug({ body : req.body, params : req.params }, 'Creating text');
 
   var tenantid = req.params.tenantid;
   var textattrs = req.body;
@@ -192,22 +189,22 @@ module.exports.createText = function createText (req, res) {
 
   db.createText(tenantid, textattrs, function returnNewTest (err, text) {
     if (err) {
-      socketUtil.send('text:create', { textattrs : textattrs, err : err });
+      socketUtil.send('text:create', { attributes: textattrs, err: err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create text.', function returnResponse () {
         return responses.error(res, err);
       });
     }
 
-    log.debug({
-      text : text
-    }, 'Created text');
+    text.id = text._id;
+    delete text._id;
+    log.debug({ text : text }, 'Created text');
 
-    socketUtil.send('text:create', text);
+    socketUtil.send('text:create', { attributes: text });
     responses.newitem(
       text,
       req.baseUrl + req.route.path, {
         ':tenantid' : tenantid,
-        ':textid' : text._id
+        ':textid' : text.id
       },
       res);
   });
@@ -259,8 +256,8 @@ function socketResponseBuilder (textid, data) {
     }
   } else if (data.classes) {
       response.classes = data.classes;
-  } else if (data.value) {
-    response.value = data.value;
+  } else if (data.metadata.value) {
+    response.value = data.metadata.value;
   }
 
   return response;

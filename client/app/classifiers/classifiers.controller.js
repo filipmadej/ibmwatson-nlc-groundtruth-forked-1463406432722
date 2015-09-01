@@ -17,14 +17,22 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClassifiersCtrl', ['$scope', 'nlc', 'ngDialog', 'alerts',
-    function init ($scope, nlc, ngDialog, alertsSvc) {
+  .controller('ClassifiersCtrl', ['$scope', '$interval', 'nlc', 'ngDialog', 'alerts',
+    function init ($scope, $interval, nlc, ngDialog, alertsSvc) {
 
       $scope.alerts = alertsSvc.alerts;
 
       $scope.loading = true;
 
       $scope.classifiers = [];
+
+      $scope.intervals = [];
+
+      $scope.$on('destroy', function destroy () {
+        $scope.intervals.forEach(function forEach (interval) {
+          $interval.cancel(interval);
+        });
+      });
 
       $scope.toggleArrowDown = function toggleArrowDown (classifier) {
         classifier.showArrowDown = !classifier.showArrowDown;
@@ -36,13 +44,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           $scope.classifiers = data.classifiers;
           $scope.classifiers.forEach(function forEach (classifier) {
             // add additional data required for UI interactions
-            //$scope.pollStatus(d, 5000); // set up the poll to update the status every 5 seconds
+            $scope.intervals.push($scope.pollStatus(classifier, 10000)); // set up the poll to update the status every 5 seconds
             classifier.logs = []; // store the texts and consequent classes
             classifier.status = ''; // what is the availibility status of the classifier
             classifier.statusDescription = '';
             classifier.textToClassify = ''; // store the ng-model variable for a given classifier
             classifier.showArrowDown = false; // show logs for a given classifier
-            $scope.checkStatus(classifier); // get an initial status check
+            // $scope.checkStatus(classifier); // get an initial status check
           });
         });
       };

@@ -29,21 +29,8 @@ var ENDPOINTS = {
     content : '/:tenantid/content',
 };
 
-var uploading = multer({
-  limits : {
-    // protect against people uploading files that are too large
-    fileSize : 10000000,
-    // support single file uploads only
-    files : 1
-  },
-  rename : function (fieldname, filename) {
-    // don't rename files
-    return filename;
-  }
-});
-
 router.use(ENDPOINTS.content, rest.ensureAuthenticated);
-router.post(ENDPOINTS.content, controller.handleFileUpload); // TODO: integrate multer into this endpoint
+router.post(ENDPOINTS.content, multer(controller.uploadOptions), controller.handleFileImport);
 router.get(ENDPOINTS.content, controller.handleFileDownload);
 
 module.exports = router;
