@@ -492,12 +492,19 @@ function handleImportClassEntries (tenant, classes, callback) {
 
         async.mapLimit(newClasses, 10, function createNew (classname, nextclass) {
           var classification = dbobjects.prepareClassInfo(tenant, {name : classname});
+          var classResult = {
+            id : classification._id,
+            name : classification.name,
+            created : true
+
+          };
           db.insert(classification, function checkResponse (err, docstatus) {
             if (err) {
-              return nextclass(null, {name : classname, error : err});
+              delete classResult.id;
+              classResult.error = err;
             }
 
-            return nextclass(null, {id : classification._id, name : classification.name, created : true});
+            return nextclass(null, classResult);
 
           });
         }, function handleResults (err, results) {
@@ -513,16 +520,45 @@ function handleImportClassEntries (tenant, classes, callback) {
   }
 }
 
+function getTextIfExists (tenant, value, callback) {
+  async.waterfall([
+    function checkText (next) {
+      checkIfTextExists(tenant, value, next);
+    },
+    function retrieveText (text, next) {
+      if (text) {
+        return getText(tenant, text.id, next);
+      } else {
+        return next(null, null);
+      }
+
+    }
+  ], callback);
+}
+
 function initImportEntry (tenant, entry, callback) {
   async.parallel([
-    function checkText (done) {
-      checkIfTextExists(tenant, entry.text, done);
+    function handleText (done) {
+      getTextIfExists(tenant, entry.text, done);
     },
     function handleClasses (done) {
       handleImportClassEntries(tenant, entry.classes, done)
     }], callback);
 }
 
+/**
+ * Handles updating an existing text during import.  It is important
+ * to note that given how we are handling errors during import,
+ * the callback to this function only expects a single 'result'
+ * parameter - that will contain embedded error information in the event
+ * it occurs.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} text - existing persisted text
+ * @param {Object[]} classes - array of classes that were included in import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
 function handleExistingTextEntry (tenant, text, classes, callback) {
 
     var classesDelta = classes.filter(function filterNew (elem) {
@@ -530,7 +566,7 @@ function handleExistingTextEntry (tenant, text, classes, callback) {
     });
 
     var result = {
-      id : text.id,
+      id : text._id,
       value : text.value,
       created : false,
       classes : classesDelta
@@ -540,15 +576,28 @@ function handleExistingTextEntry (tenant, text, classes, callback) {
       return delta.id;
     });
 
-    dbhandlers.addClassesToText(db, tenant, text.id, deltaArray, function handleUpdate (err, result) {
+    dbhandlers.addClassesToText(db, tenant, text._id, deltaArray, function handleUpdate (err) {
       if (err) {
         result.error = err;
       }
 
-      callback(null, result);
+      callback(result);
     });
 }
 
+/**
+ * Handles creating a new text during import.  It is important
+ * to note that given how we are handling errors during import,
+ * the callback to this function only expects a single 'result'
+ * parameter - that will contain embedded error information in the event
+ * it occurs.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} value - value to create text with
+ * @param {Object[]} classes - array of classes that were included in import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
 function handleNewTextEntry (tenant, value, classes, callback) {
 
     var classArray = classes.map(function convert (elem) {
@@ -566,10 +615,11 @@ function handleNewTextEntry (tenant, value, classes, callback) {
 
     db.insert(text, function checkResponse (err, docstatus) {
       if (err) {
+        delete result.id;
         result.error = err;
       }
 
-      return callback(null, result);
+      return callback(result);
 
     });
 }
@@ -591,20 +641,19 @@ module.exports.processImportEntry = function processImportEntry (tenant, entry, 
   async.waterfall([
     function init (next) {
       initImportEntry(tenant, entry, function handleResults (err, results) {
-        //results[0] === text ? null
-        // results[1] == classes formatted for response
+        if (err) {
+          return next(err);
+        }
+
         result.classes = results[1].filter(function filterNew (elem) {
           return elem.created;
         });
-        next(err, results[0], results[1]);
+        next(null, results[0], results[1]);
       });
     },
     function handleText (text, classes, next) {
 
-      var handleTextResult = function handleResult (err, textResult) {
-        if (err) {
-          textResult.error = err;
-        }
+      var handleTextResult = function handleResult (textResult) {
         result.text = textResult;
         next();
       };
