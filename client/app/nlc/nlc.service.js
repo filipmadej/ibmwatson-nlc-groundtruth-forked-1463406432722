@@ -24,52 +24,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return endpoints.classifier + '/' + session.tenant + '/classifiers';
       }
 
-      function importEndpoint () {
-        return endpoints.classifier + '/' + session.tenant + '/import';
-      }
-
-      function processClasses (processedContent, classes) {
-        classes.forEach(function forEach (clazz) {
-          if (processedContent.classes.indexOf(clazz) < 0) {
-            processedContent.classes.push(clazz);
-          }
-        });
-      }
-
-      function updateText (text, classes) {
-        classes.forEach(function forEach (clazz) {
-          if (text.classes.indexOf(clazz) < 0) {
-            text.classes.push(clazz);
-          }
-        });
-      }
-
-      function processText (processedContent, text, classes) {
-        if (!text || text.length === 0) {
-          return;
-        }
-        for (var i = 0; i < processedContent.text.length; i++) {
-          if (processedContent.text[i].text === text) {
-            updateText(processedContent.text[i], classes);
-            return;
-          }
-        }
-        processedContent.text.push({ text: text, classes: classes });
-      }
-
-      // take the raw response from the file upload and process it to create a formatted JSON for the front-end
-      function processUploadResponse (data) {
-        var processedContent = {
-          classes : [],
-          text : []
-        };
-        data.forEach(function forEach (d) {
-          processText(processedContent, d.text, d.classes);
-          processClasses(processedContent, d.classes);
-        });
-        return processedContent;
-      }
-
       var nlcSvc = {
         /* Gets a list of all classifiers in the NLC service */
         getClassifiers: function getClassifiers () {
@@ -135,7 +89,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             }
           };
           check();
-          $interval(check, time);
+          return $interval(check, time);
         },
 
         /* Send a piece of text to NLC and return a classification */
@@ -167,72 +121,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               reject(error);
             });
           });
-        },
-
-        /* Process a CSV or JSON file and set up the relevant classes & texts */
-        upload: function upload (fileContent) {
-          return $q(function upload (resolve, reject) {
-            if (!fileContent || fileContent.length === 0) {
-              reject();
-            } else if (fileContent.charAt(0) === '{') {
-              /*jshint camelcase: false */
-              resolve(processUploadResponse(JSON.parse(fileContent).training_data));
-            } else {
-              $http({
-                method: 'POST',
-                url: importEndpoint(),
-                data: fileContent,
-                headers: {
-                  'Content-Type': 'text/csv;charset=utf-8',
-                  'Accept': 'application/json'
-                }
-              }).then(function success (response) {
-                resolve(processUploadResponse(response.data));
-              }, function fail (error) {
-                reject(error);
-              });
-            }
-          });
-        },
-
-        /* export the classes & texts from the UI into a JSON file */
-        download: function download (texts, classes) {
-          var csvString = '';
-          texts.forEach(function forEach (text) {
-            csvString += '"' + text.label.replace(/"/g, '""') + '"';
-            text.classes.forEach(function forEach (clazz) {
-              csvString += ',' + clazz;
-            });
-            csvString += '\n';
-          });
-          classes.forEach(function forEach (clazz) {
-            csvString += ',' + clazz.label;
-          });
-          csvString += '\n';
-
-          // convert the CSV to a data URL
-          // export the data url
-          var contentType = 'text/csv;charset=utf-8';
-          var outputFile = 'export.csv';
-
-          window.URL = window.URL || window.webkitURL;
-          var csvFile = new Blob([csvString], {type: contentType});
-
-          // var uri = 'data:text/csv;charset=utf-8,' + escape(csvString);
-          var link = document.createElement('a');
-          // link.href = uri;
-          link.href = window.URL.createObjectURL(csvFile);
-
-          link.style.visibility = 'hidden';
-          link.download = outputFile;
-          link.dataset.downloadurl = [contentType, link.download, link.href].join(':');
-
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-
-          // var w = window.open('');
-          // w.document.write(csvString);
         }
       };
 

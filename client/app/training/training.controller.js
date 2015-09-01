@@ -78,6 +78,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           } else {
             msg = 'Error deleting text with id ' + data.id + '. Please refresh the page and try again.';
           }
+          msg += 'Error message: ' + data.err;
           alertsSvc.add({ level: 'error', text: msg });
         } else if (text){
           $scope.texts.splice($scope.texts.indexOf(text), 1);
@@ -87,12 +88,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('class:create', function createClass (data) {
         $log.debug('socket:class:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding ' + data.label + ' class. Please refresh the page and try again.';
+          var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + data.err;
           alertsSvc.add({ level: 'error', text: msg });
         } else {
-          var element = data;
-          element.$$hashKey = element._id;
-          element.id = element._id;
+          var element = data.attributes;
+          element.$$hashKey = element.id;
           element.seq = $scope.sequenceNumber++;
           element.label = element.name;
           element.edit = false;
@@ -105,18 +105,17 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:create', function createText (data) {
         $log.debug('socket:text:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding "' + data.label + '" text. Please refresh the page and try again.';
+          var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + data.err;
           alertsSvc.add({ level: 'error', text: msg });
         } else {
-          var element = data;
-          element.$$hashKey = element._id;
-          element.id = element._id;
+          var element = data.attributes;
+          element.$$hashKey = element.id;
           element.seq = $scope.sequenceNumber++;
           element.label = element.value;
           element.classes = element.classes || [];
-          for (var i = 0, len = element.classes.length; i < len; i++) {
-            element.classes[i] = $scope.getFromId($scope.classes, element.classes[i]).label;
-          }
+          element.classes.forEach(function forEach (clazz, index, array) {
+            array[index] = clazz.name;
+          });
           element.edit = false;
           element.checked = false;
           $scope.texts.push(element);
@@ -126,14 +125,22 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:update:classes:add', function addClasses (data) {
         $log.debug('socket:text:update:classes:add ' + JSON.stringify(data));
         var text = $scope.getFromId($scope.texts, data.id);
-        var classes = [];
+        var successClasses = [];
+        var errorClasses = [];
         data.classes.forEach(function forEach (clazz) {
-          classes.push($scope.getFromId($scope.classes, clazz).label);
+          if (clazz.err) {
+            errorClasses.push(clazz);
+          } else {
+            successClasses.push($scope.getFromId($scope.classes, clazz.id).label);
+          }
         });
+        if (errorClasses.length > 0) {
+          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(errorClasses) });
+        }
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(classes) });
+          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(data.classes) });
         } else {
-          text.classes = text.classes.concat(classes);
+          text.classes = text.classes.concat(successClasses);
         }
       });
 
@@ -156,24 +163,25 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:update:metadata:replace', function replaceMetadata (data) {
         $log.debug('socket:text:update:metadata:replace ' + JSON.stringify(data));
         var text = $scope.getFromId($scope.texts, data.id);
+        var newLabel = data.value;
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(data.value) });
+          alertsSvc.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(newLabel) });
         } else {
-          text.label = data.value;
-          window.document.getElementById(text.$$hashKey).value = data.value;
+          text.label = newLabel;
+          window.document.getElementById(text.$$hashKey).value = newLabel;
         }
       });
 
       socket.on('class:update', function updateClass (data) {
         $log.debug('socket:class:update ' + JSON.stringify(data));
-        var clazz = $scope.getFromId($scope.classes, data._id);
-        $log.debug(JSON.stringify(clazz));
+        var clazz = $scope.getFromId($scope.classes, data.id);
         var oldLabel = clazz.label;
         var newLabel = data.name;
         if (data.err) {
           alertsSvc.add({ level: 'error', text: 'Failed to change the ' + oldLabel + ' class to ' + newLabel });
         } else {
           clazz.label = newLabel;
+          window.document.getElementById(clazz.$$hashKey).value = newLabel;
         }
 
         $scope.texts.forEach(function forEach (text) {
@@ -185,7 +193,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       });
 
       $scope.$on('$destroy', function () {
-        $log.debug('socket:destroy');
         socket.removeAllListeners();
         // socket.removeListener(this);
       });
@@ -226,7 +233,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             element.label = element.value;
             element.classes = element.classes || [];
             for (var i = 0, len = element.classes.length; i < len; i++) {
-              element.classes[i] = $scope.getFromId($scope.classes, element.classes[i]).label;
+              var clazz = $scope.getFromId($scope.classes, element.classes[i]);
+              if (clazz) {
+                element.classes[i] = clazz.label;
+              }
             }
             element.edit = false;
             element.checked = false;
@@ -976,18 +986,10 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.exportToFile = function exportToFile () {
         content.downloadFile();
-        // nlc.download($scope.texts, $scope.classes);
       };
 
       $scope.addClass = function addClass (label) {
-      //  return
-      $scope.add('class', label);
-        // .then(function success (data) {
-        //   return data;
-        // }, function error (err) {
-        //   $log.error('error adding class: ' + JSON.stringify(err));
-        //   return null;
-        // });
+        $scope.add('class', label);
       };
 
       $scope.addText = function addText (label, classes) {
@@ -1023,36 +1025,25 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return $q.all(promises);
       };
 
-      $scope.uploading = false;
+      $scope.importing = false;
       $scope.files = [];
 
-      function progress (evt) {
-        $scope.uploading = true;
-        $scope.uploadProgress = parseInt(100 * evt.loaded / evt.total);
+      function importProgress (evt) {
+        $scope.import = true;
+        $scope.importProgress = parseInt(100 * evt.loaded / evt.total);
       }
 
-      function success () {
-        $scope.uploading = false;
-        $scope.uploadProgress = 0;
+      function importSuccess () {
+        $scope.importing = false;
+        $scope.importProgress = 0;
       }
 
-      $scope.uploadProgress = 0;
-      $scope.uploadDocuments = function uploadDocuments () {
-        console.log('upload documents: ' + JSON.stringify($scope.files));
+      $scope.importProgress = 0;
+      $scope.importDocuments = function importDocuments () {
         var files = $scope.files;
         if (files && files.length > 0) {
-          content.uploadFile(files[0], progress, success);
+          content.importFile(files[0], importProgress, importSuccess);
         }
-      };
-
-      $scope.importFile = function importFile (fileContent) {
-        var uploadResult = {};
-        nlc.upload(fileContent).then(function importClasses (data) {
-          uploadResult = data;
-          return $scope.importClasses(uploadResult.classes);
-        }).then(function importTexts () {
-          return $scope.importTexts(uploadResult.text);
-        });
       };
 
       // set language by dropdown selection
