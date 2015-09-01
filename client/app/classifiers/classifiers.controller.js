@@ -17,8 +17,8 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClassifiersCtrl', ['$scope', '$interval', 'nlc', 'ngDialog', 'alerts',
-    function init ($scope, $interval, nlc, ngDialog, alertsSvc) {
+  .controller('ClassifiersCtrl', ['$scope', '$interval', '$log', 'nlc', 'ngDialog', 'alerts',
+    function init ($scope, $interval, $log, nlc, ngDialog, alertsSvc) {
 
       $scope.alerts = alertsSvc.alerts;
 
@@ -28,7 +28,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.intervals = [];
 
-      $scope.$on('destroy', function destroy () {
+      $scope.$on('$destroy', function destroy () {
         $scope.intervals.forEach(function forEach (interval) {
           $interval.cancel(interval);
         });
@@ -53,6 +53,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             // $scope.checkStatus(classifier); // get an initial status check
           });
         });
+        $log.debug('Loaded classifiers.');
       };
 
       $scope.loadClassifiers();
