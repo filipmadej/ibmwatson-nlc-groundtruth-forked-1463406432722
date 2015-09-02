@@ -37,7 +37,7 @@ var server = require('http').createServer(app);
 
 var io = require('socket.io').listen(server);
 io.sockets.on('connection', function connect (socket) {
-  socketUtil.setSocket(socket);
+  socketUtil.setSocket(io);
 });
 
 // start db then start the server

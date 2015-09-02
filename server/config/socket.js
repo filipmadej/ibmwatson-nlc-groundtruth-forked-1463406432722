@@ -16,16 +16,16 @@
 
 'use strict';
 
-var socket;
+var io;
 
 module.exports.setSocket = function setSocket (conn) {
-  socket = conn;
+  io = conn;
 }
 
 module.exports.getSocket = function getSocket () {
-  return socket;
+  return io;
 }
 
 module.exports.send = function send (name, value) {
-  socket.emit(name, value);
+  io.sockets.emit(name, value);
 }
