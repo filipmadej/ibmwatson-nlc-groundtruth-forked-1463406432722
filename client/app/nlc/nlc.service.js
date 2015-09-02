@@ -85,6 +85,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                 handleResponse(response.data);
               }, function fail (error) {
                 $log.error(error);
+                handleResponse({ err: error });
               });
             }
           };

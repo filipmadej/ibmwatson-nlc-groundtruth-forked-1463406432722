@@ -17,15 +17,11 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('ClassifiersCtrl', ['$scope', '$interval', '$log', 'nlc', 'ngDialog', 'alerts',
-    function init ($scope, $interval, $log, nlc, ngDialog, alertsSvc) {
-
-      $scope.alerts = alertsSvc.alerts;
+  .controller('ClassifiersCtrl', ['$scope', '$interval', '$log', 'nlc', 'ngDialog', 'watsonAlerts',
+    function init ($scope, $interval, $log, nlc, ngDialog, watsonAlerts) {
 
       $scope.loading = true;
-
       $scope.classifiers = [];
-
       $scope.intervals = [];
 
       $scope.$on('$destroy', function destroy () {
@@ -52,6 +48,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             classifier.showArrowDown = false; // show logs for a given classifier
             // $scope.checkStatus(classifier); // get an initial status check
           });
+        }, function error (err) {
+          watsonAlerts.add({ level: 'error', text: 'There was an error retrieving the classifiers list. Error: ' + JSON.stringify(err) });
         });
         $log.debug('Loaded classifiers.');
       };
@@ -60,16 +58,25 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.checkStatus = function checkStatus (classifier) {
         /*jshint camelcase: false */
-        nlc.checkStatus(classifier.classifier_id).then(function setStatus (data) {
+        return nlc.checkStatus(classifier.classifier_id).then(function setStatus (data) {
           classifier.status = data.status;
           classifier.statusDescription = data.status_description;
+        }, function error (err) {
+          watsonAlerts.add({ level: 'error', text: 'Error checking the status of classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
         });
       };
 
       $scope.pollStatus = function pollStatus (classifier, interval) {
         /*jshint camelcase: false */
         return nlc.pollStatus(classifier.classifier_id, function setStatus (data) {
-          classifier.status = data.status;
+          if (data.err) {
+            watsonAlerts.add({ level: 'error', text: 'Error retrieving status for classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(data.err) });
+            classifier.status = 'Unavailable';
+            classifier.statusDescription = 'Classifier currently unavailable.';
+          } else {
+            classifier.status = data.status;
+            classifier.statusDescription = data.status_description;
+          }
         }, interval);
       };
 
@@ -77,9 +84,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         /*jshint camelcase: false */
         var msg = $scope.question('Are you sure you want to delete the ' + classifier.name + ' classifier?', 'Delete');
         ngDialog.openConfirm({template: msg, plain: true
-        }).then(function remove () {  // ok
-           $scope.loading = true;
+        }).then(function remove () {
+          $scope.loading = true;
           nlc.remove(classifier.classifier_id).then(function reload () {
+            $scope.loadClassifiers();
+          }, function error (err) {
+            watsonAlerts.add({ level: 'error', text: 'There was an error removing classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
             $scope.loadClassifiers();
           });
         });
@@ -102,6 +112,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         $('#'+classifier.classifier_id).collapse('show');
         nlc.classify(classifier.classifier_id, text).then(function logResults (data) {
           classifier.logs.splice(1, 0, { classes: data.classes });
+        }, function error (err) {
+          watsonAlerts.add({ level: 'error', text: 'There was an error classifying "' + text + '" on classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
         });
       };
 

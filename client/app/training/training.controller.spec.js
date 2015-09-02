@@ -143,16 +143,6 @@ describe('Controller: TrainingController', function() {
     var nlcMock = {
       train: function() {
       },
-      download: function() {
-      },
-      upload: function() {
-        return $q(function(resolve){
-          resolve({
-            classes: ['class'],
-            text: [ {text: 'text', classes: ['class']} ]
-          });
-        });
-      }
     };
 
     var classesMock = {
@@ -213,8 +203,24 @@ describe('Controller: TrainingController', function() {
           if (id === BAD_ID) {
             reject({ msg: 'err' });
           } else {
-            resolve();
+            resolve({ id: '5' });
           }
+        });
+      }
+    };
+
+    var contentMock = {
+      importFile: function() {
+        return $q(function(resolve){
+          resolve({
+            classes: ['class'],
+            text: [ {text: 'text', classes: ['class']} ]
+          });
+        });
+      },
+      exportFile: function() {
+        return $q(function (resolve) {
+          resolve();
         });
       }
     };
@@ -228,7 +234,8 @@ describe('Controller: TrainingController', function() {
       $scope: scope,
       nlc: nlcMock,
       classes: classesMock,
-      texts: textsMock
+      texts: textsMock,
+      content: contentMock
     });
 
     var html = '<div id="0"></div><div id="1"></div><div id="2"></div>';
@@ -242,63 +249,64 @@ describe('Controller: TrainingController', function() {
     resetTexts();
   }));
 
-  // TODO: test scope.classes and scope.texts has been set properly?
+  describe('Methods: selecting objects', function () {
+    it('should set the attribute \'checked\' to a given boolean for an array of objects', function() {
+      expect(scope.classes[0].checked).toBeFalsy();
+      expect(scope.classes[1].checked).toBeFalsy();
+      expect(scope.classes[2].checked).toBeFalsy();
 
-  it('should set the attribute \'checked\' to a given boolean for an array of objects', function() {
-    //$rootScope.$apply();
-    expect(scope.classes[0].checked).toBeFalsy();
-    expect(scope.classes[1].checked).toBeFalsy();
-    expect(scope.classes[2].checked).toBeFalsy();
+      scope.checkAll(scope.classes, true);
 
-    scope.checkAll(scope.classes, true);
+      expect(scope.classes[0].checked).toBeTruthy();
+      expect(scope.classes[1].checked).toBeTruthy();
+      expect(scope.classes[2].checked).toBeTruthy();
 
-    expect(scope.classes[0].checked).toBeTruthy();
-    expect(scope.classes[1].checked).toBeTruthy();
-    expect(scope.classes[2].checked).toBeTruthy();
+      scope.checkAll(scope.classes, false);
 
-    scope.checkAll(scope.classes, false);
+      expect(scope.classes[0].checked).toBeFalsy();
+      expect(scope.classes[1].checked).toBeFalsy();
+      expect(scope.classes[2].checked).toBeFalsy();
+    });
 
-    expect(scope.classes[0].checked).toBeFalsy();
-    expect(scope.classes[1].checked).toBeFalsy();
-    expect(scope.classes[2].checked).toBeFalsy();
+    it('should return a set of \'checked\' objects from within an array', function() {
+      scope.classes[1].checked = true;
+      var filteredArray = scope.getChecked(scope.classes);
+      expect(filteredArray.length).toBe(1);
+      expect(filteredArray[0]).toBe(scope.classes[1]);
+    });
+
+    it('should return a set of \'selected\' objects from within an array', function() {
+      scope.classes[2].selected = true;
+      var filteredArray = scope.getSelectedClasses();
+      expect(filteredArray.length).toBe(1);
+      expect(filteredArray[0]).toBe(scope.classes[2]);
+    });
   });
 
-  it('should return a set of \'checked\' objects from within an array', function() {
-    scope.classes[1].checked = true;
-    var filteredArray = scope.getChecked(scope.classes);
-    expect(filteredArray.length).toBe(1);
-    expect(filteredArray[0]).toBe(scope.classes[1]);
-  });
+  describe('Methods searching for objects', function () {
+    it('should return an object with a given \'label\' from within an array', function() {
+      var obj = scope.getFromLabel(scope.classes, 'object1');
+      expect(obj).toBe(scope.classes[0]);
 
-  it('should return a set of \'selected\' objects from within an array', function() {
-    scope.classes[2].selected = true;
-    var filteredArray = scope.getSelectedClasses();
-    expect(filteredArray.length).toBe(1);
-    expect(filteredArray[0]).toBe(scope.classes[2]);
-  });
+      obj = scope.getFromLabel(scope.classes, 'objectX');
+      expect(obj).toBeNull();
+    });
 
-  it('should return an object with a given \'label\' from within an array', function() {
-    var obj = scope.getFromLabel(scope.classes, 'object1');
-    expect(obj).toBe(scope.classes[0]);
+    it('should return an object with a given \'id\' from within an array', function() {
+      var obj = scope.getFromId(CLASSES, '0');
+      expect(obj).toBe(CLASSES[0]);
 
-    obj = scope.getFromLabel(scope.classes, 'objectX');
-    expect(obj).toBeNull();
-  });
+      obj = scope.getFromId(CLASSES, '3');
+      expect(obj).toBeNull();
+    });
 
-  it('should return an object with a given \'id\' from within an array', function() {
-    var obj = scope.getFromId(CLASSES, '0');
-    expect(obj).toBe(CLASSES[0]);
+    it('should return whether or not an object with a given \'label\' exists in an array', function() {
+      var obj = scope.containsLabel(scope.classes, 'object1');
+      expect(obj).toBeTruthy();
 
-    obj = scope.getFromId(CLASSES, '3');
-    expect(obj).toBeNull();
-  });
-
-  it('should return whether or not an object with a given \'label\' exists in an array', function() {
-    var obj = scope.containsLabel(scope.classes, 'object1');
-    expect(obj).toBeTruthy();
-
-    obj = scope.containsLabel(scope.classes, 'objectX');
-    expect(obj).toBeFalsy();
+      obj = scope.containsLabel(scope.classes, 'objectX');
+      expect(obj).toBeFalsy();
+    });
   });
 
   it('should provide a converter that allows the input of <text/class> string and should return an array of <text/class>\'s', function() {
@@ -311,167 +319,189 @@ describe('Controller: TrainingController', function() {
     expect(array).toEqual(scope.classes);
   });
 
-  it('should select a class order option', function() {
-    scope.setClassOrderOption(ORDER_OPTIONS[1]);
-    expect(scope.classOrderOption).toEqual(ORDER_OPTIONS[1]);
+  describe('Methods to order classes and texts', function () {
+    it('should select a class order option', function() {
+      scope.setClassOrderOption(ORDER_OPTIONS[1]);
+      expect(scope.classOrderOption).toEqual(ORDER_OPTIONS[1]);
+    });
+
+    it('should order the classes', function() {
+      scope.classOrderOption = ORDER_OPTIONS[0];
+      expect(scope.classOrder(scope.classes[0])).toEqual(-scope.classes[0].seq);
+
+      scope.classOrderOption = ORDER_OPTIONS[1];
+      expect(scope.classOrder(scope.classes[0])).toEqual(scope.classes[0].seq);
+
+      scope.classOrderOption = ORDER_OPTIONS[2];
+      expect(scope.classOrder(scope.classes[0])).toEqual(scope.classes[0].label);
+
+      scope.classOrderOption = ORDER_OPTIONS[3];
+      expect(scope.classOrder(scope.classes[0])).toEqual(-scope.numberTextsInClass(scope.classes[0]));
+
+      scope.classOrderOption = ORDER_OPTIONS[4];
+      expect(scope.classOrder(scope.classes[0])).toEqual(scope.numberTextsInClass(scope.classes[0]));
+
+      scope.classOrderOption = BAD_ORDER_OPTION;
+      expect(scope.classOrder(scope.classes[0])).toEqual(-scope.classes[0].seq);
+    });
+
+    it('should select a text order option', function() {
+      scope.setTextOrderOption(ORDER_OPTIONS[1]);
+      expect(scope.textOrderOption).toEqual(ORDER_OPTIONS[1]);
+    });
+
+    it('should order the texts', function() {
+      scope.textOrderOption = ORDER_OPTIONS[0];
+      expect(scope.textOrder(scope.texts[0])).toEqual(-scope.texts[0].seq);
+
+      scope.textOrderOption = ORDER_OPTIONS[1];
+      expect(scope.textOrder(scope.texts[0])).toEqual(scope.texts[0].seq);
+
+      scope.textOrderOption = ORDER_OPTIONS[2];
+      expect(scope.textOrder(scope.texts[0])).toEqual(scope.texts[0].label);
+
+      scope.textOrderOption = ORDER_OPTIONS[3];
+      expect(scope.textOrder(scope.texts[0])).toEqual(-scope.classesForText(scope.texts[0]).length);
+
+      scope.textOrderOption = ORDER_OPTIONS[4];
+      expect(scope.textOrder(scope.texts[0])).toEqual(scope.classesForText(scope.texts[0]).length);
+
+      scope.textOrderOption = BAD_ORDER_OPTION;
+      expect(scope.textOrder(scope.texts[0])).toEqual(-scope.texts[0].seq);
+    });
   });
 
-  it('should order the classes', function() {
-    scope.classOrderOption = ORDER_OPTIONS[0];
-    expect(scope.classOrder(scope.classes[0])).toEqual(-scope.classes[0].seq);
+  describe('Methods for editing classes and texts', function () {
+    it('should set \'selected\' for a given object if not in edit mode', function() {
+      scope.classes[2].edit = true;
+      scope.selectClass(scope.classes[2]);
+      expect(scope.classes[2].selected).toBeFalsy();
 
-    scope.classOrderOption = ORDER_OPTIONS[1];
-    expect(scope.classOrder(scope.classes[0])).toEqual(scope.classes[0].seq);
+      scope.selectClass(scope.classes[1]);
+      expect(scope.classes[1].selected).toBeTruthy();
+    });
 
-    scope.classOrderOption = ORDER_OPTIONS[2];
-    expect(scope.classOrder(scope.classes[0])).toEqual(scope.classes[0].label);
+    it('should allow the user to edit a field', function() {
+      scope.editField(scope.classes[1]);
+      expect(scope.classes[1].edit).toBeTruthy();
 
-    scope.classOrderOption = ORDER_OPTIONS[3];
-    expect(scope.classOrder(scope.classes[0])).toEqual(-scope.numberTextsInClass(scope.classes[0]));
+      // already in edit mode, so should now dismiss
+      scope.editField(scope.classes[1]);
+      expect(scope.classes[1].edit).toBeFalsy();
+    });
 
-    scope.classOrderOption = ORDER_OPTIONS[4];
-    expect(scope.classOrder(scope.classes[0])).toEqual(scope.numberTextsInClass(scope.classes[0]));
-
-    scope.classOrderOption = BAD_ORDER_OPTION;
-    expect(scope.classOrder(scope.classes[0])).toEqual(-scope.classes[0].seq);
+    it('should allow the user to cancel the editing of a field using the ESC key', function () {
+      var event = {
+        keyCode: 27
+      };
+      scope.keyUpCancelEditing(scope.classes[2], event);
+      expect(scope.classes[2].edit).toBeFalsy();
+    });
   });
 
-  it('should select a text order option', function() {
-    scope.setTextOrderOption(ORDER_OPTIONS[1]);
-    expect(scope.textOrderOption).toEqual(ORDER_OPTIONS[1]);
+  describe('Methods for changing class and text labels', function () {
+    it('should change a class label', inject(function ($rootScope) {
+      var object = scope.classes[0];
+      window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
+      scope.changeLabel('class', object).then(function success (result) {
+        expect(result.id).toBe('5');
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should not change a class label if it is the same or empty or already exists', inject(function ($rootScope) {
+      var object = scope.classes[0];
+
+      // same label
+      window.document.getElementById(object.$$hashKey).value = OLD_LABEL;
+      scope.changeLabel('class', object).then(function success (result) {
+        expect(result.id).toBe('5');
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+
+      // empty label
+      window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
+      scope.changeLabel('class', object).then(function success (result) {
+        expect(result.id).toBe('5');
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+
+      // existing label
+      window.document.getElementById(object.$$hashKey).value = EXISTING_LABEL;
+      scope.changeLabel('class', object).then(function success (result) {
+        expect(result.id).toBe('5');
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should change a text label', function() {
+      var object = scope.texts[0];
+      window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
+      scope.changeLabel('text', object);
+      expect(object.label).toEqual(NEW_LABEL);
+    });
+
+    it('should not change a text label if it is the same', function() {
+      var object = scope.texts[0];
+      // same label
+      window.document.getElementById(object.$$hashKey).value = OLD_TEXT_LABEL;
+      scope.changeLabel('text', object);
+      expect(object.label).toEqual(OLD_TEXT_LABEL);
+    });
+
+    it('should not change a text label if it is empty', function() {
+      // empty label
+      var object = scope.texts[0];
+      window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
+      scope.changeLabel('text', object);
+      expect(object.label).toEqual(OLD_TEXT_LABEL);
+    });
+
+    it('should not change a text label if it already exists with another text', function() {
+      var object = scope.texts[0];
+      window.document.getElementById(object.$$hashKey).value = EXISTING_TEXT_LABEL;
+      scope.changeLabel('text', object);
+      expect(object.label).toEqual(OLD_TEXT_LABEL);
+    });
+
+    it('should propogate a new class name to all texts', function() {
+      scope.classLabelChanged(scope.classes[0], OLD_CLASS, NEW_CLASS);
+
+      expect(scope.texts[0].classes[0]).toBe(NEW_CLASS);
+      expect(scope.texts[1].classes[0]).toBe(NEW_CLASS);
+      expect(scope.texts[2].classes[0]).toBe('object3');
+    });
+
+    it('should throw an error on a bad input to change class label', inject(function ($rootScope) {
+      var success = true;
+      scope.classLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
+        success = true;
+      }, function error () {
+        success = false;
+      });
+      $rootScope.$apply();
+      expect(success).toBeFalsy();
+    }));
+
+    it('should throw an error on a bad input to change text label', inject(function ($rootScope) {
+      var success = true;
+      scope.textLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
+        success = true;
+      }, function error () {
+        success = false;
+      });
+      $rootScope.$apply();
+      expect(success).toBeFalsy();
+    }));
   });
-
-  it('should order the texts', function() {
-    scope.textOrderOption = ORDER_OPTIONS[0];
-    expect(scope.textOrder(scope.texts[0])).toEqual(-scope.texts[0].seq);
-
-    scope.textOrderOption = ORDER_OPTIONS[1];
-    expect(scope.textOrder(scope.texts[0])).toEqual(scope.texts[0].seq);
-
-    scope.textOrderOption = ORDER_OPTIONS[2];
-    expect(scope.textOrder(scope.texts[0])).toEqual(scope.texts[0].label);
-
-    scope.textOrderOption = ORDER_OPTIONS[3];
-    expect(scope.textOrder(scope.texts[0])).toEqual(-scope.classesForText(scope.texts[0]).length);
-
-    scope.textOrderOption = ORDER_OPTIONS[4];
-    expect(scope.textOrder(scope.texts[0])).toEqual(scope.classesForText(scope.texts[0]).length);
-
-    scope.textOrderOption = BAD_ORDER_OPTION;
-    expect(scope.textOrder(scope.texts[0])).toEqual(-scope.texts[0].seq);
-  });
-
-  it('should set \'selected\' for a given object if not in edit mode', function() {
-    scope.classes[2].edit = true;
-    scope.selectClass(scope.classes[2]);
-    expect(scope.classes[2].selected).toBeFalsy();
-
-    scope.selectClass(scope.classes[1]);
-    expect(scope.classes[1].selected).toBeTruthy();
-  });
-
-  it('should allow the user to edit a field', function() {
-    scope.editField(scope.classes[1]);
-    expect(scope.classes[1].edit).toBeTruthy();
-
-    // already in edit mode, so should now dismiss
-    scope.editField(scope.classes[1]);
-    expect(scope.classes[1].edit).toBeFalsy();
-  });
-
-  it('should allow the user to cancel the editing of a field using the ESC key', function() {
-    var event = {
-      keyCode: 27
-    };
-    scope.keyUpCancelEditing(scope.classes[2], event);
-    expect(scope.classes[2].edit).toBeFalsy();
-  });
-
-  it('should change a class label', function() {
-    var object = scope.classes[0];
-    window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
-    scope.changeLabel('class', object);
-    expect(object.label).toEqual(NEW_LABEL);
-  });
-
-  it('should not change a class label if it is the same or empty or already exists', function() {
-    var object = scope.classes[0];
-
-    // same label
-    window.document.getElementById(object.$$hashKey).value = OLD_LABEL;
-    scope.changeLabel('class', object);
-    expect(object.label).toEqual(OLD_LABEL);
-
-    // empty label
-    window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
-    scope.changeLabel('class', object);
-    expect(object.label).toEqual(OLD_LABEL);
-
-    // existing label
-    window.document.getElementById(object.$$hashKey).value = EXISTING_LABEL;
-    scope.changeLabel('class', object);
-    expect(object.label).toEqual(OLD_LABEL);
-  });
-
-  it('should change a text label', function() {
-    var object = scope.texts[0];
-    window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
-    scope.changeLabel('text', object);
-    expect(object.label).toEqual(NEW_LABEL);
-  });
-
-  it('should not change a text label if it is the same', function() {
-    var object = scope.texts[0];
-    // same label
-    window.document.getElementById(object.$$hashKey).value = OLD_TEXT_LABEL;
-    scope.changeLabel('text', object);
-    expect(object.label).toEqual(OLD_TEXT_LABEL);
-  });
-
-  it('should not change a text label if it is empty', function() {
-    // empty label
-    var object = scope.texts[0];
-    window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
-    scope.changeLabel('text', object);
-    expect(object.label).toEqual(OLD_TEXT_LABEL);
-  });
-
-  it('should not change a text label if it already exists with another text', function() {
-    var object = scope.texts[0];
-    window.document.getElementById(object.$$hashKey).value = EXISTING_TEXT_LABEL;
-    scope.changeLabel('text', object);
-    expect(object.label).toEqual(OLD_TEXT_LABEL);
-  });
-
-  it('should propogate a new class name to all texts', function() {
-    scope.classLabelChanged(scope.classes[0], OLD_CLASS, NEW_CLASS);
-
-    expect(scope.texts[0].classes[0]).toBe(NEW_CLASS);
-    expect(scope.texts[1].classes[0]).toBe(NEW_CLASS);
-    expect(scope.texts[2].classes[0]).toBe('object3');
-  });
-
-   it('should throw an error on a bad input to change class label', inject( function($rootScope) {
-     var success = true;
-     scope.classLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
-       success = true;
-     }, function error () {
-       success = false;
-     });
-     $rootScope.$apply();
-     expect(success).toBeFalsy();
-   }));
-
-   it('should throw an error on a bad input to change text label', inject( function($rootScope) {
-     var success = true;
-     scope.textLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
-       success = true;
-     }, function error () {
-       success = false;
-     });
-     $rootScope.$apply();
-     expect(success).toBeFalsy();
-   }));
 
   it('should count the number of texts with a given class tagged', function() {
     var count = scope.numberTextsInClass({ label: OLD_CLASS });

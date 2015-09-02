@@ -29,8 +29,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         access: {
           requiredLogin: false
         },
-        onExit: function onExit (alerts) {
-          alerts.clear();
+        onExit: function onExit (watsonAlerts) {
+          watsonAlerts.clear();
         }
       });
   });
