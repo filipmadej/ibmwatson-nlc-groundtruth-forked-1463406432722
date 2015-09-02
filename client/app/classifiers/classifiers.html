@@ -1,7 +1,5 @@
-<div class="container-alerts">
-  <alerts-bar alerts="alerts"></alerts-bar>
-</div>
-<div class="ibm-container-wrapper">  
+<watson-alerts-bar></watson-alerts-bar>
+<div class="ibm-container-wrapper">
   <watson-loading ng-show="loading" loading-message="'Loading Classifiers...'"></watson-loading>
   <div class="container ibm-container" ng-show="!loading">
     <div class="ibm-nlc-column-header" style="margin-bottom: 10px">Classifiers</div>
@@ -21,7 +19,7 @@
           <div class="ibm-nlc-classifier-id">
             <label>Classifier ID:</label><span class="ibm-badge">{{ classifier.classifier_id }}</span>
           </div>
-          <div class="error-text" ng-show="classifier.status=='Failed'">
+          <div class="error-text" ng-show="classifier.status=='Failed' || classifier.status=='Unavailable'">
             <span>
               {{ classifier.statusDescription }}
             </span>

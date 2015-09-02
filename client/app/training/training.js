@@ -29,11 +29,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             return authentication.getCurrentUser();
           }
         },
-        onEnter: ['versions', 'alerts',
-          function onEnter(versions, alerts) {
+        onEnter: ['versions', 'watsonAlerts',
+          function onEnter(versions, watsonAlerts) {
             versions.isCurrent().then(function(isCurrent) {
               if (!versions.informed && !isCurrent) {
-                alerts.add({
+                watsonAlerts.add({
                   level: 'info',
                   title: 'Pssst!',
                   text: 'A new version of this tool is available',

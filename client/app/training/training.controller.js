@@ -24,10 +24,10 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('TrainingController', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'alerts', 'socket', 'content',
-    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, alertsSvc, socket, content) {
+  .controller('TrainingController', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'watsonAlerts', 'socket', 'content',
+    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, watsonAlerts, socket, content) {
 
-      $scope.alerts = alertsSvc.alerts;
+      watsonAlerts.add({ level: 'error', text: 'test' });
 
       // Page Loading Variables
       $scope.loading = {
@@ -41,7 +41,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // -------------------------------------------------------------------------
 
       socket.on('init', function init (data) {
-        $log.debug('socket data: ' + JSON.stringify(data));
+        $log.debug('socket:init ' + JSON.stringify(data));
       });
 
       socket.on('class:delete', function deleteClass (data) {
@@ -54,9 +54,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           } else {
             msg = 'Error deleting class with id ' + data.id + '. Please refresh the page and try again.';
           }
-          alertsSvc.add({ level: 'error', text: msg });
+          watsonAlerts.add({ level: 'error', text: msg });
         } else if (clazz){
-          $log.debug('got delete class from socket ' + JSON.stringify(data));
           $scope.classes.splice($scope.classes.indexOf(clazz), 1);
           $scope.texts.forEach(function forEach (text) {
             var index = text.classes.indexOf(clazz.label);
@@ -69,7 +68,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       socket.on('text:delete', function deleteText (data) {
         $log.debug('socket:text:delete ' + JSON.stringify(data));
-        $log.debug('got delete text from socket ' + JSON.stringify(data));
         var text = $scope.getFromId($scope.texts, data.id);
         if (data.err) {
           var msg;
@@ -79,7 +77,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             msg = 'Error deleting text with id ' + data.id + '. Please refresh the page and try again.';
           }
           msg += 'Error message: ' + data.err;
-          alertsSvc.add({ level: 'error', text: msg });
+          watsonAlerts.add({ level: 'error', text: msg });
         } else if (text){
           $scope.texts.splice($scope.texts.indexOf(text), 1);
         }
@@ -89,7 +87,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         $log.debug('socket:class:create ' + JSON.stringify(data));
         if (data.err) {
           var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + data.err;
-          alertsSvc.add({ level: 'error', text: msg });
+          watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
           element.$$hashKey = element.id;
@@ -106,7 +104,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         $log.debug('socket:text:create ' + JSON.stringify(data));
         if (data.err) {
           var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + data.err;
-          alertsSvc.add({ level: 'error', text: msg });
+          watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
           element.$$hashKey = element.id;
@@ -131,14 +129,14 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           if (clazz.err) {
             errorClasses.push(clazz);
           } else {
-            successClasses.push($scope.getFromId($scope.classes, clazz.id).label);
+            successClasses.push($scope.getFromId($scope.classes, clazz).label);
           }
         });
         if (errorClasses.length > 0) {
-          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(errorClasses) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(errorClasses) });
         }
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(data.classes) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to add the following classes to the "' + text.label + '" text: ' + JSON.stringify(data.classes) });
         } else {
           text.classes = text.classes.concat(successClasses);
         }
@@ -152,7 +150,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           classes.push($scope.getFromId($scope.classes, clazz).label);
         });
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to remove the following classes from the "' + text.label + '" text: ' + JSON.stringify(classes) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to remove the following classes from the "' + text.label + '" text: ' + JSON.stringify(classes) });
         } else {
           classes.forEach(function forEach (clazz) {
             text.classes.splice(text.classes.indexOf(clazz), 1);
@@ -165,7 +163,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var text = $scope.getFromId($scope.texts, data.id);
         var newLabel = data.value;
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(newLabel) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(newLabel) });
         } else {
           text.label = newLabel;
           window.document.getElementById(text.$$hashKey).value = newLabel;
@@ -178,7 +176,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var oldLabel = clazz.label;
         var newLabel = data.name;
         if (data.err) {
-          alertsSvc.add({ level: 'error', text: 'Failed to change the ' + oldLabel + ' class to ' + newLabel });
+          watsonAlerts.add({ level: 'error', text: 'Failed to change the ' + oldLabel + ' class to ' + newLabel });
         } else {
           clazz.label = newLabel;
           window.document.getElementById(clazz.$$hashKey).value = newLabel;
@@ -194,7 +192,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.$on('$destroy', function () {
         socket.removeAllListeners();
-        // socket.removeListener(this);
       });
 
       // -------------------------------------------------------------------------
@@ -301,12 +298,12 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         return $scope.loadTexts();
       }, function error (err) {
         $log.error('error loading classes: ' + JSON.stringify(err));
-        alertsSvc.add({ level: 'error', text: 'Error loading classes from database. Please refresh to try again.' });
+        watsonAlerts.add({ level: 'error', text: 'Error loading classes from database. Please refresh to try again.' });
       }).then(function afterLoadTexts () {
         $log.debug('success loading classes and texts');
       }, function error (err) {
         $log.error('error loading texts: ' + JSON.stringify(err));
-        alertsSvc.add({ level: 'error', text: 'Error loading texts from database. Please refresh to try again.' });
+        watsonAlerts.add({ level: 'error', text: 'Error loading texts from database. Please refresh to try again.' });
       });
 
       // watch for appActions from the UI
@@ -503,6 +500,8 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         } else {
           var allObjects = $scope.getScopeArray(type);
           if ($scope.containsLabel(allObjects, newLabel)) {
+            field.value = oldLabel;  // required so that empty value doesn't stick in text field
+            object.edit = false;
             var msg;
             if (type === 'class') {
               msg = $scope.inform('The ' + newLabel + ' class already exists.');
@@ -515,11 +514,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             field.value = oldLabel;
             switch (type) {
               case 'class':
-                classes.update(object.id, { name: newLabel });
-                break;
+                return classes.update(object.id, { name: newLabel });
               case 'text':
-                texts.update(object.id, { value: newLabel });
-                break;
+                return texts.update(object.id, { value: newLabel });
             }
           }
         }
@@ -934,7 +931,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }, function error (err) {
             $scope.loading.savingClassifier = false;
             $scope.showTrainConfirm = false;
-            alertsSvc.add({ level: 'error', text: err.message });
+            watsonAlerts.add({ level: 'error', text: err.message });
           });
         }
 

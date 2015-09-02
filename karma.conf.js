@@ -21,6 +21,7 @@ module.exports = function(config) {
       'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'client/bower_components/angular-xeditable/dist/js/xeditable.js',
       'client/bower_components/angular-multi-check/angular-multi-check.js',
+      'client/bower_components/angular-socket-io/socket.js',
       'client/bower_components/lodash/lodash.min.js',
       'client/bower_components/angular-ui-router/release/angular-ui-router.js',
       'client/bower_components/d3/d3.js',
@@ -37,7 +38,8 @@ module.exports = function(config) {
       'client/app/**/*.jade',
       'client/components/**/*.jade',
       'client/app/**/*.html',
-      'client/components/**/*.html'
+      'client/components/**/*.html',
+      'node_modules/socket.io/node_modules/socket.io-client/socket.io.js'
     ],
 
     preprocessors: {
