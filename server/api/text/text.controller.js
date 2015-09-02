@@ -24,7 +24,6 @@ var _ = require('lodash');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
-var cache = require('memory-cache');
 var uuid = require('node-uuid');
 
 // local dependencies
