@@ -29,6 +29,7 @@ module.exports = function(config) {
       'client/bower_components/ngDialog/js/ngDialog.js',
       'client/bower_components/ng-file-upload-shim/ng-file-upload-shim.js',
       'client/bower_components/ng-file-upload/ng-file-upload.js',
+      'client/bower_components/ibmwatson-common-ui-components/dist/ibmwatson-common-ui-components.js',
       'client/app/app.js',
       'client/app/app.coffee',
       'client/app/**/*.js',
