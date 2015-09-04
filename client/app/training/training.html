@@ -3,7 +3,7 @@
     <div>
       <ul class="nav navbar-nav navbar-left ibm-nav">
         <li>
-          <a ngf-select ngf-change="importDocuments()" role="button" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
+          <a ngf-select ngf-change="importFiles()" role="button" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
         </li>
         <li>
           <a ng-click="exportToFile()">Export</a>
@@ -82,41 +82,41 @@
       </datalist>
       <div class="ibm-nlc-table" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
-        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
+        <div class="ibm-nlc-data-row" ng-repeat="clazz in filteredClasses() | orderBy:classOrder" ng-class="clazz.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
           <div class="inline check">
             <span>
-              <input type="checkbox" ng-model="aClass.checked" multi-check/>
+              <input type="checkbox" ng-model="clazz.checked" multi-check/>
             </span>
           </div>
           <div class="inline ibm-nlc-class-label" width="100%">
             <!-- width="100%" to force this cell to maximum available space -->
-            <span ng-show="!aClass.edit" title="{{ aClass.label || 'empty' }}">
-              {{ aClass.label || 'empty' }}
+            <span ng-show="!clazz.edit" title="{{ clazz.label || 'empty' }}">
+              {{ clazz.label || 'empty' }}
             </span>
-            <form ng-show="aClass.edit" ng-submit="changeLabel('class', aClass);">
+            <form ng-show="clazz.edit" ng-submit="changeLabel('class', clazz);">
               <span>
-                <input id="{{ aClass.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ aClass.label }}" ng-keyup="keyUpCancelEditing(aClass, $event)" ng-blur="changeLabel('class', aClass)" show-focus="aClass.edit">
+                <input id="{{ clazz.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ clazz.label }}" ng-keyup="keyUpCancelEditing(clazz, $event)" ng-blur="changeLabel('class', clazz)" show-focus="clazz.edit">
               </span>
             </form>
           </div>
-          <div class="right ibm-nlc-row-options" ng-class="{'ibm-nlc-row-options-padded': aClass.edit}">
+          <div class="right ibm-nlc-row-options" ng-class="{'ibm-nlc-row-options-padded': clazz.edit}">
             <div class="inline">
-                <span class="ico-span" ng-click="editField(aClass)">
+                <span class="ico-span" ng-click="editField(clazz)">
                     <span class="ibm-icon--edit"></span>
                 </span>
             </div>
             <div class="inline">
-                <span class="ico-span" ng-click="selectClass(aClass)">
+                <span class="ico-span" ng-click="selectClass(clazz)">
                     <span class="ibm-icon--filter"></span>
                 </span>
             </div>
             <div class="inline">
-                <span class="ico-span" ng-click="deleteClass(aClass)">
+                <span class="ico-span" ng-click="deleteClass(clazz)">
                     <span class="ibm-icon--remove-trash"></span>
                 </span>
             </div>
             <div class="inline up3">
-              <span class="sr-only">(current)</span><span class="ibm-badge">{{numberTextsInClass(aClass)}}</span>
+              <span class="sr-only">(current)</span><span class="ibm-badge">{{numberTextsInClass(clazz)}}</span>
             </div>
           </div>
         </div>
@@ -136,12 +136,12 @@
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add</button>
           </span>
         </form>
-        <div ng-show="getSelected().length" style="margin-top: 10px;">
+        <div ng-show="getSelectedClasses().length" style="margin-top: 10px;">
           <span class="ibm-nlc-showing-tagged-results">Tagged with:</span>
-          <span ng-repeat="aClass in getSelected()">
+          <span ng-repeat="clazz in getSelectedClasses()">
             <span class="ibm-nlc-tag ibm-nlc-filter-tag">
-              {{ aClass.label }}
-              <a ng-click="removeClassFromView(aClass)">
+              {{ clazz.label }}
+              <a ng-click="selectClass(clazz)">
                 <span class="ibm-nlc-tag-x">x</span>
               </a>
             </span>

@@ -87,8 +87,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           });
         },
 
-        importFile : function importFile (file, progressFcn, successFcn) {
-          $log.debug('Importing file: ' + JSON.stringify(file));
+        importFiles : function importFiles (files, progressFcn, successFcn) {
+          $log.debug('Importing file: ' + JSON.stringify(files));
+          var file = files[0];
           return $q(function upload (resolve, reject) {
             if (file.length === 0) {
               reject();

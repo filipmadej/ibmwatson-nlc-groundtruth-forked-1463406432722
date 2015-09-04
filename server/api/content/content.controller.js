@@ -24,7 +24,7 @@ var http = require('http');
 var async = require('async');
 var httpstatus = require('http-status');
 var csv = require('fast-csv');
-var JSONStream = require('JSONStream');
+// var JSONStream = require('JSONStream');
 // local dependencies
 var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');

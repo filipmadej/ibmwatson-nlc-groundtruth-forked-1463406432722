@@ -27,7 +27,30 @@ describe('Controller: TrainingController', function() {
   }));
 
   var TrainingController, scope;
+  var classesMock, textsMock, nlcMock, contentMock;
   var CLASSES, TEXTS, SCOPECLASSES, SCOPETEXTS;
+
+  var OLD_CLASS_LABEL = 'object1';
+  var OLD_TEXT_LABEL = 'text1';
+  var EXISTING_CLASS_LABEL = 'object2';
+  var EXISTING_TEXT_LABEL = 'text2';
+  var NEW_LABEL = 'label';
+  var EMPTY_LABEL = '';
+  
+  var BAD_ID = 'bad';
+  var BAD_OBJECT = { id: BAD_ID };
+  var ERROR_MSG = { msg: 'error' };
+  var GOOD_POST = { id: '5' };
+  var GOOD_UPDATE = { id: '5' };
+
+  var ORDER_OPTIONS = [
+    { label: 'Newest', value: 'newest' },
+    { label: 'Oldest', value: 'oldest' },
+    { label: 'Alphabetical', value: 'alpha' },
+    { label: 'Most', value: 'most' },
+    { label: 'Fewest', value: 'fewest' }
+  ];
+  var BAD_ORDER_OPTION = { label: 'Bad', value: 'bad' };
 
   function resetClasses() {
     // Mock NLC API response
@@ -71,17 +94,6 @@ describe('Controller: TrainingController', function() {
       seq: 2,
     }];
   }
-
-  var OLD_CLASS = 'object1';
-  var NEW_CLASS = 'object2';
-  var OLD_LABEL = 'object1';
-  var OLD_TEXT_LABEL = 'text1';
-  var NEW_LABEL = 'label';
-  var EMPTY_LABEL = '';
-  var EXISTING_LABEL = 'object2';
-  var EXISTING_TEXT_LABEL = 'text2';
-  var BAD_ID = 'bad';
-  var BAD_OBJECT = { id: BAD_ID };
 
   function resetTexts() {
     // Mock NLC API response
@@ -129,50 +141,35 @@ describe('Controller: TrainingController', function() {
     }];
   }
 
-  var ORDER_OPTIONS = [
-    { label: 'Newest', value: 'newest' },
-    { label: 'Oldest', value: 'oldest' },
-    { label: 'Alphabetical', value: 'alpha' },
-    { label: 'Most', value: 'most' },
-    { label: 'Fewest', value: 'fewest' }
-  ];
-  var BAD_ORDER_OPTION = { label: 'Bad', value: 'bad' };
-
   // Initialize the controller and a mock scope
   beforeEach(inject(function($controller, $compile, $rootScope, $q) {
-    var nlcMock = {
-      train: function() {
-      },
+    var promise = function (data) {
+      return $q(function (resolve) {
+        resolve(data);
+      });
     };
 
-    var classesMock = {
-      query: function() {
-        return $q(function(resolve) {
-          resolve(CLASSES);
-        });
-      },
-      post: function() {
-        return $q(function(resolve) {
-          resolve({ id : '5' });
-        });
-      },
-      remove: function() {
-        return $q(function(resolve) {
-          resolve();
-        });
-      },
-      update: function(id) {
-        return $q(function (resolve, reject) {
-          if (id === BAD_ID) {
-            reject({ msg: 'err' });
-          } else {
-            resolve({ id: '5' });
-          }
-        });
-      }
+    // set the variables so that the mocks return the correct data
+    resetClasses();
+    resetTexts();
+
+    nlcMock = {
+      train: sinon.stub()
     };
 
-    var textsMock = {
+    classesMock = {
+      query: sinon.stub(),
+      post: sinon.stub(),
+      remove: sinon.spy(),
+      update: sinon.stub()
+    };
+    classesMock.query.returns(promise(CLASSES));
+    classesMock.post.withArgs(BAD_POST).returns(ERROR_MSG);
+    classesMock.post.returns(GOOD_POST);
+    classesMock.update.withArgs(BAD_UPDATE).returns(ERROR_MSG);
+    classesMock.update.returns(GOOD_UPDATE);
+
+    textsMock = {
       query: function() {
         return $q(function(resolve) {
           resolve(TEXTS);
@@ -209,7 +206,7 @@ describe('Controller: TrainingController', function() {
       }
     };
 
-    var contentMock = {
+    contentMock = {
       importFile: function() {
         return $q(function(resolve){
           resolve({
@@ -225,10 +222,6 @@ describe('Controller: TrainingController', function() {
       }
     };
 
-    // set the variables so that the mocks return the correct data
-    resetClasses();
-    resetTexts();
-
     scope = $rootScope.$new();
     TrainingController = $controller('TrainingController', {
       $scope: scope,
@@ -243,8 +236,7 @@ describe('Controller: TrainingController', function() {
     $compile(elm)($rootScope);
     $rootScope.$apply();
 
-    // reset the globals as they get modified inside the loadTasks and loadClasses functions
-    // want to use these globals for tests
+    // reset the globals as they get modified inside the loadTexts and loadClasses functions
     resetClasses();
     resetTexts();
   }));
@@ -411,35 +403,21 @@ describe('Controller: TrainingController', function() {
       $rootScope.$apply();
     }));
 
-    it('should not change a class label if it is the same or empty or already exists', inject(function ($rootScope) {
+    iit('should not change a class label if it is the same or empty or already exists', inject(function ($rootScope) {
       var object = scope.classes[0];
 
       // same label
-      window.document.getElementById(object.$$hashKey).value = OLD_LABEL;
-      scope.changeLabel('class', object).then(function success (result) {
-        expect(result.id).toBe('5');
-      }, function error (err) {
-        expect(err).toBeNull();
-      });
-      $rootScope.$apply();
+      window.document.getElementById(object.$$hashKey).value = OLD_CLASS_LABEL;
+      scope.changeLabel('class', object);
+      classesMock.update.should.not.be.called;
 
       // empty label
       window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
-      scope.changeLabel('class', object).then(function success (result) {
-        expect(result.id).toBe('5');
-      }, function error (err) {
-        expect(err).toBeNull();
-      });
-      $rootScope.$apply();
+      scope.changeLabel('class', object);
 
       // existing label
-      window.document.getElementById(object.$$hashKey).value = EXISTING_LABEL;
-      scope.changeLabel('class', object).then(function success (result) {
-        expect(result.id).toBe('5');
-      }, function error (err) {
-        expect(err).toBeNull();
-      });
-      $rootScope.$apply();
+      window.document.getElementById(object.$$hashKey).value = EXISTING_CLASS_LABEL;
+      scope.changeLabel('class', object);
     }));
 
     it('should change a text label', function() {
@@ -473,10 +451,10 @@ describe('Controller: TrainingController', function() {
     });
 
     it('should propogate a new class name to all texts', function() {
-      scope.classLabelChanged(scope.classes[0], OLD_CLASS, NEW_CLASS);
+      scope.classLabelChanged(scope.classes[0], OLD_CLASS_LABEL, NEW_LABEL);
 
-      expect(scope.texts[0].classes[0]).toBe(NEW_CLASS);
-      expect(scope.texts[1].classes[0]).toBe(NEW_CLASS);
+      expect(scope.texts[0].classes[0]).toBe(NEW_LABEL);
+      expect(scope.texts[1].classes[0]).toBe(NEW_LABEL);
       expect(scope.texts[2].classes[0]).toBe('object3');
     });
 
@@ -504,7 +482,7 @@ describe('Controller: TrainingController', function() {
   });
 
   it('should count the number of texts with a given class tagged', function() {
-    var count = scope.numberTextsInClass({ label: OLD_CLASS });
+    var count = scope.numberTextsInClass({ label: OLD_CLASS_LABEL });
     expect(count).toBe(2);
   });
 
@@ -515,8 +493,8 @@ describe('Controller: TrainingController', function() {
 
   // TODO: fix mock. promise not being returned properly.
   // it('should add a new class', function() {
-  //   scope.add('class', OLD_LABEL).then(function () {
-  //     expect(scope.classes[0].label).toEqual(OLD_LABEL);
+  //   scope.add('class', OLD_CLASS_LABEL).then(function () {
+  //     expect(scope.classes[0].label).toEqual(OLD_CLASS_LABEL);
   //   }, function error (err) {
   //     expect(err).toBeNull();
   //   });
