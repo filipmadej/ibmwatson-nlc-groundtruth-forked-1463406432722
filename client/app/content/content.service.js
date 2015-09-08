@@ -89,28 +89,33 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
         importFiles : function importFiles (files, progressFcn, successFcn) {
           $log.debug('Importing file: ' + JSON.stringify(files));
-          var file = files[0];
-          return $q(function upload (resolve, reject) {
-            if (file.length === 0) {
-              reject();
-            } else {
-              Upload.upload({
-                url: contentEndpoint(),
-                file: file
+          var promises = [];
+          files.forEach(function forEach (file) {
+            promises.push(
+              $q(function upload (resolve, reject) {
+                if (file.length === 0) {
+                  reject();
+                } else {
+                  Upload.upload({
+                    url: contentEndpoint(),
+                    file: file
+                  })
+                  .progress(function progress (evt) {
+                    progressFcn(evt);
+                  })
+                  .success(function success (data) {
+                    $log.debug('Succesfully imported file: ' + data);
+                    successFcn();
+                    resolve(data);
+                  }).error(function error (err) {
+                    $log.error('Importing file failed: ' + err);
+                    reject(err);
+                  });
+                }
               })
-              .progress(function progress (evt) {
-                progressFcn(evt);
-              })
-              .success(function success (data) {
-                $log.debug('Succesfully imported file: ' + data);
-                successFcn();
-                resolve(data);
-              }).error(function error (err) {
-                $log.error('Importing file failed: ' + err);
-                reject(err);
-              });
-            }
+            );
           });
+          return $q.all(promises);
         }
       };
 
