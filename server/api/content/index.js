@@ -27,10 +27,12 @@ var router = express.Router();
 
 var ENDPOINTS = {
     content : '/:tenantid/content',
+    importstatus : '/:tenantid/content/import/:importid',
 };
 
 router.use(ENDPOINTS.content, rest.ensureAuthenticated);
 router.post(ENDPOINTS.content, multer(controller.uploadOptions), controller.handleFileImport);
 router.get(ENDPOINTS.content, controller.handleFileDownload);
+router.get(ENDPOINTS.importstatus, controller.importStatus);
 
 module.exports = router;

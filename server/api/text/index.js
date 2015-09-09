@@ -30,7 +30,8 @@ var router = express.Router();
 
 var ENDPOINTS = {
     texts : '/:tenantid/texts',
-    text : '/:tenantid/texts/:textid'
+    text : '/:tenantid/texts/:textid',
+    patchstatus : '/:tenantid/texts/:textid/patch/:patchid',
 };
 
 router.use(ENDPOINTS.texts, rest.ensureAuthenticated);
@@ -42,5 +43,7 @@ router.post(ENDPOINTS.texts, controller.createText);
 router.patch(ENDPOINTS.text, controller.editText);
 router.delete(ENDPOINTS.text, controller.deleteText);
 router.delete(ENDPOINTS.texts, controller.deleteTexts);
+
+router.get(ENDPOINTS.patchstatus, controller.patchStatus);
 
 module.exports = router;

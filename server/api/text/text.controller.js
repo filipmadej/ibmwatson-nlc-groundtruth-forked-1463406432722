@@ -24,6 +24,7 @@ var _ = require('lodash');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
+var cache = require('memory-cache');
 var uuid = require('node-uuid');
 
 // local dependencies
@@ -35,6 +36,15 @@ var socketUtil = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
+
+var MINUTE = 1000 * 60;
+var HOUR = 60 * MINUTE;
+
+var STATUS = {
+  RUNNING : 'running',
+  COMPLETE : 'complete',
+  ERROR : 'error'
+};
 
 /**
  * Constructor for a new Error object specific to database patch operations
@@ -84,7 +94,6 @@ function patchTextClasses (tenantid, textid, patchoperation, callback) {
       if (tenantsToAdd.length !== patchoperation.value.length) {
         return callback(dberrors.invalid('Invalid value array'));
       }
-
       db.addClassesToText(tenantid, textid, tenantsToAdd, callback);
       break;
     case 'remove':
@@ -188,7 +197,7 @@ module.exports.createText = function createText (req, res) {
 
   db.createText(tenantid, textattrs, function returnNewTest (err, text) {
     if (err) {
-      socketUtil.send('text:create', { attributes: textattrs, err: err });
+      socketUtil.send('text:create', { attributes : textattrs, err : err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create text.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -198,7 +207,7 @@ module.exports.createText = function createText (req, res) {
     delete text._id;
     log.debug({ text : text }, 'Created text');
 
-    socketUtil.send('text:create', { attributes: text });
+    socketUtil.send('text:create', { attributes : text });
     responses.newitem(
       text,
       req.baseUrl + req.route.path, {
@@ -209,14 +218,20 @@ module.exports.createText = function createText (req, res) {
   });
 };
 
-function errorWrapper (patchoperation, callback) {
-  return function (err, result) {
+function operationHandler (patchoperation, patchid, patchdetails, callback) {
+  return function handleResult (err, result) {
+    var output = result;
     if (err) {
       log.debug(err, 'Patch error: ' + JSON.stringify(patchoperation));
-      return callback(null, new PatchError(err, patchoperation));
+      patchdetails.error++;
+      output = new PatchError(err, patchoperation);
     } else {
-      return callback(null, result);
+      patchdetails.success++;
+      output = result;
     }
+
+    cache.put(patchid, patchdetails, 5 * MINUTE);
+    return callback(null, output);
   };
 }
 
@@ -243,7 +258,7 @@ function socketResponseBuilder (textid, data) {
   var response = {};
   response.id = textid;
   if (data instanceof PatchError) {
-    response.err = data;
+    response.error = data;
 
     // metadata patch
     if (_.has(data, 'operation.value.value')) {
@@ -273,21 +288,53 @@ module.exports.editText = function editText (req, res) {
 
   var patchoperations = requests.verifyObjectsList(makeArray(req.body));
 
+  var details = {
+      status : STATUS.RUNNING,
+      success : 0,
+      error : 0
+  };
+
+  var patchid = uuid.v1();
+
+  cache.put(patchid, details, 5 * MINUTE);
+
   async.mapLimit(patchoperations, 10, function applyPatch (patchoperation, nextop) {
+    var getCallback = function getCallback () {
+      return operationHandler(patchoperation, patchid, details, nextop);
+    };
+
     if (patchoperation.path === '/classes') {
-      return patchTextClasses(tenantid, textid, patchoperation, errorWrapper(patchoperation, nextop));
+      return patchTextClasses(tenantid, textid, patchoperation, getCallback());
     } else if (patchoperation.path === '/metadata') {
-      return patchTextMetadata(tenantid, textid, patchoperation, errorWrapper(patchoperation, nextop));
+      return patchTextMetadata(tenantid, textid, patchoperation, getCallback());
     } else {
       log.debug({operation : patchoperation}, 'Unsupported operation');
+      details.error++;
       return nextop(null, new PatchError(dberrors.invalid('Unsupported operation'), patchoperation));
     }
   }, function handlePatchResponse (err, data) {
+
+    if (err) {
+      details.status = STATUS.ERROR;
+    } else {
+      details.status = STATUS.COMPLETE;
+    }
+
+    cache.put(patchid, details, 5 * MINUTE);
+
     data.forEach(function forEach (result) {
       socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
     });
-    responses.edited(res);
   });
+
+  responses.accepted(
+    req.baseUrl + req.route.path + '/patch/:patchid',
+    {
+      ':tenantid' : tenantid,
+      ':textid' : textid,
+      ':patchid' : patchid
+    },
+    res);
 };
 
 module.exports.deleteText = function deleteText (req, res) {
@@ -340,3 +387,16 @@ module.exports.deleteTexts = function deleteTexts (req, res) {
   });
   responses.del(res);
 };
+
+module.exports.patchStatus = function patchStatus (req, res) {
+  var tenantid = req.params.tenantid;
+  var patchid = req.params.patchid;
+
+  var details = cache.get(patchid);
+  if (details) {
+    return res.status(httpstatus.OK)
+      .json(details);
+  }
+
+  return responses.notfound(res);
+}

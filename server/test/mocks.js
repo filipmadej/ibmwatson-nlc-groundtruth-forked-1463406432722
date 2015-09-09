@@ -92,6 +92,7 @@ function StoreMock () {
   this.countTexts = sinon.stub();
   this.getText = sinon.stub();
   this.deleteTenant = sinon.stub();
+  this.processImportEntry = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
@@ -128,6 +129,11 @@ function StoreMock () {
     this.getText.callsArgWith(2, null, {});
     this.deleteTenant.reset();
     this.deleteTenant.callsArgWith(2, null, {});
+    this.processImportEntry.reset();
+    this.processImportEntry.callsArgWith(2, null, {
+      classes : [],
+      text : { id : uuid.v1(), value : uuid.v1(), classes : [] }
+    });
   };
 
   this.reset();

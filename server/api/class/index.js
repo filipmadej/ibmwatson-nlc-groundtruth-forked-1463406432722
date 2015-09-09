@@ -19,7 +19,7 @@
 var express = require('express');
 
 // local dependencies
-var controller = require('./class.controller.js');
+var controller = require('./class.controller');
 var rest = require('../../config/rest');
 
 var router = express.Router();
