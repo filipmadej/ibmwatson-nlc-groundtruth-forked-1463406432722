@@ -77,7 +77,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('class:create', function createClass (data) {
         $log.debug('socket:class:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + data.err;
+          var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + JSON.stringify(data.err);
           watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
@@ -94,7 +94,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:create', function createText (data) {
         $log.debug('socket:text:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + data.err;
+          var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + JSON.stringify(data.err);
           watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
@@ -136,14 +136,22 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:update:classes:remove', function removeClasses (data) {
         $log.debug('socket:text:update:classes:remove ' + JSON.stringify(data));
         var text = $scope.getFromId($scope.texts, data.id);
-        var classes = [];
+        var successClasses = [];
+        var errorClasses = [];
         data.classes.forEach(function forEach (clazz) {
-          classes.push($scope.getFromId($scope.classes, clazz).label);
+          if (clazz.err) {
+            errorClasses.push(clazz);
+          } else {
+            successClasses.push($scope.getFromId($scope.classes, clazz).label);
+          }
         });
+        if (errorClasses.length > 0) {
+          watsonAlerts.add({ level: 'error', text: 'Failed to remove the following classes to the "' + text.label + '" text: ' + JSON.stringify(errorClasses) });
+        }
         if (data.err) {
-          watsonAlerts.add({ level: 'error', text: 'Failed to remove the following classes from the "' + text.label + '" text: ' + JSON.stringify(classes) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to remove the following classes to the "' + text.label + '" text: ' + JSON.stringify(data.classes) });
         } else {
-          classes.forEach(function forEach (clazz) {
+          successClasses.forEach(function forEach (clazz) {
             text.classes.splice(text.classes.indexOf(clazz), 1);
           });
         }
