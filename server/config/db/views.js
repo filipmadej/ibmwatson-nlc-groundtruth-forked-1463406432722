@@ -247,7 +247,7 @@ module.exports.lookupClassesByName = function lookupClassesByName (db, tenant, n
   lookupClasses(db, 'class', tenant, names, callback);
 };
 
-module.exports.getTextByValue = function getTenantByName (db, tenant, value, callback) {
+module.exports.getTextByValue = function getTextByValue (db, tenant, value, callback) {
     var designdoc = 'text';
     var viewname = 'text';
     var req = {

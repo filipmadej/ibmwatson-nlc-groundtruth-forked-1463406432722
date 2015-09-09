@@ -209,12 +209,23 @@ describe('/server/components/restutils/responses', function () {
 
     it('should provide location header on Accepted response', function () {
 
-      var location = 'http://test.com';
+      var locationtemplate = 'http://test.com/:id';
+      var locationids = { ':id' : 1 };
 
-      responses.accepted(location, this.res);
+      responses.accepted(locationtemplate, locationids, this.res);
 
       this.res.status.should.have.been.calledWith(httpstatus.ACCEPTED);
-      this.res.header.should.have.been.calledWith('Location', location);
+      this.res.header.should.have.been.calledWith('Location', 'http://test.com/1');
+    });
+
+    it('should handle empty ids object', function () {
+
+      var locationtemplate = 'http://test.com';
+
+      responses.accepted(locationtemplate, {}, this.res);
+
+      this.res.status.should.have.been.calledWith(httpstatus.ACCEPTED);
+      this.res.header.should.have.been.calledWith('Location', locationtemplate);
     });
 
   });

@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2015 IBM Corp.
  *
@@ -24,7 +25,8 @@ var http = require('http');
 var async = require('async');
 var httpstatus = require('http-status');
 var csv = require('fast-csv');
-// var JSONStream = require('JSONStream');
+var cache = require('memory-cache');
+var uuid = require('node-uuid');
 // local dependencies
 var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
@@ -37,6 +39,15 @@ var requests = restutils.req;
 
 var TEN_MB = 10 * 1000 * 1000;
 
+var MINUTE = 1000 * 60;
+var HOUR = 60 * MINUTE;
+
+var STATUS = {
+  RUNNING : 'running',
+  COMPLETE : 'complete',
+  ERROR : 'error'
+};
+
 var FILE_UPLOAD_OPTIONS = {
   limits : {
     // protect against people uploading files that are too large
@@ -44,108 +55,92 @@ var FILE_UPLOAD_OPTIONS = {
     // support single file uploads only
     files : 1
   },
-  rename : function (fieldname, filename) {
+  rename : function mirror (fieldname, filename) {
     // don't rename files
     return filename;
   }
 };
 
-/**
- * Constructor for a new Error object specific to database operations
- *
- * @param {String} category - type of error
- * @param {String} message - description of error
- * @param {Number} code - http status code to associate with error
- * @returns {void} this is a constructor meant to be called via 'new'
- */
-function ImportError (category, message, code) {
-    Error.call(this); //super constructor
-    Error.captureStackTrace(this, this.constructor);
-
-    this.name = this.constructor.name;
-    this.error = category;
-    this.message = message;
-    this.statusCode = code;
-}
-util.inherits(ImportError, Error);
-
-function verifyExtension (extension) {
-  if (extension !== 'json' && extension !== 'csv') {
-    throw new Error('Only JSON and CSV formats are accepted');
-  }
-}
-
 // take the raw response from the file upload and process it to create a formatted JSON for the front-end
-function processFileContent (tenantid, data, req, res) {
+function processFileContent (tenantid, data, file, statusId, done) {
+  var details = {
+      status : STATUS.RUNNING,
+      success : 0,
+      error : 0
+  };
+
+  cache.put(statusId, details, 5 * MINUTE);
+
   async.forEachSeries(data, function process (entry, callback) {
     db.processImportEntry(tenantid, entry, function importEntry (err, result) {
-      if (err) {
-        socketUtil.send('import', { file: req.files.file, err: err });
-        callback();
-        return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to import from file.', function returnResponse () {
-          return responses.error(res, err);
-        });
+      var hasError = false;
+      if (err || result.error) {
+        details.error++;
+        socketUtil.send('import', { file : file, err : err || result.error });
+        return callback();
       }
 
       log.debug({ result : result }, 'Imported data');
 
       result.classes.forEach(function forEach (clazz) {
-        if (clazz.err) {
-          socketUtil.send('class:create', { attributes: clazz, err: clazz.err });
+        if (clazz.error) {
+          hasError = true;
+          socketUtil.send('class:create', { attributes : clazz, err : clazz.error });
         } else {
-          socketUtil.send('class:create', { attributes: clazz });
+          socketUtil.send('class:create', { attributes : clazz });
         }
       });
 
       if (result.text.created) {
-        if (result.text.err) {
-          socketUtil.send('text:create', { attributes: result.text, err: result.text.err });
+        if (result.text.error) {
+          hasError = true;
+          socketUtil.send('text:create', { attributes : result.text, err : result.text.error });
         } else {
-          socketUtil.send('text:create', { attributes: result.text });
+          socketUtil.send('text:create', { attributes : result.text });
         }
       } else if (result.text.classes) {
-        if (result.text.err) {
-          socketUtil.send('text:update:classes:add', { id: result.text.id, classes: result.text.classes, err: result.text.err });
+        var addClassError;
+        result.text.classes.some(function errorCheck (clazz) {
+          addClassError = clazz.error;
+          return clazz.error;
+        });
+        if (addClassError) {
+          hasError = true;
+          socketUtil.send('text:update:classes:add', { id : result.text.id, classes : result.text.classes, err : addClassError });
         } else {
-          socketUtil.send('text:update:classes:add', { id: result.text.id, classes: result.text.classes });
+          socketUtil.send('text:update:classes:add', { id : result.text.id, classes : result.text.classes });
         }
       }
+
+      if (hasError) {
+        details.error++;
+      } else {
+        details.success++;
+      }
+
+      cache.put(statusId, details, 5 * MINUTE);
+
       callback();
-      return responses.ok(res);
     });
+  }, function onEnd (err) {
+    done(err, details);
   });
 }
 
-function handleFileImport (req, res) {
-  log.debug({ files : req.files }, 'File import request');
+var q = async.queue(function add (task, callback) {
+  importFile(task.tenantid, task.file, task.importid, callback);
+});
 
-  if (!req.files) {
-    return res.status(httpstatus.INTERNAL_SERVER_ERROR)
-      .send({ error : 'File upload middleware not initialized' });
-  }
-
-  if (!req.files.file) {
-    return res.status(httpstatus.BAD_REQUEST)
-      .send({ error : 'Expected one file' });
-  }
-
-  var tenantid = req.params.tenantid;
-  var file = req.files.file;
-  var extension = file.extension;
-
-  try {
-    verifyExtension(extension);
-  } catch (err) {
-    return responses.error(res, err);
-  }
+function importFile (tenantid, file, importid, callback) {
 
   fs.readFile(file.path, 'utf8', function read (err, fileContent) {
     if (err) {
-      return responses.error(res, err);
+      return callback(err);
     }
-    if (extension === 'json') {
-      processFileContent(tenantid, JSON.parse(fileContent).training_data, req, res);
-    } else if (extension === 'csv') {
+
+    if (file.extension === 'json') {
+      processFileContent(tenantid, JSON.parse(fileContent).training_data, file, importid, callback);
+    } else {
       var entries = [];
       csv.fromString(fileContent, {headers : false, ignoreEmpty : true})
         .transform(function format (data) {
@@ -156,64 +151,64 @@ function handleFileImport (req, res) {
               classes.push(element);
             }
           })
-          return { text: text, classes: classes };
+          return { text : text, classes : classes };
         })
         .on('data', function onData (data) {
           entries.push(data);
         })
         .on('end', function onEnd () {
-          return processFileContent(tenantid, entries, req, res);
+          processFileContent(tenantid, entries, file, importid, callback);
         });
     }
-    return responses.ok(res);
+
+  });
+}
+
+function handleFileImport (req, res) {
+  log.debug({ files : req.files }, 'File import request');
+
+  if (!req.files) {
+    return res.status(httpstatus.INTERNAL_SERVER_ERROR)
+      .json({ error : 'File upload middleware not initialized' });
+  }
+
+  if (!req.files.file) {
+    return res.status(httpstatus.BAD_REQUEST)
+      .json({ error : 'Expected one file' });
+  }
+
+  var tenantid = req.params.tenantid;
+  var file = req.files.file;
+  var extension = file.extension;
+
+
+  if (extension !== 'json' && extension !== 'csv') {
+    return responses.badrequest('Only JSON and CSV formats are accepted', res);
+  }
+
+  var importid = uuid.v1();
+
+  cache.put(importid, {status : STATUS.RUNNING}, 5 * MINUTE);
+
+  q.push({tenantid : tenantid, file : file, importid : importid}, function handleError (err, info) {
+    info = info || {};
+    if (err) {
+      info.status = STATUS.ERROR;
+    } else {
+      info.status = STATUS.COMPLETE;
+    }
+
+    cache.put(importid, info, 24 * HOUR);
   });
 
-  // var stream = fs.createReadStream(file.path, { encoding: 'utf-8' });
-  // var parser;
-  // if (extension === 'json') {
-  //   parser = JSONStream.parse('training_data.*');
-  // } else if (extension === 'csv') {
-  //   parser = csv.parse({ headers: false, ignoreEmpty: true })
-  //     .transform(function format (data) {
-  //       var text = data.shift();
-  //       var classes = [];
-  //       for (var i = 0, len = data.length; i < len; i++) {
-  //         if (data[i] !== '') {
-  //           classes.push(data[i]);
-  //         }
-  //       }
-  //       return { text: text, classes: classes };
-  //     });
-  // }
-  // stream.pipe(parser)
-  //   .on('data', function parse (data) {
-  //     log.debug(data, 'Importing data');
-  //     db.processImportEntry(tenantid, data, function importEntry (err, result) {
-  //       if (err) {
-  //         socketUtil.send('import', { file: file, err: err });
-  //         return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to import from file.', function returnResponse () {
-  //           return responses.error(res, err);
-  //         });
-  //       }
-  //
-  //       log.debug({ result : result }, 'Imported data');
-  //
-  //       result.classes.forEach(function forEach (clazz) {
-  //         socketUtil.send('class:create', { attributes: clazz });
-  //       });
-  //       if (result.text.created) {
-  //         socketUtil.send('text:create', { attributes: result.text });
-  //       } else if (result.text.classes) {
-  //         socketUtil.send('text:update:classes:add', { attributes: result.text });
-  //       }
-  //       responses.ok(res);
-  //     });
-  //   })
-  //   .on('end', function done (data) {
-  //     log.debug(data, 'end import');
-  //     socketUtil.send('import:complete', data);
-  //     responses.ok(res);
-  //   });
+  responses.accepted(
+    req.baseUrl + req.route.path + '/import/:importid',
+    {
+      ':tenantid' : tenantid,
+      ':importid' : importid
+    },
+    res);
+
 }
 
 // Retrieves texts and classes from the database and returns them
@@ -227,7 +222,7 @@ function handleFileDownload (req, res) {
         },
         function getClassObjects (limit, next) {
           log.debug(limit, 'classLimit');
-          db.getClasses(tenantid, { limit: limit }, next);
+          db.getClasses(tenantid, { limit : limit }, next);
         }
       ], callback);
     },
@@ -237,7 +232,7 @@ function handleFileDownload (req, res) {
           db.countTexts(tenantid, next);
         },
         function getTextObjects (limit, next) {
-          db.getTexts(tenantid, { limit: limit }, next);
+          db.getTexts(tenantid, { limit : limit }, next);
         }
       ], callback);
     }
@@ -248,12 +243,27 @@ function handleFileDownload (req, res) {
     var classes = results[0];
     var texts = results[1];
 
-    return res.status(httpstatus.OK).json({ classes: classes, texts: texts });
+    return res.status(httpstatus.OK).json({ classes : classes, texts : texts });
   });
+}
+
+function importStatus (req, res) {
+
+  var tenantid = req.params.tenantid;
+  var importid = req.params.importid;
+
+  var details = cache.get(importid);
+  if (details) {
+    return res.status(httpstatus.OK)
+      .json(details);
+  }
+
+  return responses.notfound(res);
 }
 
 module.exports = {
   uploadOptions : FILE_UPLOAD_OPTIONS,
   handleFileImport : handleFileImport,
-  handleFileDownload : handleFileDownload
+  handleFileDownload : handleFileDownload,
+  importStatus : importStatus
 };
