@@ -496,7 +496,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       };
 
       // -------------------------------------------------------------------------
-      // Counting  functions
+      // Counting functions
       // -------------------------------------------------------------------------
 
       // Counts the number of texts that have a given <clazz> tagged
@@ -523,23 +523,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       // Create functions
       // -------------------------------------------------------------------------
 
-      // adds a new class
-      $scope.addClass = function addClass (label) {
-        return $scope.add('class', label);
-      };
-
-      // adds a new text
-      $scope.addText = function addText (label, classes) {
-        return $scope.add('text', label).then(function success (data) {
-          $scope.tagTextByLabels(data, classes);
-          return data;
-        }, function error (err) {
-          $log.error('error adding text: ' + JSON.stringify(err));
-          return null;
-        });
-      };
-
       // adds a new object
+      // type can be 'class' or 'text'
+      // optional can contain a text id for a new class to be added to
       $scope.add = function add (type, label, optional) {
         $scope.newClassString = '';
         $scope.newTextString = '';
@@ -565,7 +551,6 @@ angular.module('ibmwatson-nlc-groundtruth-app')
               } else {
                 return classes.post({ name: label });
               }
-              break;
             case 'text' :
               var checkedClasses = $scope.getChecked($scope.classes);
               if (checkedClasses.length > 0) {
@@ -600,7 +585,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         } else {
           msg = question($scope.numberTextsInClass(clazz) + ' text(s) are tagged with the ' + label + ' class. If you delete this class, it will be removed from those texts.', 'Delete');
         }
-        ngDialog.openConfirm({template: msg, plain: true
+        return ngDialog.openConfirm({template: msg, plain: true
         }).then(function remove () {
           return $scope.deleteClasses([clazz]);
         }, function cancel () {
@@ -618,7 +603,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         }
 
         var msg = question('Do you want to delete the "' + label + '" text?', 'Delete');
-        ngDialog.openConfirm({template: msg, plain: true
+        return ngDialog.openConfirm({template: msg, plain: true
         }).then(function remove () {
           return $scope.deleteTexts([text]);
         }, function cancel () {
