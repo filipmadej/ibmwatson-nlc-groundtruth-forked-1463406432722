@@ -1,0 +1,8 @@
+<div class="ibm-alert-bar">
+	<div ng-repeat="alert in alerts" class="alert alert-{{alert.level}} alert-dismissible ibm-alert ibm-alert--{{alert.level}}" role="alert">
+		<button ng-show="alert.dismissable" ng-click="alert.dismiss()" type="button" class="close ibm-alert__close" data-dismiss="alert" aria-label="Close">
+			<span class="ibm-icon--close-cancel-error" aria-hidden="true"></span>
+		</button>
+		<span ng-show="alert.title"><strong>{{alert.title}}</strong> </span>{{alert.text}}<span ng-show="alert.link"> <a href="{{alert.link}}">{{alert.linkText || 'Learn more'}}</a></span>
+	</div>
+</div>
