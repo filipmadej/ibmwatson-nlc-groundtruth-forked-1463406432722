@@ -153,7 +153,7 @@
           <input type="checkbox" ng-model="checkAllTextsChecked" ng-click="checkAll(filteredTexts(),checkAllTextsChecked);">
         </div>
         <div ng-show="getChecked(texts).length && filteredTexts().length" class="left">
-            <span class="ico-span" ng-click="tagCheckedTexts()">
+            <span class="ico-span" ng-click="tagCheckedTexts()" ng-show="getChecked(classes).length">
                 <span class="ibm-icon--tag"></span>Assign
             </span>
             <span class="ico-span" ng-click="deleteCheckedTexts()">
