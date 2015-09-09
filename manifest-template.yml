@@ -8,8 +8,8 @@ applications:
   buildpack: sdk-for-nodejs
   framework: node
   description: An application to configure and train a Watson Natural Language Classifier
-  memory: 256M
-  disk_quota: 256M
+  memory: 512M
+  disk_quota: 512M
   command: NODE_ENV=production node server/start.js
   domain: mybluemix.net
   host: @appBaseName@-@environment.name@-@BUILD_NUMBER@
