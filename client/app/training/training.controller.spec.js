@@ -30,18 +30,24 @@ describe('Controller: TrainingController', function() {
   var classesMock, textsMock, nlcMock, contentMock;
   var CLASSES, TEXTS, SCOPECLASSES, SCOPETEXTS;
 
-  var OLD_CLASS_LABEL = 'object1';
+  var CLASS = 'class';
+  var TEXT = 'text';
+  var OLD_CLASS_LABEL = 'class1';
   var OLD_TEXT_LABEL = 'text1';
-  var EXISTING_CLASS_LABEL = 'object2';
+  var EXISTING_CLASS_LABEL = 'class2';
   var EXISTING_TEXT_LABEL = 'text2';
   var NEW_LABEL = 'label';
   var EMPTY_LABEL = '';
-  
-  var BAD_ID = 'bad';
-  var BAD_OBJECT = { id: BAD_ID };
+
+  var BAD_ID = 'BAD';
+  var GOOD_ID = '0';
+  var BAD_ARGS = {};
   var ERROR_MSG = { msg: 'error' };
-  var GOOD_POST = { id: '5' };
-  var GOOD_UPDATE = { id: '5' };
+
+  var GOOD_POST_RESPONSE = { id: '4' };
+  var GOOD_UPDATE_RESPONSE = { id: '4' };
+  var GOOD_PATCH_RESPONSE = { id: '4' };
+  var GOOD_REMOVE_RESPONSE = {};
 
   var ORDER_OPTIONS = [
     { label: 'Newest', value: 'newest' },
@@ -55,19 +61,22 @@ describe('Controller: TrainingController', function() {
   function resetClasses() {
     // Mock NLC API response
     CLASSES = [{
-      name: 'object1',
+      name: 'class1',
       id: '0'
     }, {
-      name: 'object2',
+      name: 'class2',
       id: '1'
     }, {
-      name: 'object3',
+      name: 'class3',
       id: '2'
+    }, {
+      name: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      id: '3'
     }];
     // Mock Scope Array
     SCOPECLASSES = [{
-      label: 'object1',
-      name: 'object1',
+      label: 'class1',
+      name: 'class1',
       id: '0',
       $$hashKey: '0',
       checked : false,
@@ -75,8 +84,8 @@ describe('Controller: TrainingController', function() {
       selected: false,
       seq: 0,
     }, {
-      label: 'object2',
-      name: 'object2',
+      label: 'class2',
+      name: 'class2',
       id: '1',
       $$hashKey: '1',
       checked : false,
@@ -84,14 +93,23 @@ describe('Controller: TrainingController', function() {
       selected: false,
       seq: 1,
     }, {
-      label: 'object3',
-      name: 'object3',
+      label: 'class3',
+      name: 'class3',
       id: '2',
       $$hashKey: '2',
       checked : false,
       edit: false,
       selected: false,
       seq: 2,
+    }, {
+      label: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      name: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      id: '3',
+      $$hashKey: '3',
+      checked : false,
+      edit: false,
+      selected: false,
+      seq: 3,
     }];
   }
 
@@ -109,12 +127,16 @@ describe('Controller: TrainingController', function() {
       value: 'text3',
       classes: ['2'],
       id: '2'
+    }, {
+      value: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      classes: ['2'],
+      id: '3'
     }];
     // Mock Scope array
     SCOPETEXTS = [{
       label: 'text1',
       value: 'text1',
-      classes: ['object1'],
+      classes: ['class1'],
       id: '0',
       $$hashKey: '0',
       seq: 0,
@@ -123,7 +145,7 @@ describe('Controller: TrainingController', function() {
     }, {
       label: 'text2',
       value: 'text2',
-      classes: ['object1', 'object3'],
+      classes: ['class1', 'class3'],
       id: '1',
       $$hashKey: '1',
       seq: 1,
@@ -132,10 +154,19 @@ describe('Controller: TrainingController', function() {
     }, {
       label: 'text3',
       value: 'text3',
-      classes: ['object3'],
+      classes: ['class3'],
       id: '2',
       $$hashKey: '2',
       seq: 2,
+      checked: false,
+      edit: false
+    }, {
+      label: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      value: 'loooooooooooooooooooooooooooooooooooooooooooooooonglabel',
+      classes: ['class3'],
+      id: '3',
+      $$hashKey: '3',
+      seq: 3,
       checked: false,
       edit: false
     }];
@@ -160,66 +191,40 @@ describe('Controller: TrainingController', function() {
     classesMock = {
       query: sinon.stub(),
       post: sinon.stub(),
-      remove: sinon.spy(),
+      removeAll: sinon.stub(),
       update: sinon.stub()
     };
     classesMock.query.returns(promise(CLASSES));
-    classesMock.post.withArgs(BAD_POST).returns(ERROR_MSG);
-    classesMock.post.returns(GOOD_POST);
-    classesMock.update.withArgs(BAD_UPDATE).returns(ERROR_MSG);
-    classesMock.update.returns(GOOD_UPDATE);
+    classesMock.post.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    classesMock.post.returns(promise(GOOD_POST_RESPONSE));
+    classesMock.removeAll.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    classesMock.removeAll.returns(promise(GOOD_REMOVE_RESPONSE));
+    classesMock.update.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    classesMock.update.returns(promise(GOOD_UPDATE_RESPONSE));
 
     textsMock = {
-      query: function() {
-        return $q(function(resolve) {
-          resolve(TEXTS);
-        });
-      },
-      post: function() {
-        return $q(function(resolve) {
-          resolve({ id : '5' });
-        });
-      },
-      addClasses: function() {
-        return $q(function(resolve) {
-          resolve();
-        });
-      },
-      removeClasses: function() {
-        return $q(function(resolve) {
-          resolve();
-        });
-      },
-      remove: function() {
-        return $q(function(resolve) {
-          resolve();
-        });
-      },
-      update: function(id) {
-        return $q(function (resolve, reject) {
-          if (id === BAD_ID) {
-            reject({ msg: 'err' });
-          } else {
-            resolve({ id: '5' });
-          }
-        });
-      }
+      query: sinon.stub(),
+      post: sinon.stub(),
+      removeAll: sinon.stub(),
+      update: sinon.stub(),
+      removeClasses: sinon.stub(),
+      addClasses: sinon.stub()
     };
+    textsMock.query.returns(promise(TEXTS));
+    textsMock.post.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    textsMock.post.returns(promise(GOOD_POST_RESPONSE));
+    textsMock.removeAll.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    textsMock.removeAll.returns(promise(GOOD_REMOVE_RESPONSE));
+    textsMock.update.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    textsMock.update.returns(promise(GOOD_UPDATE_RESPONSE));
+    textsMock.addClasses.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    textsMock.addClasses.returns(promise(GOOD_PATCH_RESPONSE));
+    textsMock.removeClasses.withArgs(BAD_ARGS).returns(promise(ERROR_MSG));
+    textsMock.removeClasses.returns(promise(GOOD_PATCH_RESPONSE));
 
     contentMock = {
-      importFile: function() {
-        return $q(function(resolve){
-          resolve({
-            classes: ['class'],
-            text: [ {text: 'text', classes: ['class']} ]
-          });
-        });
-      },
-      exportFile: function() {
-        return $q(function (resolve) {
-          resolve();
-        });
-      }
+      importFile: sinon.stub(),
+      downloadFile: sinon.stub()
     };
 
     scope = $rootScope.$new();
@@ -246,18 +251,21 @@ describe('Controller: TrainingController', function() {
       expect(scope.classes[0].checked).toBeFalsy();
       expect(scope.classes[1].checked).toBeFalsy();
       expect(scope.classes[2].checked).toBeFalsy();
+      expect(scope.classes[3].checked).toBeFalsy();
 
       scope.checkAll(scope.classes, true);
 
       expect(scope.classes[0].checked).toBeTruthy();
       expect(scope.classes[1].checked).toBeTruthy();
       expect(scope.classes[2].checked).toBeTruthy();
+      expect(scope.classes[3].checked).toBeTruthy();
 
       scope.checkAll(scope.classes, false);
 
       expect(scope.classes[0].checked).toBeFalsy();
       expect(scope.classes[1].checked).toBeFalsy();
       expect(scope.classes[2].checked).toBeFalsy();
+      expect(scope.classes[3].checked).toBeFalsy();
     });
 
     it('should return a set of \'checked\' objects from within an array', function() {
@@ -277,26 +285,26 @@ describe('Controller: TrainingController', function() {
 
   describe('Methods searching for objects', function () {
     it('should return an object with a given \'label\' from within an array', function() {
-      var obj = scope.getFromLabel(scope.classes, 'object1');
+      var obj = scope.getFromLabel(scope.classes, OLD_CLASS_LABEL);
       expect(obj).toBe(scope.classes[0]);
 
-      obj = scope.getFromLabel(scope.classes, 'objectX');
+      obj = scope.getFromLabel(scope.classes, NEW_LABEL);
       expect(obj).toBeNull();
     });
 
     it('should return an object with a given \'id\' from within an array', function() {
-      var obj = scope.getFromId(CLASSES, '0');
+      var obj = scope.getFromId(CLASSES, GOOD_ID);
       expect(obj).toBe(CLASSES[0]);
 
-      obj = scope.getFromId(CLASSES, '3');
+      obj = scope.getFromId(CLASSES, BAD_ID);
       expect(obj).toBeNull();
     });
 
     it('should return whether or not an object with a given \'label\' exists in an array', function() {
-      var obj = scope.containsLabel(scope.classes, 'object1');
+      var obj = scope.containsLabel(scope.classes, OLD_CLASS_LABEL);
       expect(obj).toBeTruthy();
 
-      obj = scope.containsLabel(scope.classes, 'objectX');
+      obj = scope.containsLabel(scope.classes, NEW_LABEL);
       expect(obj).toBeFalsy();
     });
   });
@@ -304,10 +312,10 @@ describe('Controller: TrainingController', function() {
   it('should provide a converter that allows the input of <text/class> string and should return an array of <text/class>\'s', function() {
     var array = [];
 
-    array = scope.getScopeArray('text');
+    array = scope.getScopeArray(TEXT);
     expect(array).toEqual(scope.texts);
 
-    array = scope.getScopeArray('class');
+    array = scope.getScopeArray(CLASS);
     expect(array).toEqual(scope.classes);
   });
 
@@ -364,13 +372,14 @@ describe('Controller: TrainingController', function() {
   });
 
   describe('Methods for editing classes and texts', function () {
-    it('should set \'selected\' for a given object if not in edit mode', function() {
-      scope.classes[2].edit = true;
-      scope.selectClass(scope.classes[2]);
-      expect(scope.classes[2].selected).toBeFalsy();
-
+    it('should set \'selected\' for a given object', function() {
+      // select
       scope.selectClass(scope.classes[1]);
       expect(scope.classes[1].selected).toBeTruthy();
+
+      // unselect
+      scope.selectClass(scope.classes[1]);
+      expect(scope.classes[1].selected).toBeFalsy();
     });
 
     it('should allow the user to edit a field', function() {
@@ -395,193 +404,272 @@ describe('Controller: TrainingController', function() {
     it('should change a class label', inject(function ($rootScope) {
       var object = scope.classes[0];
       window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
-      scope.changeLabel('class', object).then(function success (result) {
-        expect(result.id).toBe('5');
+      scope.changeLabel(CLASS, object).then(function success (result) {
+        expect(result).toBe(GOOD_UPDATE_RESPONSE);
       }, function error (err) {
         expect(err).toBeNull();
       });
       $rootScope.$apply();
     }));
 
-    iit('should not change a class label if it is the same or empty or already exists', inject(function ($rootScope) {
+    it('should not change a class label if it is the same', inject(function ($rootScope) {
       var object = scope.classes[0];
-
-      // same label
       window.document.getElementById(object.$$hashKey).value = OLD_CLASS_LABEL;
-      scope.changeLabel('class', object);
-      classesMock.update.should.not.be.called;
-
-      // empty label
-      window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
-      scope.changeLabel('class', object);
-
-      // existing label
-      window.document.getElementById(object.$$hashKey).value = EXISTING_CLASS_LABEL;
-      scope.changeLabel('class', object);
+      scope.changeLabel(CLASS, object).then(function success (result) {
+        classesMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
     }));
 
-    it('should change a text label', function() {
+    it('should not change a class label if it is empty', inject(function ($rootScope) {
+      var object = scope.classes[0];
+      window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
+      scope.changeLabel(CLASS, object).then(function success (result) {
+        classesMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should not change a class label if it already exists', inject(function ($rootScope) {
+      var object = scope.classes[0];
+      window.document.getElementById(object.$$hashKey).value = EXISTING_CLASS_LABEL;
+      scope.changeLabel(CLASS, object).then(function success (result) {
+        classesMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should change a text label', inject(function ($rootScope) {
       var object = scope.texts[0];
       window.document.getElementById(object.$$hashKey).value = NEW_LABEL;
-      scope.changeLabel('text', object);
-      expect(object.label).toEqual(NEW_LABEL);
-    });
+      scope.changeLabel(TEXT, object).then(function success (result) {
+        expect(result).toBe(GOOD_UPDATE_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
 
-    it('should not change a text label if it is the same', function() {
+    it('should not change a text label if it is the same', inject(function ($rootScope) {
       var object = scope.texts[0];
-      // same label
       window.document.getElementById(object.$$hashKey).value = OLD_TEXT_LABEL;
-      scope.changeLabel('text', object);
-      expect(object.label).toEqual(OLD_TEXT_LABEL);
-    });
+      scope.changeLabel(TEXT, object).then(function success (result) {
+        textsMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
 
-    it('should not change a text label if it is empty', function() {
-      // empty label
+    it('should not change a text label if it is empty', inject(function ($rootScope) {
       var object = scope.texts[0];
       window.document.getElementById(object.$$hashKey).value = EMPTY_LABEL;
-      scope.changeLabel('text', object);
-      expect(object.label).toEqual(OLD_TEXT_LABEL);
-    });
+      scope.changeLabel(TEXT, object).then(function success (result) {
+        textsMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
 
-    it('should not change a text label if it already exists with another text', function() {
+    it('should not change a text label if it already exists with another text', inject(function ($rootScope) {
       var object = scope.texts[0];
       window.document.getElementById(object.$$hashKey).value = EXISTING_TEXT_LABEL;
-      scope.changeLabel('text', object);
-      expect(object.label).toEqual(OLD_TEXT_LABEL);
-    });
-
-    it('should propogate a new class name to all texts', function() {
-      scope.classLabelChanged(scope.classes[0], OLD_CLASS_LABEL, NEW_LABEL);
-
-      expect(scope.texts[0].classes[0]).toBe(NEW_LABEL);
-      expect(scope.texts[1].classes[0]).toBe(NEW_LABEL);
-      expect(scope.texts[2].classes[0]).toBe('object3');
-    });
-
-    it('should throw an error on a bad input to change class label', inject(function ($rootScope) {
-      var success = true;
-      scope.classLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
-        success = true;
-      }, function error () {
-        success = false;
+      scope.changeLabel(TEXT, object).then(function success (result) {
+        textsMock.update.should.not.be.called;
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
       });
       $rootScope.$apply();
-      expect(success).toBeFalsy();
-    }));
-
-    it('should throw an error on a bad input to change text label', inject(function ($rootScope) {
-      var success = true;
-      scope.textLabelChanged(BAD_OBJECT, EMPTY_LABEL, EMPTY_LABEL).then(function () {
-        success = true;
-      }, function error () {
-        success = false;
-      });
-      $rootScope.$apply();
-      expect(success).toBeFalsy();
     }));
   });
 
-  it('should count the number of texts with a given class tagged', function() {
-    var count = scope.numberTextsInClass({ label: OLD_CLASS_LABEL });
-    expect(count).toBe(2);
+  describe('Methods for counting filtered objects', function () {
+    it('should count the number of texts with a given class tagged', function() {
+      var count = scope.numberTextsInClass({ label: OLD_CLASS_LABEL });
+      expect(count).toBe(2);
+    });
+
+    it('should return an array of classes tagged for a given text', function() {
+      var classes = scope.classesForText(scope.texts[0]);
+      expect(classes).toEqual([SCOPECLASSES[0]]);
+    });
   });
 
-  it('should return an array of classes tagged for a given text', function() {
-    var classes = scope.classesForText(scope.texts[0]);
-    expect(classes).toEqual([SCOPECLASSES[0]]);
+  describe('Methods for creating objects', function () {
+    it('should not add if the label is empty', inject(function ($rootScope) {
+      scope.add(CLASS, EMPTY_LABEL).then(function (result) {
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should not add if the class label exists', inject(function ($rootScope) {
+      scope.add(CLASS, EXISTING_CLASS_LABEL).then(function (result) {
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should not add if the text label exists', inject(function ($rootScope) {
+      scope.add(TEXT, EXISTING_TEXT_LABEL).then(function (result) {
+        expect(result).toBeUndefined();
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should add a new class', inject(function ($rootScope) {
+      scope.add(CLASS, NEW_LABEL).then(function (result) {
+        expect(result).toEqual(GOOD_POST_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should add a new class with a text id', inject(function ($rootScope) {
+      scope.add(CLASS, NEW_LABEL, GOOD_ID).then(function (result) {
+        expect(result).toEqual(GOOD_POST_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should add a new text', inject(function ($rootScope) {
+      scope.add(TEXT, NEW_LABEL).then(function (result) {
+        expect(result).toEqual(GOOD_POST_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should add a new text with checked classes', inject(function ($rootScope) {
+      scope.classes[0].checked = true;
+      scope.add(TEXT, NEW_LABEL).then(function (result) {
+        expect(result).toEqual(GOOD_POST_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
   });
 
-  // TODO: fix mock. promise not being returned properly.
-  // it('should add a new class', function() {
-  //   scope.add('class', OLD_CLASS_LABEL).then(function () {
-  //     expect(scope.classes[0].label).toEqual(OLD_CLASS_LABEL);
+  // TODO: need to add ngDialog mock
+  describe('Methods to delete objects', function () {
+    it('should delete a class', inject(function ($rootScope) {
+      scope.deleteClass(scope.classes[0]).then(function (result) {
+        expect(result).toEqual(GOOD_REMOVE_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should delete a class with a long label and no texts', inject(function ($rootScope) {
+      scope.deleteClass(scope.classes[3]).then(function (result) {
+        expect(result).toEqual(GOOD_REMOVE_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should delete a class', inject(function ($rootScope) {
+      scope.deleteText(scope.texts[0]).then(function (result) {
+        expect(result).toEqual(GOOD_REMOVE_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+
+    it('should delete a class with a long label', inject(function ($rootScope) {
+      scope.deleteText(scope.texts[3]).then(function (result) {
+        expect(result).toEqual(GOOD_REMOVE_RESPONSE);
+      }, function error (err) {
+        expect(err).toBeNull();
+      });
+      $rootScope.$apply();
+    }));
+  });
+
+  it('should determine whether a given text has been tagged or not', function() {
+    expect(scope.isTagged({classes:[]})).toBeFalsy();
+    expect(scope.isTagged({classes:['class1', 'class2']})).toBeTruthy();
+  });
+
+  it('should toggle \'beingTagged\' attribute of an text', function() {
+    scope.texts[1].beingTagged = true;
+    scope.beginTaggingText(scope.texts[1]);
+    expect(scope.texts[1].beingTagged).toBeFalsy();
+
+    scope.beginTaggingText(scope.texts[0]);
+    expect(scope.texts[0].beingTagged).toBeTruthy();
+  });
+
+  // it('should be able to tag an text with any number of classes', inject(function ($rootScope) {
+  //   scope.tagTexts([scope.texts[0]], [{label: 'newClass'}]).then(function (result) {
+  //     expect(result).toBe([GOOD_PATCH_RESPONSE]);
   //   }, function error (err) {
   //     expect(err).toBeNull();
   //   });
+  //   $rootScope.$apply();
+  // }));
+  //
+  // it('should be able to tag all checked texts with all checked classes', function() {
+  //   expect(scope.texts[0].classes.length).toBe(1);
+  //   scope.texts[0].checked = true;
+  //   scope.classes[1].checked = true;
+  //   scope.tagCheckedTexts();
+  //   expect(scope.texts[0].classes.length).toBe(2);
   // });
 
-  it('should set \'selected\' to false for a given object', function() {
-    scope.removeClassFromView(CLASSES[2]);
-    expect(CLASSES[2].selected).toBeFalsy();
+  // -------------------------------------------------------------------------------------------------
+  //
+  // --------------------------------------- API/Service functions -----------------------------------
+  //
+  // -------------------------------------------------------------------------------------------------
 
-    scope.removeClassFromView(CLASSES[1]);
-    expect(CLASSES[1].selected).toBeFalsy();
-  });
+  /*it('should be able to call the NLC \'train\' service', function() {
+  scope.train();
+  });*/
 
-  // TODO: Finish tests
-  /*it('should be able to delete a list of texts from $scope.texts', function() {
-  scope.texts = TEXTS;
-  var deletedObj = TEXTS.splice(2);
-  console.log(deletedObj);
-  scope.deleteTexts([deletedObj]);
-  console.log(scope.texts);
-  expect(scope.texts).toEqual(TEXTS[0], TEXTS[1]);
-});*/
+  // it('should be able to call the NLC \'download\' service', function() {
+  //   scope.exportToFile();
+  //   // TODO: Test the response
+  // });
 
+  // the test was failing due to "TypeError: 'undefined' is not a function (evaluating '$browser.cookies()')"
+  // got rid of this error by changing version of angular mocks to 1.3.17
+  // then found that the $rootScope.$digest() is triggering the authentication service, tried to mock it but failed.
 
-
-// -------------------------------------------------------------------------------------------------
-//
-// --------------------- tagging (associating text with class or classes) ---------------------
-//
-// -------------------------------------------------------------------------------------------------
-
-it('should determine whether a given text has been tagged or not', function() {
-  expect(scope.isTagged({classes:[]})).toBeFalsy();
-  expect(scope.isTagged({classes:['class1', 'class2']})).toBeTruthy();
-});
-
-it('should toggle \'beingTagged\' attribute of an text', function() {
-  scope.texts[1].beingTagged = true;
-  scope.beginTaggingText(scope.texts[1]);
-  expect(scope.texts[1].beingTagged).toBeFalsy();
-
-  scope.beginTaggingText(scope.texts[0]);
-  expect(scope.texts[0].beingTagged).toBeTruthy();
-});
-
-it('should be able to tag an text with any number of classes', function() {
-  scope.tagTexts(scope.texts, [{label: 'newClass'}]);
-
-  scope.texts.forEach(function(d) {
-    expect(d.classes[d.classes.length - 1]).toBe('newClass');
-  });
-});
-
-it('should be able to tag all checked texts with all checked classes', function() {
-  expect(scope.texts[0].classes.length).toBe(1);
-  scope.texts[0].checked = true;
-  scope.classes[1].checked = true;
-  scope.tagCheckedTexts();
-  expect(scope.texts[0].classes.length).toBe(2);
-});
-
-// -------------------------------------------------------------------------------------------------
-//
-// --------------------------------------- API/Service functions -----------------------------------
-//
-// -------------------------------------------------------------------------------------------------
-
-/*it('should be able to call the NLC \'train\' service', function() {
-scope.train();
-});*/
-
-it('should be able to call the NLC \'download\' service', function() {
-  scope.exportToFile();
-  // TODO: Test the response
-});
-
-// the test was failing due to "TypeError: 'undefined' is not a function (evaluating '$browser.cookies()')"
-// got rid of this error by changing version of angular mocks to 1.3.17
-// then found that the $rootScope.$digest() is triggering the authentication service, tried to mock it but failed.
-
-/*it('should be able to call the NLC \'upload\' service', inject(function($rootScope) {
-var fileContent = 'text,class';
-scope.importFile(fileContent);
-$rootScope.$digest();
-expect(scope.classes[0].label).toEqual('class');
-expect(scope.texts[0].label).toEqual('text');
-expect(scope.texts[0].classes).toEqual(['class']);
-}));*/
+  /*it('should be able to call the NLC \'upload\' service', inject(function($rootScope) {
+  var fileContent = 'text,class';
+  scope.importFile(fileContent);
+  $rootScope.$digest();
+  expect(scope.classes[0].label).toEqual(CLASS);
+  expect(scope.texts[0].label).toEqual(TEXT);
+  expect(scope.texts[0].classes).toEqual([CLASS]);
+  }));*/
 
 });
