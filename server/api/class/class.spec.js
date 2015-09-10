@@ -63,11 +63,13 @@ describe('/server/api/class', function () {
     this.storeMock = new mocks.StoreMock();
     this.socketMock = new mocks.SocketUtilMock();
     this.logMock = new mocks.LogMock();
+    this.cacheMock = new mocks.CacheMock();
 
     this.controllerOverrides = {
       '../../config/db/store' : this.storeMock,
       '../../config/socket' : this.socketMock,
-      '../../config/log' : this.logMock
+      '../../config/log' : this.logMock,
+      '../job/cache' : this.cacheMock
     };
 
     this.controller = proxyquire('./class.controller', this.controllerOverrides);
@@ -210,6 +212,91 @@ describe('/server/api/class', function () {
             done(err);
           }.bind(this));
       });
+
+    });
+
+
+    describe('DELETE', function () {
+
+      function deleteTestRunner (app, body, expectedStatus, verifyFn, callback) {
+        async.waterfall([
+          function (next) {
+            request(app)
+              .delete(ENDPOINTBASE)
+              .send(body)
+              .expect(httpstatus.ACCEPTED)
+              .end(function (err, resp) {
+                next(err, resp.headers.location);
+              });
+          }.bind(this),
+          function (location, next) {
+            var result = {};
+            var jobid = location.substr(location.lastIndexOf('/') + 1);
+            async.until(
+              function () {
+                var status;
+                if (this.cacheMock.put.lastCall) {
+                  status = this.cacheMock.put.lastCall.args[1].status;
+                }
+
+                return status === expectedStatus;
+              }.bind(this),
+              function (nexttry) {
+                setTimeout(function () {
+                  nexttry();
+                }, 250);
+              }.bind(this),
+              next
+            );
+          }.bind(this),
+          function (next) {
+            var result = this.cacheMock.put.lastCall.args[1];
+            result.should.have.property('status', expectedStatus);
+            verifyFn.call(this, result)
+            next();
+          }.bind(this)
+        ], callback);
+
+      }
+
+      beforeEach(function () {
+        this.ids = [uuid.v1(), uuid.v1()];
+      });
+
+      it('should fail if no request body specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should fail if empty array specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .send([])
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should delete texts', function (done) {
+        var verify = function (result) {
+          result.should.have.property('error', 0);
+          result.should.have.property('success', 2);
+        };
+
+        deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
+      it('should handle when some deletes fail', function (done) {
+        this.storeMock.deleteClass.onCall(0).callsArgWith(3,this.error);
+        this.storeMock.deleteClass.callsArgWith(3, null, {});
+
+        var verify = function (result) {
+          result.should.have.property('error', 1);
+          result.should.have.property('success', 1);
+        };
+
+        deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
 
     });
 

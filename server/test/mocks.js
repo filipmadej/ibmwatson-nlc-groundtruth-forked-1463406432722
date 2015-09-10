@@ -219,6 +219,24 @@ function SocketUtilMock () {
 
 }
 
+function CacheMock () {
+
+  this.get = sinon.stub();
+  this.put = sinon.spy();
+  this.entry = sinon.stub();
+
+  this.reset = function () {
+    this.get.reset();
+    this.get.returns({});
+    this.put.reset();
+    this.entry.reset();
+    this.entry.returns(uuid.v1());
+  };
+
+  this.reset();
+
+}
+
 module.exports.LogMock = LogMock;
 
 module.exports.DBMock = DBMock;
@@ -232,3 +250,5 @@ module.exports.WDCMock = WDCMock;
 module.exports.WebSocketMock = WebSocketMock;
 
 module.exports.SocketUtilMock = SocketUtilMock;
+
+module.exports.CacheMock = CacheMock;

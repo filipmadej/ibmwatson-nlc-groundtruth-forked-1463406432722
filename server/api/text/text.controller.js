@@ -24,10 +24,10 @@ var _ = require('lodash');
 var async = require('async');
 var httpstatus = require('http-status');
 var makeArray = require('make-array');
-var cache = require('memory-cache');
 var uuid = require('node-uuid');
 
 // local dependencies
+var cache = require('../job/cache');
 var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
@@ -36,15 +36,6 @@ var socketUtil = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
-
-var MINUTE = 1000 * 60;
-var HOUR = 60 * MINUTE;
-
-var STATUS = {
-  RUNNING : 'running',
-  COMPLETE : 'complete',
-  ERROR : 'error'
-};
 
 /**
  * Constructor for a new Error object specific to database patch operations
@@ -218,19 +209,19 @@ module.exports.createText = function createText (req, res) {
   });
 };
 
-function operationHandler (patchoperation, patchid, patchdetails, callback) {
+function operationHandler (patchoperation, jobid, jobdetails, callback) {
   return function handleResult (err, result) {
     var output = result;
     if (err) {
       log.debug(err, 'Patch error: ' + JSON.stringify(patchoperation));
-      patchdetails.error++;
+      jobdetails.error++;
       output = new PatchError(err, patchoperation);
     } else {
-      patchdetails.success++;
+      jobdetails.success++;
       output = result;
     }
 
-    cache.put(patchid, patchdetails, 5 * MINUTE);
+    cache.put(jobid, jobdetails);
     return callback(null, output);
   };
 }
@@ -289,18 +280,16 @@ module.exports.editText = function editText (req, res) {
   var patchoperations = requests.verifyObjectsList(makeArray(req.body));
 
   var details = {
-      status : STATUS.RUNNING,
+      status : cache.STATUS.RUNNING,
       success : 0,
       error : 0
   };
 
-  var patchid = uuid.v1();
-
-  cache.put(patchid, details, 5 * MINUTE);
+  var jobid = cache.entry(details);
 
   async.mapLimit(patchoperations, 10, function applyPatch (patchoperation, nextop) {
     var getCallback = function getCallback () {
-      return operationHandler(patchoperation, patchid, details, nextop);
+      return operationHandler(patchoperation, jobid, details, nextop);
     };
 
     if (patchoperation.path === '/classes') {
@@ -315,12 +304,12 @@ module.exports.editText = function editText (req, res) {
   }, function handlePatchResponse (err, data) {
 
     if (err) {
-      details.status = STATUS.ERROR;
+      details.status = cache.STATUS.ERROR;
     } else {
-      details.status = STATUS.COMPLETE;
+      details.status = cache.STATUS.COMPLETE;
     }
 
-    cache.put(patchid, details, 5 * MINUTE);
+    cache.put(jobid, details);
 
     data.forEach(function forEach (result) {
       socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
@@ -328,11 +317,10 @@ module.exports.editText = function editText (req, res) {
   });
 
   responses.accepted(
-    req.baseUrl + req.route.path + '/patch/:patchid',
+    req.baseUrl + '/jobs/:jobid',
     {
       ':tenantid' : tenantid,
-      ':textid' : textid,
-      ':patchid' : patchid
+      ':jobid' : jobid
     },
     res);
 };
@@ -367,36 +355,53 @@ module.exports.deleteTexts = function deleteTexts (req, res) {
 
   var tenantid = req.params.tenantid;
   var ids = req.body;
-  var etag = req.headers['if-match'];
 
-  if (!etag) {
-    return responses.missingEtag(res);
+  if (!ids || !Object.keys(ids).length) {
+    return responses.badrequest('Missing request body', res);
   }
 
-  ids.forEach(function forEach (textid) {
-    db.deleteText(tenantid, textid, etag, function deletedText (err) {
+  var details = {
+      status : cache.STATUS.RUNNING,
+      success : 0,
+      error : 0
+  };
+
+  var jobid = cache.entry(details);
+
+  async.eachLimit(ids, 5, function doDelete (id, next) {
+    db.deleteText(tenantid, id, '*', function deletedText (err) {
       if (err) {
-        socketUtil.send('text:delete', { id : textid, err : err });
-        return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
-          return responses.error(res, err);
-        });
+        var message = 'Error occurred while attempting to delete text.';
+        if (err.statusCode === httpstatus.NOT_FOUND) {
+          log.debug({ message : err.message, error : err.error }, message);
+        } else {
+          log.error({ err : err }, message);
+        }
+        details.error++;
+        socketUtil.send('text:delete', { id : id, err : err });
+      } else {
+        log.debug({text : id}, 'Deleted text');
+        details.success++;
+        socketUtil.send('text:delete', { id : id });
       }
-      log.debug({text : textid}, 'Deleted text');
-      socketUtil.send('text:delete', { id : textid });
+
+      next();
     });
-  });
-  responses.del(res);
+  }, function onEnd (err) {
+      if (err) {
+        details.status = cache.STATUS.ERROR;
+      } else {
+        details.status = cache.STATUS.COMPLETE;
+      }
+
+      cache.put(jobid, details);
+    });
+
+  responses.accepted(
+    req.baseUrl + '/jobs/:jobid',
+    {
+      ':tenantid' : tenantid,
+      ':jobid' : jobid
+    },
+    res);
 };
-
-module.exports.patchStatus = function patchStatus (req, res) {
-  var tenantid = req.params.tenantid;
-  var patchid = req.params.patchid;
-
-  var details = cache.get(patchid);
-  if (details) {
-    return res.status(httpstatus.OK)
-      .json(details);
-  }
-
-  return responses.notfound(res);
-}

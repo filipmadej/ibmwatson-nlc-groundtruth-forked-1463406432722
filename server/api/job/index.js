@@ -17,30 +17,19 @@
 'use strict';
 
 var express = require('express');
-var async = require('async');
-var httpstatus = require('http-status');
-var makeArray = require('make-array');
 
 // local dependencies
-var controller = require('./text.controller');
-var log = require('../../config/log');
+var controller = require('./job.controller');
 var rest = require('../../config/rest');
 
 var router = express.Router();
 
 var ENDPOINTS = {
-    texts : '/:tenantid/texts',
-    text : '/:tenantid/texts/:textid'
+    job : '/:tenantid/jobs/:jobid'
 };
 
-router.use(ENDPOINTS.texts, rest.ensureAuthenticated);
-router.use(ENDPOINTS.text, rest.ensureAuthenticated);
+router.use(ENDPOINTS.job, rest.ensureAuthenticated);
 
-router.get(ENDPOINTS.texts, controller.getTexts);
-router.get(ENDPOINTS.text, controller.getText);
-router.post(ENDPOINTS.texts, controller.createText);
-router.patch(ENDPOINTS.text, controller.editText);
-router.delete(ENDPOINTS.text, controller.deleteText);
-router.delete(ENDPOINTS.texts, controller.deleteTexts);
+router.get(ENDPOINTS.job, controller.jobStatus);
 
 module.exports = router;

@@ -16,21 +16,29 @@
 
 'use strict';
 
-var express = require('express');
-var multer = require('multer');
+// core dependencies
+var util = require('util');
+
+// external dependencies
+var _ = require('lodash');
+var httpstatus = require('http-status');
+var uuid = require('node-uuid');
 
 // local dependencies
-var controller = require('./content.controller');
-var rest = require('../../config/rest');
+var cache = require('./cache');
+var restutils = require('../../components/restutils');
 
-var router = express.Router();
+var responses = restutils.res;
 
-var ENDPOINTS = {
-    content : '/:tenantid/content'
-};
+module.exports.jobStatus = function jobStatus (req, res) {
+  var tenantid = req.params.tenantid;
+  var jobid = req.params.jobid;
 
-router.use(ENDPOINTS.content, rest.ensureAuthenticated);
-router.post(ENDPOINTS.content, multer(controller.uploadOptions), controller.handleFileImport);
-router.get(ENDPOINTS.content, controller.handleFileDownload);
+  var details = cache.get(jobid);
+  if (details) {
+    return res.status(httpstatus.OK)
+      .json(details);
+  }
 
-module.exports = router;
+  return responses.notfound(res);
+}

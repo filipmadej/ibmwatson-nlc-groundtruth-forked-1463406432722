@@ -290,6 +290,9 @@ describe('/server/api/content', function () {
         this.processAppOverrides = this.appOverrides;
         this.processAppOverrides['./content.controller'] = this.processController;
         this.processApp.use('/api', proxyquire('./index', this.processAppOverrides));
+        this.processApp.use('/api', proxyquire('../job', {
+          '../../config/rest' : this.restMock
+        }));
 
       });
 
@@ -424,6 +427,9 @@ describe('/server/api/content', function () {
       var errorAppOverrides = this.appOverrides;
       errorAppOverrides['./content.controller'] = errorController;
       errorApp.use('/api', proxyquire('./index', errorAppOverrides));
+      errorApp.use('/api', proxyquire('../job', {
+        '../../config/rest' : this.restMock
+      }));
 
       processTestRunner.call(this, errorApp, 'error', function () {}, done);
 
@@ -446,6 +452,9 @@ describe('/server/api/content', function () {
         var errorAppOverrides = this.appOverrides;
         errorAppOverrides['./content.controller'] = errorController;
         errorApp.use('/api', proxyquire('./index', errorAppOverrides));
+        errorApp.use('/api', proxyquire('../job', {
+          '../../config/rest' : this.restMock
+        }));
 
         this.storeMock.processImportEntry.callsArgWith(2, this.error);
 
@@ -518,58 +527,6 @@ describe('/server/api/content', function () {
 
       });
 
-    });
-
-  });
-
-  describe('GET /api/:tenantid/content/import/:id', function () {
-
-    before(function () {
-      this.ID = uuid.v1();
-      this.LOCATION = ENDPOINTBASE + '/import/' + this.ID;
-
-      this.details = {
-        status : 'complete',
-        error : 0,
-        success : 10
-      };
-    });
-
-    it('should return a 200 response', function (done) {
-
-      var cacheMock = {
-        put : sinon.spy(),
-        get : sinon.stub()
-      }
-
-      cacheMock.get.returns(this.details);
-
-      var cacheControllerOverrides = this.controllerOverrides;
-      cacheControllerOverrides['memory-cache'] = cacheMock;
-
-      var cacheController = proxyquire('./content.controller', cacheControllerOverrides);
-
-      var cacheApp = express();
-
-      var cacheAppOverrides = this.appOverrides;
-      cacheAppOverrides['./content.controller'] = cacheController;
-
-      cacheApp.use('/api', proxyquire('./index', cacheAppOverrides));
-
-      request(cacheApp)
-        .get(this.LOCATION)
-        .expect(httpstatus.OK)
-        .end(function (err, resp) {
-          cacheMock.get.should.have.been.calledWith(this.ID);
-          done(err);
-        }.bind(this));
-    });
-
-    it('should return a 404 response', function (done) {
-
-      request(this.app)
-        .get(this.LOCATION)
-        .expect(httpstatus.NOT_FOUND, done);
     });
 
   });

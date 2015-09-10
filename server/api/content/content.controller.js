@@ -25,9 +25,9 @@ var http = require('http');
 var async = require('async');
 var httpstatus = require('http-status');
 var csv = require('fast-csv');
-var cache = require('memory-cache');
 var uuid = require('node-uuid');
 // local dependencies
+var cache = require('../job/cache');
 var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
@@ -38,15 +38,6 @@ var responses = restutils.res;
 var requests = restutils.req;
 
 var TEN_MB = 10 * 1000 * 1000;
-
-var MINUTE = 1000 * 60;
-var HOUR = 60 * MINUTE;
-
-var STATUS = {
-  RUNNING : 'running',
-  COMPLETE : 'complete',
-  ERROR : 'error'
-};
 
 var FILE_UPLOAD_OPTIONS = {
   limits : {
@@ -62,14 +53,14 @@ var FILE_UPLOAD_OPTIONS = {
 };
 
 // take the raw response from the file upload and process it to create a formatted JSON for the front-end
-function processFileContent (tenantid, data, file, statusId, done) {
+function processFileContent (tenantid, data, file, jobid, done) {
   var details = {
-      status : STATUS.RUNNING,
+      status : cache.STATUS.RUNNING,
       success : 0,
       error : 0
   };
 
-  cache.put(statusId, details, 5 * MINUTE);
+  cache.put(jobid, details);
 
   async.forEachSeries(data, function process (entry, callback) {
     db.processImportEntry(tenantid, entry, function importEntry (err, result) {
@@ -118,7 +109,7 @@ function processFileContent (tenantid, data, file, statusId, done) {
         details.success++;
       }
 
-      cache.put(statusId, details, 5 * MINUTE);
+      cache.put(jobid, details);
 
       callback();
     });
@@ -128,10 +119,10 @@ function processFileContent (tenantid, data, file, statusId, done) {
 }
 
 var q = async.queue(function add (task, callback) {
-  importFile(task.tenantid, task.file, task.importid, callback);
+  importFile(task.tenantid, task.file, task.jobid, callback);
 });
 
-function importFile (tenantid, file, importid, callback) {
+function importFile (tenantid, file, jobid, callback) {
 
   fs.readFile(file.path, 'utf8', function read (err, fileContent) {
     if (err) {
@@ -139,7 +130,7 @@ function importFile (tenantid, file, importid, callback) {
     }
 
     if (file.extension === 'json') {
-      processFileContent(tenantid, JSON.parse(fileContent).training_data, file, importid, callback);
+      processFileContent(tenantid, JSON.parse(fileContent).training_data, file, jobid, callback);
     } else {
       var entries = [];
       csv.fromString(fileContent, {headers : false, ignoreEmpty : true})
@@ -157,7 +148,7 @@ function importFile (tenantid, file, importid, callback) {
           entries.push(data);
         })
         .on('end', function onEnd () {
-          processFileContent(tenantid, entries, file, importid, callback);
+          processFileContent(tenantid, entries, file, jobid, callback);
         });
     }
 
@@ -186,26 +177,24 @@ function handleFileImport (req, res) {
     return responses.badrequest('Only JSON and CSV formats are accepted', res);
   }
 
-  var importid = uuid.v1();
+  var jobid = cache.entry();
 
-  cache.put(importid, {status : STATUS.RUNNING}, 5 * MINUTE);
-
-  q.push({tenantid : tenantid, file : file, importid : importid}, function handleError (err, info) {
+  q.push({tenantid : tenantid, file : file, jobid : jobid}, function handleError (err, info) {
     info = info || {};
     if (err) {
-      info.status = STATUS.ERROR;
+      info.status = cache.STATUS.ERROR;
     } else {
-      info.status = STATUS.COMPLETE;
+      info.status = cache.STATUS.COMPLETE;
     }
 
-    cache.put(importid, info, 24 * HOUR);
+    cache.put(jobid, info);
   });
 
   responses.accepted(
-    req.baseUrl + req.route.path + '/import/:importid',
+    req.baseUrl + '/:tenantid/jobs/:jobid',
     {
       ':tenantid' : tenantid,
-      ':importid' : importid
+      ':jobid' : jobid
     },
     res);
 
@@ -247,23 +236,8 @@ function handleFileDownload (req, res) {
   });
 }
 
-function importStatus (req, res) {
-
-  var tenantid = req.params.tenantid;
-  var importid = req.params.importid;
-
-  var details = cache.get(importid);
-  if (details) {
-    return res.status(httpstatus.OK)
-      .json(details);
-  }
-
-  return responses.notfound(res);
-}
-
 module.exports = {
   uploadOptions : FILE_UPLOAD_OPTIONS,
   handleFileImport : handleFileImport,
-  handleFileDownload : handleFileDownload,
-  importStatus : importStatus
+  handleFileDownload : handleFileDownload
 };

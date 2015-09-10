@@ -21,6 +21,7 @@
 var util = require('util');
 
 // external dependencies
+var _ = require('lodash');
 var async = require('async');
 var bodyParser = require('body-parser');
 var chai = require('chai');
@@ -62,11 +63,13 @@ describe('/server/api/text', function () {
 
     this.storeMock = new mocks.StoreMock();
     this.socketMock = new mocks.SocketUtilMock();
+    this.cacheMock = new mocks.CacheMock();
     this.logMock = new mocks.LogMock();
 
     this.controllerOverrides = {
       '../../config/db/store' : this.storeMock,
-      '../../config/socket' : this.socketMock
+      '../../config/socket' : this.socketMock,
+      '../job/cache' : this.cacheMock
     };
 
     this.controller = proxyquire('./text.controller', this.controllerOverrides);
@@ -229,6 +232,89 @@ describe('/server/api/text', function () {
 
     });
 
+    describe('DELETE', function () {
+
+      function deleteTestRunner (app, body, expectedStatus, verifyFn, callback) {
+        async.waterfall([
+          function (next) {
+            request(app)
+              .delete(ENDPOINTBASE)
+              .send(body)
+              .expect(httpstatus.ACCEPTED)
+              .end(function (err, resp) {
+                next(err, resp.headers.location);
+              });
+          }.bind(this),
+          function (location, next) {
+            var result = {};
+            var jobid = location.substr(location.lastIndexOf('/') + 1);
+            async.until(
+              function () {
+                var status;
+                if (this.cacheMock.put.lastCall) {
+                  status = this.cacheMock.put.lastCall.args[1].status;
+                }
+
+                return status === expectedStatus;
+              }.bind(this),
+              function (nexttry) {
+                setTimeout(function () {
+                  nexttry();
+                }, 250);
+              }.bind(this),
+              next
+            );
+          }.bind(this),
+          function (next) {
+            var result = this.cacheMock.put.lastCall.args[1];
+            result.should.have.property('status', expectedStatus);
+            verifyFn.call(this, result)
+            next();
+          }.bind(this)
+        ], callback);
+
+      }
+
+      beforeEach(function () {
+        this.ids = [uuid.v1(), uuid.v1()];
+      });
+
+      it('should fail if no request body specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should fail if empty array specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .send([])
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should delete texts', function (done) {
+          var verify = function (result) {
+            result.should.have.property('error', 0);
+            result.should.have.property('success', 2);
+          };
+
+          deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
+      it('should handle when some deletes fail', function (done) {
+        this.storeMock.deleteText.onCall(0).callsArgWith(3,this.error);
+        this.storeMock.deleteText.callsArgWith(3, null, {});
+
+        var verify = function (result) {
+          result.should.have.property('error', 1);
+          result.should.have.property('success', 1);
+        };
+
+        deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
+    });
+
   });
 
   describe('/texts/:textid', function () {
@@ -284,25 +370,26 @@ describe('/server/api/text', function () {
           }.bind(this),
           function (location, next) {
             var result = {};
+            var jobid = location.substr(location.lastIndexOf('/') + 1);
             async.until(
               function () {
-                return result.status === expectedStatus;
+                var status;
+                if (this.cacheMock.put.lastCall) {
+                  status = this.cacheMock.put.lastCall.args[1].status;
+                }
+
+                return status === expectedStatus;
               }.bind(this),
               function (nexttry) {
-                request(app)
-                  .get(location)
-                  .expect(httpstatus.OK)
-                  .end(function (err, resp) {
-                    result = resp.body;
-                    nexttry(err)
-                  });
+                setTimeout(function () {
+                  nexttry();
+                }, 250);
               }.bind(this),
-              function (err) {
-                next(err, result);
-              }
+              next
             );
           }.bind(this),
-          function (result, next) {
+          function (next) {
+            var result = this.cacheMock.put.lastCall.args[1];
             result.should.have.property('status', expectedStatus);
             verifyFn.call(this, result)
             next();
@@ -648,59 +735,6 @@ describe('/server/api/text', function () {
         }.bind(this));
       });
 
-    });
-
-  });
-
-  describe('GET /api/:tenantid/texts/:textid/patch/:patchid', function () {
-
-    before(function () {
-      this.TEXTID = uuid.v1();
-      this.PATCHID = uuid.v1();
-      this.LOCATION = ENDPOINTBASE + '/' + this.TEXTID + '/patch/' + this.PATCHID;
-
-      this.details = {
-        status : 'complete',
-        error : 0,
-        success : 10
-      };
-    });
-
-    it('should return a 200 response', function (done) {
-
-      var cacheMock = {
-        put : sinon.spy(),
-        get : sinon.stub()
-      }
-
-      cacheMock.get.returns(this.details);
-
-      var cacheControllerOverrides = this.controllerOverrides;
-      cacheControllerOverrides['memory-cache'] = cacheMock;
-
-      var cacheController = proxyquire('./text.controller', cacheControllerOverrides);
-
-      var cacheApp = express();
-
-      var cacheAppOverrides = this.appOverrides;
-      cacheAppOverrides['./text.controller'] = cacheController;
-
-      cacheApp.use('/api', proxyquire('./index', cacheAppOverrides));
-
-      request(cacheApp)
-        .get(this.LOCATION)
-        .expect(httpstatus.OK)
-        .end(function (err, resp) {
-          cacheMock.get.should.have.been.calledWith(this.PATCHID);
-          done(err);
-        }.bind(this));
-    });
-
-    it('should return a 404 response', function (done) {
-
-      request(this.app)
-        .get(this.LOCATION)
-        .expect(httpstatus.NOT_FOUND, done);
     });
 
   });
