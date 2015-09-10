@@ -103,7 +103,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           element.label = element.value;
           element.classes = element.classes || [];
           element.classes.forEach(function forEach (clazz, index, array) {
-            array[index] = $scope.getFromId($scope.classes, clazz).label;
+            if (clazz.name) {
+              array[index] = clazz.name;
+            } else {
+              array[index] = $scope.getFromId($scope.classes, clazz).label;
+            }
           });
           element.edit = false;
           element.checked = false;
