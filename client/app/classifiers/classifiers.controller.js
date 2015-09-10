@@ -25,22 +25,28 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       $scope.intervals = [];
 
       $scope.$on('$destroy', function destroy () {
-        $scope.intervals.forEach(function forEach (interval) {
-          $interval.cancel(interval);
-        });
+        cancelPolling();
       });
+
+      function cancelPolling () {
+        $scope.intervals.forEach(function forEach (interval) {
+          $interval.cancel(interval.interval);
+        });
+        $scope.intervals.length = 0;
+      }
 
       $scope.toggleArrowDown = function toggleArrowDown (classifier) {
         classifier.showArrowDown = !classifier.showArrowDown;
       };
 
       $scope.loadClassifiers = function loadClassifiers () {
+        cancelPolling();
         nlc.getClassifiers().then(function getClassifiers (data) {
           $scope.loading = false;
           $scope.classifiers = data.classifiers;
           $scope.classifiers.forEach(function forEach (classifier) {
             // add additional data required for UI interactions
-            $scope.intervals.push($scope.pollStatus(classifier, 10000)); // set up the poll to update the status every 5 seconds
+            $scope.intervals.push({ id: classifier.classifier_id, interval: $scope.pollStatus(classifier, 10000) }); // set up the poll to update the status every 5 seconds
             classifier.logs = []; // store the texts and consequent classes
             classifier.status = ''; // what is the availibility status of the classifier
             classifier.statusDescription = '';
@@ -49,7 +55,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             // $scope.checkStatus(classifier); // get an initial status check
           });
         }, function error (err) {
-          watsonAlerts.add({ level: 'error', text: 'There was an error retrieving the classifiers list. Error: ' + JSON.stringify(err) });
+          watsonAlerts.add({ level: 'error', text: 'There was an error retrieving the classifiers list. Error: ' + JSON.stringify(err.data) });
         });
         $log.debug('Loaded classifiers.');
       };
@@ -62,7 +68,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           classifier.status = data.status;
           classifier.statusDescription = data.status_description;
         }, function error (err) {
-          watsonAlerts.add({ level: 'error', text: 'Error checking the status of classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
+          watsonAlerts.add({ level: 'error', text: 'Error checking the status of classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err.data) });
         });
       };
 
@@ -70,7 +76,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         /*jshint camelcase: false */
         return nlc.pollStatus(classifier.classifier_id, function setStatus (data) {
           if (data.err) {
-            watsonAlerts.add({ level: 'error', text: 'Error retrieving status for classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(data.err) });
+            watsonAlerts.add({ level: 'error', text: 'Error retrieving status for classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(data.err.data) });
             classifier.status = 'Unavailable';
             classifier.statusDescription = 'Classifier currently unavailable.';
           } else {
@@ -89,7 +95,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           nlc.remove(classifier.classifier_id).then(function reload () {
             $scope.loadClassifiers();
           }, function error (err) {
-            watsonAlerts.add({ level: 'error', text: 'There was an error removing classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
+            watsonAlerts.add({ level: 'error', text: 'There was an error removing classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err.data) });
             $scope.loadClassifiers();
           });
         });
@@ -113,7 +119,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         nlc.classify(classifier.classifier_id, text).then(function logResults (data) {
           classifier.logs.splice(1, 0, { classes: data.classes });
         }, function error (err) {
-          watsonAlerts.add({ level: 'error', text: 'There was an error classifying "' + text + '" on classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err) });
+          watsonAlerts.add({ level: 'error', text: 'There was an error classifying "' + text + '" on classifier ' + classifier.classifier_id + '. Error: ' + JSON.stringify(err.data) });
         });
       };
 

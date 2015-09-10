@@ -259,10 +259,12 @@ function socketResponseBuilder (textid, data) {
     else if (_.has(data, 'operation.value')) {
       response.classes = data.operation.value;
     }
-  } else if (data.classes) {
-      response.classes = data.classes;
-  } else if (data.metadata.value) {
+  } else if (data.classes && data.classes.length) {
+    response.classes = data.classes;
+  } else if (_.has(data, 'metadata.value')) {
     response.value = data.metadata.value;
+  } else {
+    return null;
   }
 
   return response;
@@ -312,7 +314,10 @@ module.exports.editText = function editText (req, res) {
     cache.put(jobid, details);
 
     data.forEach(function forEach (result) {
-      socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), socketResponseBuilder(textid, result));
+      var response = socketResponseBuilder(textid, result);
+      if (response !== null) {
+        socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), response);
+      }
     });
   });
 

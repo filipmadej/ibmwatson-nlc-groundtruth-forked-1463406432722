@@ -89,7 +89,7 @@ function processFileContent (tenantid, data, file, jobid, done) {
         } else {
           socketUtil.send('text:create', { attributes : result.text });
         }
-      } else if (result.text.classes) {
+      } else if (result.text.classes && result.text.classes.length) {
         var addClassError;
         result.text.classes.some(function errorCheck (clazz) {
           addClassError = clazz.error;

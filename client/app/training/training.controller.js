@@ -77,7 +77,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('class:create', function createClass (data) {
         $log.debug('socket:class:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + JSON.stringify(data.err);
+          var msg = 'Error adding ' + data.attributes.name + ' class. Error message: ' + JSON.stringify(data.err.message);
           watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
@@ -94,7 +94,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       socket.on('text:create', function createText (data) {
         $log.debug('socket:text:create ' + JSON.stringify(data));
         if (data.err) {
-          var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + JSON.stringify(data.err);
+          var msg = 'Error adding "' + data.attributes.value + '" text. Error message: ' + JSON.stringify(data.err.message);
           watsonAlerts.add({ level: 'error', text: msg });
         } else {
           var element = data.attributes;
@@ -103,7 +103,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           element.label = element.value;
           element.classes = element.classes || [];
           element.classes.forEach(function forEach (clazz, index, array) {
-            array[index] = clazz.name;
+            array[index] = $scope.getFromId($scope.classes, clazz).label;
           });
           element.edit = false;
           element.checked = false;
@@ -162,7 +162,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var text = $scope.getFromId($scope.texts, data.id);
         var newLabel = data.value;
         if (data.err) {
-          watsonAlerts.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + JSON.stringify(newLabel) });
+          watsonAlerts.add({ level: 'error', text: 'Failed to change the label of the "' + text.label + '" text to ' + newLabel });
         } else {
           text.label = newLabel;
           window.document.getElementById(text.$$hashKey).value = newLabel;
