@@ -14,29 +14,10 @@
  * limitations under the License.
  **/
 
- 'use strict';
+'use strict';
 
-angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('errors', [function init () {
-    var errors = [];
-
-    function publishError(errObj) {
-      errors.push(errObj);
-    }
-
-    function getErrors() {
-      return errors;
-    }
-
-    function clearErrors() {
-      errors = [];
-    }
-
-    // Public API here
-    return {
-      'publish' : publishError,
-      'get' : getErrors,
-      'clear' : clearErrors
-    };
-
-  }]);
+angular.module('ibmwatson-common-ui-components.templates', [
+  'watsonAlerts/watsonAlertsBar.html',
+  'watsonFooter/watsonFooter.html',
+  'watsonLoading/watsonLoading.html'
+]);

@@ -31,7 +31,9 @@ var uuid = require('node-uuid');
 
 // local dependencies
 var dberrors = require('./errors');
-var log = require('../log');
+
+// test dependencies
+var mocks = require('../../test/mocks');
 
 var handler ;
 
@@ -50,13 +52,14 @@ describe('/server/config/db/updatehandlers', function () {
     };
 
     this.viewMock = {
-      lookupClasses : sinon.stub(),
+      lookupClassesById : sinon.stub(),
+      lookupClassesByName : sinon.stub(),
       '@noCallThru' : true
     };
 
     handler = proxyquire('./updatehandlers', {
       './views' : this.viewMock,
-      '../log' : log
+      '../log' : new mocks.LogMock()
     });
   });
 
@@ -66,14 +69,14 @@ describe('/server/config/db/updatehandlers', function () {
       handler.addClassesToText(this.dbMock, TENANT, 'test-text-id', undefined, function (err, result) {
         should.not.exist(err);
         should.not.exist(result);
-        this.viewMock.lookupClasses.should.not.have.been.called;
+        this.viewMock.lookupClassesById.should.not.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
       }.bind(this));
 
       handler.addClassesToText(this.dbMock, TENANT, 'test-text-id', [], function (err, result) {
         should.not.exist(err);
         should.not.exist(result);
-        this.viewMock.lookupClasses.should.not.have.been.called;
+        this.viewMock.lookupClassesById.should.not.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
       }.bind(this));
     });
@@ -82,13 +85,13 @@ describe('/server/config/db/updatehandlers', function () {
     it('should complete successfully', function (done) {
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       this.dbMock.atomic.callsArgWith(4, null, {ok : true});
 
       handler.addClassesToText (this.dbMock, TENANT, 'test-text-id', testClasses, function (err, resp) {
         should.not.exist(err);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
         done();
       }.bind(this));
@@ -98,14 +101,14 @@ describe('/server/config/db/updatehandlers', function () {
     it('should error if invalid class id specified', function (done) {
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, []);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, []);
 
       this.dbMock.atomic.callsArgWith(4, null, {ok : true});
 
       handler.addClassesToText (this.dbMock, TENANT, 'test-text-id', testClasses, function (err, resp) {
         should.exist(err);
         err.should.have.property('statusCode', httpstatus.UNPROCESSABLE_ENTITY);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
         done();
       }.bind(this));
@@ -116,7 +119,7 @@ describe('/server/config/db/updatehandlers', function () {
 
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       var errorMessage = 'test-generated';
       this.dbMock.atomic.callsArgWith(4, new Error(errorMessage));
@@ -124,7 +127,7 @@ describe('/server/config/db/updatehandlers', function () {
       handler.addClassesToText(this.dbMock, TENANT, 'test-text-id', testClasses, function (err, result) {
         should.exist(err);
         err.should.have.property('message', errorMessage);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
       }.bind(this));
     });
@@ -133,7 +136,7 @@ describe('/server/config/db/updatehandlers', function () {
 
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       var statusCode = httpstatus.NOT_FOUND;
       this.dbMock.atomic.callsArgWith(4, null, {error : dberrors.NOT_FOUND, code : statusCode});
@@ -142,7 +145,7 @@ describe('/server/config/db/updatehandlers', function () {
         should.exist(err);
         err.should.have.property('error', dberrors.NOT_FOUND);
         err.should.have.property('statusCode', statusCode);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
       }.bind(this));
     });
@@ -154,14 +157,14 @@ describe('/server/config/db/updatehandlers', function () {
       handler.removeClassesFromText(this.dbMock, TENANT, 'test-text-id', undefined, function (err, result) {
         should.not.exist(err);
         should.not.exist(result);
-        this.viewMock.lookupClasses.should.not.have.been.called;
+        this.viewMock.lookupClassesById.should.not.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
       }.bind(this));
 
       handler.removeClassesFromText(this.dbMock, 'test-text-id', [], function (err, result) {
         should.not.exist(err);
         should.not.exist(result);
-        this.viewMock.lookupClasses.should.not.have.been.called;
+        this.viewMock.lookupClassesById.should.not.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
       }.bind(this));
     });
@@ -169,13 +172,13 @@ describe('/server/config/db/updatehandlers', function () {
     it('should complete successfully', function (done) {
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       this.dbMock.atomic.callsArgWith(4, null, {ok : true});
 
       handler.removeClassesFromText (this.dbMock, TENANT, 'test-text-id', testClasses, function (err, resp) {
         should.not.exist(err);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
         done();
       }.bind(this));
@@ -185,14 +188,14 @@ describe('/server/config/db/updatehandlers', function () {
     it('should error if invalid class id specified', function (done) {
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, []);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, []);
 
       this.dbMock.atomic.callsArgWith(4, null, {ok : true});
 
       handler.removeClassesFromText (this.dbMock, TENANT, 'test-text-id', testClasses, function (err, resp) {
         should.exist(err);
         err.should.have.property('statusCode', httpstatus.UNPROCESSABLE_ENTITY);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.not.have.been.called;
         done();
       }.bind(this));
@@ -203,7 +206,7 @@ describe('/server/config/db/updatehandlers', function () {
 
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       var errorMessage = 'test-generated';
       this.dbMock.atomic.callsArgWith(4, new Error(errorMessage));
@@ -211,7 +214,7 @@ describe('/server/config/db/updatehandlers', function () {
       handler.removeClassesFromText(this.dbMock, TENANT, 'test-text-id', testClasses, function (err, result) {
         should.exist(err);
         err.should.have.property('message', errorMessage);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
       }.bind(this));
     });
@@ -220,7 +223,7 @@ describe('/server/config/db/updatehandlers', function () {
 
       var testClasses = ['test-class-id'];
 
-      this.viewMock.lookupClasses.callsArgWith(3, null, [{id : testClasses[0]}]);
+      this.viewMock.lookupClassesById.callsArgWith(3, null, [{id : testClasses[0]}]);
 
       var statusCode = httpstatus.NOT_FOUND;
       this.dbMock.atomic.callsArgWith(4, null, {error : dberrors.NOT_FOUND, code : statusCode});
@@ -229,7 +232,7 @@ describe('/server/config/db/updatehandlers', function () {
         should.exist(err);
         err.should.have.property('error', dberrors.NOT_FOUND);
         err.should.have.property('statusCode', statusCode);
-        this.viewMock.lookupClasses.should.have.been.called;
+        this.viewMock.lookupClassesById.should.have.been.called;
         this.dbMock.atomic.should.have.been.called;
       }.bind(this));
     });

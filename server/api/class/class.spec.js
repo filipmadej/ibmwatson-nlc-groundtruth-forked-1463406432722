@@ -22,7 +22,9 @@ var util = require('util');
 
 // external dependencies
 var async = require('async');
+var bodyParser = require('body-parser');
 var chai = require('chai');
+var express = require('express');
 var httpstatus = require('http-status');
 var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
@@ -38,68 +40,58 @@ var mocks = require('../../test/mocks');
 
 var should = chai.should();
 
-var storeMock = new mocks.StoreMock();
-storeMock['@global'] = true;
-
-var app, nlccreds;
-
-var vcapTest = '{\
-    "natural_language_classifier": [ \
-        { \
-        "name": "ibmwatson-nlc-classifier", \
-        "label": "natural_language_classifier", \
-        "plan": "standard", \
-        "credentials": { \
-          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
-          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
-          "password": "wgGb9arQWnqw" \
-        } \
-      } \
-     ] \
-  }';
-
 describe('/server/api/class', function () {
 
-  var TENANT = 'nlc-test';
+   var TENANT = 'nlc-test';
   var ENDPOINTBASE = '/api/' + TENANT + '/classes';
-
-  var error = {
-    error : 'test-generated',
-    statusCode : httpstatus.NOT_FOUND
-  };
 
   this.timeout(5000);
 
-  before(function (done) {
+  before(function () {
 
-    this.originalVcapServices = process.env.VCAP_SERVICES;
+    this.error = {
+      error : 'test-generated',
+      statusCode : httpstatus.INTERNAL_SERVER_ERROR
+    };
 
-    process.env.VCAP_SERVICES = vcapTest;
-
-    nlccreds = proxyquire('../../config/nlc',{});
-
-    app = proxyquire('../../app', {
-      './config/db/store' : storeMock,
-      '../../config/db/store' : storeMock,
-      'watson-developer-cloud' : new mocks.WDCMock()
-    });
-
-    request(app)
-      .post('/api/authenticate')
-      .send({username : nlccreds.username, password : nlccreds.password})
-      .expect(httpstatus.OK)
-      .end(function (err, res) {
-      this.sessionCookie = res.headers['set-cookie'][0];
-      done(err);
-    }.bind(this));
   });
 
-  after(function(){
-    process.env.VCAP_SERVICES = this.originalVcapServices;
-  });
+  this.timeout(5000);
 
   beforeEach(function () {
-    storeMock.reset();
+
+    this.storeMock = new mocks.StoreMock();
+    this.socketMock = new mocks.SocketUtilMock();
+    this.logMock = new mocks.LogMock();
+    this.cacheMock = new mocks.CacheMock();
+
+    this.controllerOverrides = {
+      '../../config/db/store' : this.storeMock,
+      '../../config/socket' : this.socketMock,
+      '../../config/log' : this.logMock,
+      '../job/cache' : this.cacheMock
+    };
+
+    this.controller = proxyquire('./class.controller', this.controllerOverrides);
+
+    this.restMock = {
+      ensureAuthenticated : function (req, res, next) {
+        next();
+      }
+    }
+
+    this.app = express();
+
+    this.appOverrides = {
+      './class.controller' : this.controller,
+      '../../config/rest' : this.restMock
+    }
+
+    this.app.use(bodyParser.json());
+    this.app.use('/api', proxyquire('./index', this.appOverrides));
+
+    this.agent = request.agent(this.app);
+
   });
 
   describe('/:tenantid/classes', function () {
@@ -107,64 +99,59 @@ describe('/server/api/class', function () {
     describe('POST', function () {
 
       it('should fail if no request body specified', function (done) {
-        request(app)
+        this.agent
           .post(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .expect(httpstatus.BAD_REQUEST, done);
       });
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.createClass.callsArgWith(2, error);
+        this.storeMock.createClass.callsArgWith(2, this.error);
 
-        request(app)
+        this.agent
           .post(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .send({ name : 'test-1' })
           .expect('Content-Type', /json/)
-          .expect(httpstatus.NOT_FOUND)
+          .expect(this.error.statusCode)
           .end(function (err, resp) {
-            storeMock.createClass.should.have.been.called;
+            this.storeMock.createClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should create class without error', function (done) {
-        request(app)
+        this.agent
           .post(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .send({ name : 'test-1' })
           .expect(httpstatus.CREATED)
           .end(function (err, resp) {
             resp.should.have.property('body');
             resp.should.have.deep.property('headers.location').that.contains(ENDPOINTBASE);
-            storeMock.createClass.should.have.been.called;
+            this.storeMock.createClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should return information about created class', function (done) {
         var classRequest = { name : 'test-2', description : 'testing' };
 
-        request(app)
+        this.agent
           .post(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .send(classRequest)
           .expect(httpstatus.CREATED)
           .expect('Content-Type', /json/)
           .end(function (err, resp) {
             resp.should.have.property('body');
             resp.should.have.deep.property('body.id');
-            storeMock.createClass.should.have.been.called;
+            this.storeMock.createClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should hide internal implementation details', function (done) {
         var classRequest = { name : 'test-3' };
 
-        request(app)
+        this.agent
           .post(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .send(classRequest)
           .expect(httpstatus.CREATED)
           .expect('Content-Type', /json/)
@@ -172,9 +159,9 @@ describe('/server/api/class', function () {
             resp.should.have.property('body');
             resp.should.not.have.deep.property('body._id');
             resp.should.not.have.deep.property('body._rev');
-            storeMock.createClass.should.have.been.called;
+            this.storeMock.createClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
     });
@@ -182,58 +169,147 @@ describe('/server/api/class', function () {
     describe('GET', function () {
 
       it('should pass back error from cloudant', function (done) {
-        storeMock.countClasses.callsArgWith(1, error);
+        this.storeMock.countClasses.callsArgWith(1, this.error);
 
-        request(app)
+        this.agent
           .get(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .expect('Content-Type', /json/)
-          .expect(httpstatus.NOT_FOUND)
+          .expect(this.error.statusCode)
           .end(function (err, resp) {
-            storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
-            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
+            this.storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should fetch classes without error', function (done) {
-        request(app)
+        this.agent
           .get(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .expect('Content-Type', /json/)
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
-            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.getClasses.should.have.been.calledWith(TENANT, sinon.match.object, sinon.match.func);
+            this.storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should fetch results based on custom parameters', function (done) {
         var fields = [ 'id', 'name' ];
-        request(app)
+        this.agent
           .get(ENDPOINTBASE)
-          .set('Cookie', [this.sessionCookie])
           .expect('Content-Type', /json/)
           .set('Range', 'items=2-7')
           .query({ fields : fields.join(',') })
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getClasses.should.have.been.calledWith(TENANT,
+            this.storeMock.getClasses.should.have.been.calledWith(TENANT,
                sinon.match({skip : 2, limit : 6, fields : ['_id', 'name']}),
                sinon.match.func);
-            storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
+            this.storeMock.countClasses.should.have.been.calledWith(TENANT, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
+
+    });
+
+
+    describe('DELETE', function () {
+
+      function deleteTestRunner (app, body, expectedStatus, verifyFn, callback) {
+        async.waterfall([
+          function (next) {
+            request(app)
+              .delete(ENDPOINTBASE)
+              .send(body)
+              .expect(httpstatus.ACCEPTED)
+              .end(function (err, resp) {
+                next(err, resp.headers.location);
+              });
+          }.bind(this),
+          function (location, next) {
+            var result = {};
+            var jobid = location.substr(location.lastIndexOf('/') + 1);
+            async.until(
+              function () {
+                var status;
+                if (this.cacheMock.put.lastCall) {
+                  status = this.cacheMock.put.lastCall.args[1].status;
+                }
+
+                return status === expectedStatus;
+              }.bind(this),
+              function (nexttry) {
+                setTimeout(function () {
+                  nexttry();
+                }, 250);
+              }.bind(this),
+              next
+            );
+          }.bind(this),
+          function (next) {
+            var result = this.cacheMock.put.lastCall.args[1];
+            result.should.have.property('status', expectedStatus);
+            verifyFn.call(this, result)
+            next();
+          }.bind(this)
+        ], callback);
+
+      }
+
+      beforeEach(function () {
+        this.ids = [uuid.v1(), uuid.v1()];
+      });
+
+      it('should fail if no request body specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should fail if empty array specified', function (done) {
+        this.agent
+          .delete(ENDPOINTBASE)
+          .send([])
+          .expect(httpstatus.BAD_REQUEST, done);
+      });
+
+      it('should delete texts', function (done) {
+        var verify = function (result) {
+          result.should.have.property('error', 0);
+          result.should.have.property('success', 2);
+        };
+
+        deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
+      it('should handle when some deletes fail', function (done) {
+        this.storeMock.deleteClass.onCall(0).callsArgWith(3,this.error);
+        this.storeMock.deleteClass.callsArgWith(3, null, {});
+
+        var verify = function (result) {
+          result.should.have.property('error', 1);
+          result.should.have.property('success', 1);
+        };
+
+        deleteTestRunner.call(this, this.app, this.ids, 'complete', verify, done);
+      });
+
 
     });
 
   });
 
   describe('/classes/:classid', function () {
+
+    before (function () {
+      this.notfound = {
+        error : 'test-generated',
+        statusCode : httpstatus.NOT_FOUND
+      };
+    });
 
     var VALID_ID = 'abc-123';
 
@@ -244,25 +320,23 @@ describe('/server/api/class', function () {
 
       it('should fail to return non-existent class', function (done) {
 
-        storeMock.getClass.callsArgWith(2, error);
+        this.storeMock.getClass.callsArgWith(2, this.notfound);
 
-        request(app)
+        this.agent
           .get(INVALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .expect(httpstatus.NOT_FOUND, done);
       });
 
       it('should fetch created class', function (done) {
 
-        request(app)
+        this.agent
           .get(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.getClass.should.have.been.calledWith(TENANT, VALID_ID, sinon.match.func);
+            this.storeMock.getClass.should.have.been.calledWith(TENANT, VALID_ID, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });
@@ -270,50 +344,46 @@ describe('/server/api/class', function () {
     describe('PUT', function () {
 
       it('should fail if no request body specified', function (done) {
-        request(app)
+        this.agent
           .put(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', 'doesntmatter')
           .expect(httpstatus.BAD_REQUEST, done);
       });
 
       it('should fail to replace unknown class', function (done) {
-        storeMock.replaceClass.callsArgWith(3, error);
+        this.storeMock.replaceClass.callsArgWith(3, this.notfound);
 
-        request(app)
+        this.agent
           .put(INVALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', 'doesntmatter')
           .send({name : 'updated'})
           .expect(httpstatus.NOT_FOUND, done);
       });
 
       it('should require an etag', function (done) {
-        request(app)
+        this.agent
           .put(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .send({name : 'updated'})
           .expect(httpstatus.PRECONDITION_FAILED)
           .end(function (err) {
-            storeMock.replaceClass.should.not.have.been.called;
+            this.storeMock.replaceClass.should.not.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should fail when id in body does not match request', function (done) {
 
         var replacement = { id : uuid.v1(), name : uuid.v1(), description : uuid.v1() };
 
-        request(app)
+        this.agent
           .put(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', '*')
           .send(replacement)
           .expect(httpstatus.BAD_REQUEST)
           .end(function (err) {
-            storeMock.replaceClass.should.not.have.been.called;
+            this.storeMock.replaceClass.should.not.have.been.called;
             done(err);
-          });
+          }.bind(this));
 
       });
 
@@ -321,17 +391,16 @@ describe('/server/api/class', function () {
 
         var replacement = { name : uuid.v1(), description : uuid.v1() };
 
-        request(app)
+        this.agent
           .put(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', uuid.v1())
           .send(replacement)
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.replaceClass.should.have.been.called;
+            this.storeMock.replaceClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
 
       });
 
@@ -339,17 +408,16 @@ describe('/server/api/class', function () {
 
         var replacement = { id : VALID_ID, name : uuid.v1(), description : uuid.v1() };
 
-        request(app)
+        this.agent
           .put(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', uuid.v1())
           .send(replacement)
           .expect(httpstatus.OK)
           .end(function (err, resp) {
             resp.should.have.property('body');
-            storeMock.replaceClass.should.have.been.called;
+            this.storeMock.replaceClass.should.have.been.called;
             done(err);
-          });
+          }.bind(this));
 
       });
 
@@ -357,17 +425,16 @@ describe('/server/api/class', function () {
 
         var replacement = { name : uuid.v1(), description : uuid.v1() };
 
-            request(app)
+            this.agent
               .put(VALID_LOCATION)
-              .set('Cookie', [this.sessionCookie])
               .set('If-Match', '*')
               .send(replacement)
               .expect(httpstatus.OK)
               .end(function (err, resp) {
                 resp.should.have.property('body');
-                storeMock.replaceClass.should.have.been.called;
+                this.storeMock.replaceClass.should.have.been.called;
                 done(err);
-              });
+              }.bind(this));
 
       });
 
@@ -376,38 +443,35 @@ describe('/server/api/class', function () {
     describe('DELETE', function () {
 
       it('should fail to delete unknown class', function (done) {
-        storeMock.deleteClass.callsArgWith(3, error);
+        this.storeMock.deleteClass.callsArgWith(3, this.notfound);
 
-        request(app)
+        this.agent
           .del(INVALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', 'doesntmatter')
           .expect(httpstatus.NOT_FOUND, done);
       });
 
       it('should require an etag', function (done) {
 
-        request(app)
+        this.agent
           .del(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .expect(httpstatus.PRECONDITION_FAILED)
           .end(function (err) {
-            storeMock.deleteClass.should.not.have.been.called;
+            this.storeMock.deleteClass.should.not.have.been.called;
             done(err);
-          });
+          }.bind(this));
       });
 
       it('should successfully delete class', function (done) {
         var etag = uuid.v1();
-        request(app)
+        this.agent
           .del(VALID_LOCATION)
-          .set('Cookie', [this.sessionCookie])
           .set('If-Match', etag)
           .expect(httpstatus.NO_CONTENT)
           .end(function (err) {
-            storeMock.deleteClass.should.have.been.calledWith(TENANT, VALID_ID, etag, sinon.match.func);
+            this.storeMock.deleteClass.should.have.been.calledWith(TENANT, VALID_ID, etag, sinon.match.func);
             done(err);
-          });
+          }.bind(this));
       });
 
     });

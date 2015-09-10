@@ -14,13 +14,12 @@
  * limitations under the License.
  **/
 
- 'use strict';
+'use strict';
 
-angular.module('ibmwatson-nlc-groundtruth-app')
-  .directive('errorBar', function init () {
+angular.module('ibmwatson-common-ui-components.watsonFooter', [])
+  .directive('watsonFooter', function() {
     return {
-      templateUrl: 'app/errorBar/errorBar.html',
-      controller: 'ErrorBarCtrl',
+      templateUrl: 'watsonFooter/watsonFooter.html',
       restrict: 'EA',
       replace: true
     };

@@ -28,24 +28,32 @@
  *  linkText: '' // Optional: Text to put on the link. If link is supplied, defaults to 'Learn more'
  * }
  */
-angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('alerts', ['$log', function init($log) {
+angular.module('ibmwatson-common-ui-components.watsonAlerts')
+  .factory('watsonAlerts', ['$log', function init ($log) {
 
-    $log.debug('init');
+    var LEVELS = [ 'success', 'info', 'warning', 'error' ];
 
     var alerts = [];
 
     /**
-     * Add an alert to the list of alerts
-     */
-    function add(/*Object*/alert){
-      $log.debug('add',alert,alerts);
+    * Add an alert to the list of alerts
+    */
+    function add( /*Object*/ alert) {
+      $log.debug('add', alert, alerts);
 
-      alert.level = alert.level || 'info';
+      alert.level = alert.level || LEVELS[1];
+      if (LEVELS.indexOf(alert.level) < 0) {
+        alert.level = LEVELS[1];
+      }
+
+      // check the optional 'dismissable' attribute and set to default 'true'
+      if (alert.dismissable === undefined) {
+        alert.dismissable = true;
+      }
 
       // Create a dismiss function to allow the alert to be removed
-      alert.dismiss = function(){
-        remove.apply(this,[alert]);
+      alert.dismiss = function() {
+        remove.apply(this, [alert]);
       };
 
       alerts.push(alert);
@@ -54,21 +62,21 @@ angular.module('ibmwatson-nlc-groundtruth-app')
     }
 
     /**
-     * Remove an alert from the list of alerts
-     */
-    function remove(/*Object*/alert){
-      $log.debug(remove,alert);
+    * Remove an alert from the list of alerts
+    */
+    function remove( /*Object*/ alert) {
+      $log.debug(remove, alert);
       var index = alerts.indexOf(alert);
-      if(index >= 0){
-        alerts.splice(index,1);
+      if (index >= 0) {
+        alerts.splice(index, 1);
       }
     }
 
     /**
-     * Remove all current alerts
-     */
-    function clear(){
-      alerts.splice(0,alerts.length);
+    * Remove all current alerts
+    */
+    function clear() {
+      alerts.splice(0, alerts.length);
     }
 
     // Public API here

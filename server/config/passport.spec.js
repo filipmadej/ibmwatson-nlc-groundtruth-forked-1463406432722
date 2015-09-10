@@ -28,7 +28,6 @@ var cookieParser = require('cookie-parser');
 var express = require('express');
 var session = require('express-session');
 var httpstatus = require('http-status');
-var passport = require('passport');
 var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
 var sinon = require('sinon');
@@ -128,8 +127,11 @@ describe('/server/config/passport', function () {
       this.app.use(cookieParser());
       this.app.use(session({secret : 'testing'}));
 
+      this.passportLib = proxyquire('passport', {});
+
       this.overrides = {
-        './nlc' : this.nlc
+        './nlc' : this.nlc,
+        'passport' : this.passportLib
       };
 
       proxyquire('./passport', this.overrides)(this.app);
@@ -139,12 +141,12 @@ describe('/server/config/passport', function () {
     describe('local strategy', function () {
 
       before(function () {
-        this.app.post('/local', passport.authenticate('local'), function (req, res) {
+        this.app.post('/local', this.passportLib.authenticate('local'), function (req, res) {
           res.status(httpstatus.OK).json(req.user);
         });
       });
 
-      it.skip('should succeed with local strategy authentication', function (done) {
+      it('should succeed with local strategy authentication', function (done) {
         request(this.app)
           .post('/local')
           .send({
@@ -173,12 +175,12 @@ describe('/server/config/passport', function () {
     describe('basic strategy', function () {
 
       before(function () {
-        this.app.post('/basic', passport.authenticate('basic'), function (req, res) {
+        this.app.post('/basic', this.passportLib.authenticate('basic'), function (req, res) {
           res.status(httpstatus.OK).json(req.user);
         });
       });
 
-      it.skip('should succeed with basic strategy authentication', function (done) {
+      it('should succeed with basic strategy authentication', function (done) {
         request(this.app)
           .post('/basic')
           .auth(this.nlc.username, this.nlc.password)

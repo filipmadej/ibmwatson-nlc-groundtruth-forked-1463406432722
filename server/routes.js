@@ -30,10 +30,10 @@ module.exports = function configure (app) {
 
   // Insert routes below
   app.use('/api/authenticate', require('./api/authenticate'));
-  app.use('/api', require('./api/import'));
   app.use('/api', require('./api/classifier'));
   app.use('/api', require('./api/text'));
   app.use('/api', require('./api/class'));
+  app.use('/api', require('./api/content'));
 
   // All undefined asset or api routes should return a 404
   app.route('/:url(api|auth|components|app|bower_components|assets)/*')

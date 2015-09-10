@@ -16,15 +16,14 @@
 
 'use strict';
 
-angular.module('ibmwatson-nlc-groundtruth-app')
-	.directive('alertsBar', function() {
-		return {
-			templateUrl: 'app/alertsBar/alertsBar.html',
-			scope:{
-				alerts: '=alerts'
-			},
-			//controller: 'AlertsBarCtrl',
-			restrict: 'E',
-			replace: true
-		};
-	});
+angular.module('ibmwatson-common-ui-components.watsonLoading', [])
+  .directive('watsonLoading', function() {
+    return {
+      templateUrl: 'watsonLoading/watsonLoading.html',
+      restrict: 'EA',
+      replace: true,
+      scope: {
+        loadingMessage: '=',
+      }
+    };
+  });

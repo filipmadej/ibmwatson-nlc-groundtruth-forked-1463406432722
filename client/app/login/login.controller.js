@@ -17,15 +17,13 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', '$log', 'authentication', 'alerts',
-    function init ($scope, $rootScope, $state, $log, authentication, alertsSvc) {
-
-      $scope.alerts = alertsSvc.alerts;
+  .controller('LoginCtrl', ['$scope', '$rootScope', '$state', '$log', 'authentication', 'watsonAlerts',
+    function init ($scope, $rootScope, $state, $log, authentication, watsonAlerts) {
 
       // Any messages to be displayed
       if($state.params.alerts && _.isArray($state.params.alerts)){
         for (var i = 0; i < $state.params.alerts.length; i++) {
-          alertsSvc.add($state.params.alerts[i]);
+          watsonAlerts.add($state.params.alerts[i]);
         }
       }
 

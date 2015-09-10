@@ -64,6 +64,7 @@ function DatabaseError (category, message, code) {
     this.statusCode = code;
 }
 util.inherits(DatabaseError, Error);
+module.exports.DatabaseError = DatabaseError;
 
 /**
  * Helper function used when we know a request will be rejected
