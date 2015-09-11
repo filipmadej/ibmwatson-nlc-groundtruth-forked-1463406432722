@@ -1,47 +1,41 @@
 <nav class="navbar navbar-default ibm-navbar ibm-nlc-navbar">
   <div style="padding-left:0px" class="container ibm-container">
-    <div ng-controller="AppController">
-      <div>
-        <ul class="nav navbar-nav navbar-left ibm-nav">
-          <li>
-            <a ngf-select ngf-change="getFileContent(files)" accept=".json,.csv" ngf-accept="'.json,.csv'" data-multiple="true" ng-model="files">Import</a>
-          </li>
-          <li>
-            <a ng-click="export()">Export</a>
-          </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right ibm-nav">
-          <li style="float: right">
-            <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Train</a>
-            <a ng-show="!showTrainConfirm && loading.savingClassifier">Saving &amp; Training</a>
-            <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm && !loading.savingClassifier">
-              <div class="form-group ibm-form-group input-group">
-                <div class="input-group-btn dropdown">
-                  <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
-                  </button>
-                  <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
-                    <li ng-repeat="option in languageOptions">
-                      <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
-                    </li>
-                  </ul>
-                </div>
-                <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter new classifier's name" ng-model="newClassifier.name" show-focus="showTrainConfirm">
-                <span class="input-group-btn">
-                  <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
-                </span>
+    <div>
+      <ul class="nav navbar-nav navbar-left ibm-nav">
+        <li>
+          <a ngf-select ngf-change="importFiles()" role="button" accept=".json,.csv" ngf-accept="'.json,.csv'" ngf-multiple="true" data-multiple="true" ng-model="files">Import</a>
+        </li>
+        <li>
+          <a ng-click="exportToFile()">Export</a>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right ibm-nav">
+        <li style="float: right">
+          <a ng-click="showTrainConfirm=true" ng-show="!showTrainConfirm && !loading.savingClassifier">Train</a>
+          <a ng-show="!showTrainConfirm && loading.savingClassifier">Saving &amp; Training</a>
+          <form class="form-inline" style="margin-top:7px" ng-submit="train()" ng-show="showTrainConfirm && !loading.savingClassifier">
+            <div class="form-group ibm-form-group input-group">
+              <div class="input-group-btn dropdown">
+                <button style="padding-top:9px; padding-bottom:7px;" class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span style="margin-left:5px" class="caret"></span>
+                </button>
+                <ul style="margin-top: 0px;border-radius: 0px;padding: 0px;margin-left: 1px;" class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
+                  <li ng-repeat="option in languageOptions">
+                    <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
+                  </li>
+                </ul>
               </div>
-            </form>
-          </li>
-        </ul>
-      </div>
+              <input type="text" style="min-width:225px" class="form-control ibm-form-control ibm-nlc-entry-field" placeholder="Enter new classifier's name" ng-model="newClassifier.name" show-focus="showTrainConfirm">
+              <span class="input-group-btn">
+                <button style="border:none" class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit">Confirm</button>
+              </span>
+            </div>
+          </form>
+        </li>
+      </ul>
     </div>
   </div>
 </nav>
-<div class="container-alerts">
-  <alerts-bar alerts="alerts"></alerts-bar>
-</div>
-
-<error-bar></error-bar>
+<watson-alerts-bar></watson-alerts-bar>
 
 <div class="container ibm-container" ng-init="setTableHeights()">
   <div class="row ibm-row" style="margin-top: 20px;" ng-show="!loading.savingClassifier">
@@ -88,41 +82,41 @@
       </datalist>
       <div class="ibm-nlc-table" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
-        <div class="ibm-nlc-data-row" ng-repeat="aClass in filteredClasses() | orderBy:classOrder" ng-class="aClass.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
+        <div class="ibm-nlc-data-row" ng-repeat="clazz in filteredClasses() | orderBy:classOrder" ng-class="clazz.selected ? 'ibm-nlc-class-selected' : ''" ng-show="classes.length">
           <div class="inline check">
             <span>
-              <input type="checkbox" ng-model="aClass.checked" multi-check/>
+              <input type="checkbox" ng-model="clazz.checked" multi-check/>
             </span>
           </div>
           <div class="inline ibm-nlc-class-label" width="100%">
             <!-- width="100%" to force this cell to maximum available space -->
-            <span ng-show="!aClass.edit" title="{{ aClass.label || 'empty' }}">
-              {{ aClass.label || 'empty' }}
+            <span ng-show="!clazz.edit" title="{{ clazz.label || 'empty' }}">
+              {{ clazz.label || 'empty' }}
             </span>
-            <form ng-show="aClass.edit" ng-submit="changeLabel('class', aClass);">
+            <form ng-show="clazz.edit" ng-submit="changeLabel('class', clazz);">
               <span>
-                <input id="{{ aClass.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ aClass.label }}" ng-keyup="keyUpCancelEditing(aClass, $event)" ng-blur="changeLabel('class', aClass)" show-focus="aClass.edit">
+                <input id="{{ clazz.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ clazz.label }}" ng-keyup="keyUpCancelEditing(clazz, $event)" ng-blur="changeLabel('class', clazz)" show-focus="clazz.edit">
               </span>
             </form>
           </div>
-          <div class="right ibm-nlc-row-options" ng-class="{'ibm-nlc-row-options-padded': aClass.edit}">
+          <div class="right ibm-nlc-row-options" ng-class="{'ibm-nlc-row-options-padded': clazz.edit}">
             <div class="inline">
-                <span class="ico-span" ng-click="editField(aClass)">
+                <span class="ico-span" ng-click="editField(clazz)">
                     <span class="ibm-icon--edit"></span>
                 </span>
             </div>
             <div class="inline">
-                <span class="ico-span" ng-click="selectClass(aClass)">
+                <span class="ico-span" ng-click="selectClass(clazz)">
                     <span class="ibm-icon--filter"></span>
                 </span>
             </div>
             <div class="inline">
-                <span class="ico-span" ng-click="deleteClass(aClass)">
+                <span class="ico-span" ng-click="deleteClass(clazz)">
                     <span class="ibm-icon--remove-trash"></span>
                 </span>
             </div>
             <div class="inline up3">
-              <span class="sr-only">(current)</span><span class="ibm-badge">{{numberTextsInClass(aClass)}}</span>
+              <span class="sr-only">(current)</span><span class="ibm-badge">{{numberTextsInClass(clazz)}}</span>
             </div>
           </div>
         </div>
@@ -142,12 +136,12 @@
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit" ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add</button>
           </span>
         </form>
-        <div ng-show="getSelected().length" style="margin-top: 10px;">
+        <div ng-show="getSelectedClasses().length" style="margin-top: 10px;">
           <span class="ibm-nlc-showing-tagged-results">Tagged with:</span>
-          <span ng-repeat="aClass in getSelected()">
+          <span ng-repeat="clazz in getSelectedClasses()">
             <span class="ibm-nlc-tag ibm-nlc-filter-tag">
-              {{ aClass.label }}
-              <a ng-click="removeClassFromView(aClass)">
+              {{ clazz.label }}
+              <a ng-click="selectClass(clazz)">
                 <span class="ibm-nlc-tag-x">x</span>
               </a>
             </span>
@@ -159,14 +153,12 @@
           <input type="checkbox" ng-model="checkAllTextsChecked" ng-click="checkAll(filteredTexts(),checkAllTextsChecked);">
         </div>
         <div ng-show="getChecked(texts).length && filteredTexts().length" class="left">
-            <span class="ico-span" ng-click="tagCheckedTexts()">
+            <span class="ico-span" ng-click="tagCheckedTexts()" ng-show="getChecked(classes).length">
                 <span class="ibm-icon--tag"></span>Assign
             </span>
             <span class="ico-span" ng-click="deleteCheckedTexts()">
                 <span class="ibm-icon--remove-trash"></span>Delete
             </span>
-          <!--<input type="image" class="ibm-nlc-icon-header" src="https://ibmwatson-assets-nlc.mybluemix.net/images/remove-trash_32.png" width="20px" height="20px" ng-click="deleteCheckedTexts()" style="margin-left:0px;">-->
-          <!--<input type="image" class="ibm-nlc-icon-header" src="https://ibmwatson-assets-nlc.mybluemix.net/images/tag_32.png" width="20px" height="20px" ng-click="tagCheckedTexts()"/>-->
         </div>
         <div class="dropdown ibm-dropdown ibm-nlc-sortbydropdown">
           <button class="btn btn-default dropdown-toggle ibm-btn ibm-btn-default ng-binding" type="button" id="dropdownMenu1" aria-haspopup="true" aria-expanded="false">Sort by: {{ textOrderOption.label }} <span class="caret"></span>
@@ -184,41 +176,39 @@
         <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
         <table class="table ibm-nlc-table" width="100%" ng-show="texts.length">
           <tbody multi-check-group>
-            <tr class="ibm-nlc-table-row" ng-repeat="anText in filteredTexts() | orderBy:textOrder">
+            <tr class="ibm-nlc-table-row" ng-repeat="text in filteredTexts() | orderBy:textOrder">
               <td>
                 <span class="in4">
-                  <input type="checkbox" ng-model="anText.checked" multi-check/>
+                  <input type="checkbox" ng-model="text.checked" multi-check/>
                 </span>
               </td>
               <td width="100%" style="padding: 10px 8px 5px;">
                 <!-- to force this cell to maximum available space -->
-                <div ng-show="!anText.edit">
-                  {{ anText.label || 'empty' }}
+                <div ng-show="!text.edit">
+                  {{ text.label || 'empty' }}
                 </div>
-                <form ng-show="anText.edit" ng-submit="changeLabel('text', anText);">
+                <form ng-show="text.edit" ng-submit="changeLabel('text', text);">
                   <span>
-                    <input id="{{ anText.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ anText.label }}" ng-keyup="keyUpCancelEditing(anText, $event)" ng-blur="changeLabel('text', anText)" show-focus="anText.edit">
+                    <input id="{{ text.$$hashKey }}" type="text" class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ text.label }}" ng-keyup="keyUpCancelEditing(text, $event)" ng-blur="changeLabel('text', text)" show-focus="text.edit">
                   </span>
                 </form>
                 <span class="ibm-nlc-classes-label">Classes:</span>
-                <div ng-repeat="answer in anText.classes" class="ibm-nlc-tag">
+                <div ng-repeat="answer in text.classes" class="ibm-nlc-tag">
                   <span>{{ answer }}</span>
-                  <a ng-click="removeTag(anText, answer)"><span class="ibm-nlc-tag-x">x</span></a>
+                  <a ng-click="removeTag(text, answer)"><span class="ibm-nlc-tag-x">x</span></a>
                 </div>
-                <input type="text" id="newTagField{{ anText.$$hashKey }}" class="ibm-nlc-add-tag-field" placeholder="class name..." ng-model="newTagStrings[anText.$$hashKey]" ng-blur="tagText(newTagStrings[anText.$$hashKey], anText);" ng-keyup="newTagFieldKeyUp($event, anText)" list="classList" ng-show="anText.beingTagged" show-focus="anText.beingTagged">
-                <input type="button" value="+" class="ibm-nlc-add-class-button" ng-hide="anText.beingTagged" ng-click="beginTaggingText(anText)" />
+                <input type="text" id="newTagField{{ text.$$hashKey }}" class="ibm-nlc-add-tag-field" placeholder="class name..." ng-model="newTagStrings[text.$$hashKey]" ng-blur="tagText(newTagStrings[text.$$hashKey], text);" ng-keyup="newTagFieldKeyUp($event, text)" list="classList" ng-show="text.beingTagged" show-focus="text.beingTagged">
+                <input type="button" value="+" class="ibm-nlc-add-class-button" ng-hide="text.beingTagged" ng-click="beginTaggingText(text)" />
               </td>
               <td class="ibm-left-icon">
                   <span class="ico-span">
-                      <span class="ibm-icon--edit" ng-click="editField(anText)"></span>
+                      <span class="ibm-icon--edit" ng-click="editField(text)"></span>
                   </span>
-                <!--<span class="ibm-icon ibm-icon-edit" ng-click="editField(anText)"></span>-->
               </td>
-              <td ng-click="deleteText(anText)" class="ibm-right-icon">
+              <td ng-click="deleteText(text)" class="ibm-right-icon">
                   <span class="ico-span">
                       <span class="ibm-icon--remove-trash"></span>
                   </span>
-                <!--<span class="ibm-icon ibm-icon-delete"></span>-->
               </td>
             </tr>
           </tbody>

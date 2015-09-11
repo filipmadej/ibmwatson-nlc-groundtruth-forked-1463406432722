@@ -29,6 +29,7 @@
 var util = require('util');
 
 // external dependencies
+var _ = require('lodash');
 var async = require('async');
 var makeArray = require('make-array');
 // db module dependencies
@@ -469,4 +470,205 @@ module.exports.getText = getText;
 
 module.exports.deleteTenant = function deleteTenant (tenant, callback) {
   deleteall(db, tenant, callback);
+};
+
+
+function handleImportClassEntries (tenant, classes, callback) {
+  if (makeArray(classes).length > 0) {
+    return async.waterfall([
+      function lookupClasses (next) {
+        dbviews.lookupClassesByName(db, tenant, classes, next);
+      },
+      function processClasses (existingClasses, next) {
+        existingClasses = makeArray(existingClasses);
+        var newClasses = classes;
+        if (existingClasses.length > 0) {
+          newClasses = classes.filter(function find (elem) {
+            return !(_.find(existingClasses, function exist (existing) {
+              return elem === existing.key[1]
+            }));
+          });
+        }
+
+        async.mapLimit(newClasses, 10, function createNew (classname, nextclass) {
+          var classification = dbobjects.prepareClassInfo(tenant, {name : classname});
+          var classResult = {
+            id : classification._id,
+            name : classification.name,
+            created : true
+
+          };
+          db.insert(classification, function checkResponse (err, docstatus) {
+            if (err) {
+              delete classResult.id;
+              classResult.error = err;
+            }
+
+            return nextclass(null, classResult);
+
+          });
+        }, function handleResults (err, results) {
+          var classEntries = existingClasses.map(function transform (elem) {
+            return {id : elem.id, name : elem.key[1], created : false}
+          }).concat(results);
+
+          next(err, classEntries);
+        });
+      }], callback);
+  } else {
+    callback(null, []);
+  }
+}
+
+function getTextIfExists (tenant, value, callback) {
+  async.waterfall([
+    function checkText (next) {
+      checkIfTextExists(tenant, value, next);
+    },
+    function retrieveText (text, next) {
+      if (text) {
+        return getText(tenant, text.id, next);
+      } else {
+        return next(null, null);
+      }
+
+    }
+  ], callback);
+}
+
+function initImportEntry (tenant, entry, callback) {
+  async.parallel([
+    function handleText (done) {
+      getTextIfExists(tenant, entry.text, done);
+    },
+    function handleClasses (done) {
+      handleImportClassEntries(tenant, entry.classes, done)
+    }], callback);
+}
+
+/**
+ * Handles updating an existing text during import.  It is important
+ * to note that given how we are handling errors during import,
+ * the callback to this function only expects a single 'result'
+ * parameter - that will contain embedded error information in the event
+ * it occurs.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} text - existing persisted text
+ * @param {Object[]} classes - array of classes that were included in import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
+function handleExistingTextEntry (tenant, text, classes, callback) {
+
+    var classesDelta = classes.filter(function filterNew (elem) {
+      return (makeArray(text.classes).indexOf(elem.id) === -1);
+    });
+
+    var result = {
+      id : text._id,
+      value : text.value,
+      created : false,
+      classes : classesDelta
+    };
+
+    var deltaArray = classesDelta.map(function convert (delta) {
+      return delta.id;
+    });
+
+    dbhandlers.addClassesToText(db, tenant, text._id, deltaArray, function handleUpdate (err) {
+      if (err) {
+        result.error = err;
+      }
+
+      callback(result);
+    });
+}
+
+/**
+ * Handles creating a new text during import.  It is important
+ * to note that given how we are handling errors during import,
+ * the callback to this function only expects a single 'result'
+ * parameter - that will contain embedded error information in the event
+ * it occurs.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} value - value to create text with
+ * @param {Object[]} classes - array of classes that were included in import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
+function handleNewTextEntry (tenant, value, classes, callback) {
+
+    var classArray = classes.map(function convert (elem) {
+      return elem.id;
+    });
+
+    var text = dbobjects.prepareTextInfo(tenant, {value : value, classes : classArray});
+
+    var result = {
+      id : text._id,
+      value : text.value,
+      created : true,
+      classes : classes
+    };
+
+    db.insert(text, function checkResponse (err, docstatus) {
+      if (err) {
+        delete result.id;
+        result.error = err;
+      }
+
+      return callback(result);
+
+    });
+}
+/**
+ * Processes a specific entry during import.  Ensures all referenced entities
+ * exist and are properly correlated.
+ *
+ * @param {String} tenant - ID of the tenant to delete the text from
+ * @param {Object} entry - import entry
+ * @param {Function} callback - called once complete
+ * @returns {void}
+ */
+module.exports.processImportEntry = function processImportEntry (tenant, entry, callback) {
+
+  var result = {};
+
+  var requestedClasses = makeArray(entry.classes);
+
+  async.waterfall([
+    function init (next) {
+      initImportEntry(tenant, entry, function handleResults (err, results) {
+        if (err) {
+          return next(err);
+        }
+
+        result.classes = results[1].filter(function filterNew (elem) {
+          return elem.created;
+        });
+        next(null, results[0], results[1]);
+      });
+    },
+    function handleText (text, classes, next) {
+
+      var handleTextResult = function handleResult (textResult) {
+        result.text = textResult;
+        next();
+      };
+
+      if (text) {
+        return handleExistingTextEntry (tenant, text, classes, handleTextResult);
+      } else {
+        return handleNewTextEntry (tenant, entry.text, classes, handleTextResult);
+      }
+    }], function handleResult (err) {
+      if (err) {
+        result.error = err;
+      }
+
+    return callback(null, result);
+
+  });
 };

@@ -7,7 +7,7 @@ module.exports = function(config) {
     basePath: '',
 
     // testing framework to use (jasmine/mocha/qunit/...)
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'chai', 'sinon'],
 
     // list of files / patterns to load in the browser
     files: [
@@ -21,6 +21,7 @@ module.exports = function(config) {
       'client/bower_components/angular-bootstrap/ui-bootstrap-tpls.js',
       'client/bower_components/angular-xeditable/dist/js/xeditable.js',
       'client/bower_components/angular-multi-check/angular-multi-check.js',
+      'client/bower_components/angular-socket-io/socket.js',
       'client/bower_components/lodash/lodash.min.js',
       'client/bower_components/angular-ui-router/release/angular-ui-router.js',
       'client/bower_components/d3/d3.js',
@@ -28,6 +29,7 @@ module.exports = function(config) {
       'client/bower_components/ngDialog/js/ngDialog.js',
       'client/bower_components/ng-file-upload-shim/ng-file-upload-shim.js',
       'client/bower_components/ng-file-upload/ng-file-upload.js',
+      'client/bower_components/ibmwatson-common-ui-components/dist/ibmwatson-common-ui-components.js',
       'client/app/app.js',
       'client/app/app.coffee',
       'client/app/**/*.js',
@@ -37,7 +39,8 @@ module.exports = function(config) {
       'client/app/**/*.jade',
       'client/components/**/*.jade',
       'client/app/**/*.html',
-      'client/components/**/*.html'
+      'client/components/**/*.html',
+      'node_modules/socket.io/node_modules/socket.io-client/socket.io.js'
     ],
 
     preprocessors: {

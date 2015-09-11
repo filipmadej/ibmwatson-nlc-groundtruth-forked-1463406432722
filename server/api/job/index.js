@@ -17,18 +17,19 @@
 'use strict';
 
 var express = require('express');
-var controller = require('./import.controller');
-var bodyParser = require('body-parser');
+
+// local dependencies
+var controller = require('./job.controller');
 var rest = require('../../config/rest');
 
 var router = express.Router();
 
 var ENDPOINTS = {
-    csv : '/:tenantid/import'
+    job : '/:tenantid/jobs/:jobid'
 };
 
-router.use(bodyParser.text({ type : 'text/*', limit : '10mb' }));
+router.use(ENDPOINTS.job, rest.ensureAuthenticated);
 
-router.post(ENDPOINTS.csv, rest.ensureAuthenticated ,controller.import);
+router.get(ENDPOINTS.job, controller.jobStatus);
 
 module.exports = router;

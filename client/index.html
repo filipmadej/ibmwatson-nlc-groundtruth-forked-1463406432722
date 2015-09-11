@@ -101,22 +101,20 @@
     <script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
     <script src="bower_components/ngDialog/js/ngDialog.js"></script>
     <script src="bower_components/ng-file-upload/ng-file-upload.js"></script>
+    <script src="bower_components/angular-socket-io/socket.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
+    <script src="/socket.io/socket.io.js"></script>
 
     <!-- build:js({.tmp,client}) app/app.js -->
     <script src="app/app.js"></script>
     <!-- injector:js -->
-    <script src="app/alerts/alerts.service.js"></script>
-    <script src="app/alertsBar/alertsBar.directive.js"></script>
     <script src="app/authentication/authentication.service.js"></script>
     <script src="app/classes/classes.service.js"></script>
     <script src="app/classifiers/classifiers.controller.js"></script>
     <script src="app/classifiers/classifiers.js"></script>
     <script src="app/config/config.service.js"></script>
-    <script src="app/errorBar/errorBar.controller.js"></script>
-    <script src="app/errorBar/errorBar.directive.js"></script>
-    <script src="app/errors/errors.service.js"></script>
+    <script src="app/content/content.service.js"></script>
     <script src="app/focusOnShow/focusOnShow.directive.js"></script>
     <script src="app/login/login.controller.js"></script>
     <script src="app/login/login.js"></script>
@@ -124,11 +122,21 @@
     <script src="app/nlc/nlc.service.js"></script>
     <script src="app/session/session.js"></script>
     <script src="app/slice/slice.filter.js"></script>
+    <script src="app/socket/socket.service.js"></script>
     <script src="app/texts/texts.service.js"></script>
     <script src="app/training/training.controller.js"></script>
     <script src="app/training/training.js"></script>
     <script src="app/versions/versions.service.js"></script>
-    <script src="components/ibmwatson-common-ui-components/angular-watson.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/angular-watson-templates.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/angular-watson.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.service.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.directive.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.html.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.html.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.html.js"></script>
+    <script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.js"></script>
     <script src="components/modal/modal.service.js"></script>
     <script src="components/navbar/navbar.controller.js"></script>
     <!-- endinjector -->

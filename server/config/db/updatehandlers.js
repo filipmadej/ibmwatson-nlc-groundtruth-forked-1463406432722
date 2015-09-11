@@ -35,13 +35,11 @@ var dberrors = require('./errors');
 var dbviews = require('./views');
 var log = require('../log');
 
-function getErrorMessage (updatename) {
-    var op = updatename.split('-')[0];
+function getErrorMessage (op) {
     return util.format('Failed to %s classes on text', op)
 }
 
 function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
-
     log.debug({
         classes : classes,
         text : textid,
@@ -53,9 +51,11 @@ function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
         return callback();
     }
 
-    async.series([
+    var op = update.split('-')[0];
+
+    async.waterfall([
         function verifyClasses (done) {
-            dbviews.lookupClasses(db, tenantid, classes, function verifyClasses (err, results) {
+            dbviews.lookupClassesById(db, tenantid, classes, function verifyClasses (err, results) {
 
                 var invalid = results.some(function validateClass (cls) {
                     return (classes.indexOf(cls.id) === -1);
@@ -76,14 +76,14 @@ function handleTextClasses ( db, update, tenantid, textid, classes, callback ) {
 
             db.atomic('text', update, textid, parameters, function checkResponse (err, resp) {
                 if (err) {
-                    log.error({ err : err }, getErrorMessage(update));
-                    return done(err);
+                    log.error({ err : err }, getErrorMessage(op));
+                    return done(dberrors.asError(err, err.msg, err.code));
                 }
                 if (resp.error) {
-                    log.error({ response : resp }, getErrorMessage(update));
-                    return done(dberrors.asError(resp.error, getErrorMessage(update), resp.code));
+                    log.error({ response : resp }, getErrorMessage(op));
+                    return done(dberrors.asError(resp.error, getErrorMessage(op), resp.code));
                 }
-                return done();
+                return done(null, { operation : { path : 'classes', op : op}, id : textid, classes : classes });
             });
         }
     ], callback);
@@ -123,14 +123,14 @@ module.exports.updateTextMetadata = function updateTextMetadata (db, tenantid, t
 
         if (err) {
             log.error({ err : err }, errorMsg());
-            return callback(err);
+            // TODO FIGURE OUT WHY THIS DIDN'T APPEAR TO BE STD NANO ERR
+            return callback(dberrors.asError(dberrors.UNKNOWN, err.message, err.statusCode));
         }
-
         if (resp.error) {
             log.error({ response : resp }, errorMsg());
             return callback(dberrors.asError(resp.error, errorMsg(), resp.code));
         }
-        return callback();
+
+        return callback(null, { operation : { path : 'metadata', op : 'replace' }, id : textid, metadata : metadata });
     });
 };
-

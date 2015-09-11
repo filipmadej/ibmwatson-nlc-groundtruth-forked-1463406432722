@@ -48,7 +48,7 @@ var vcapTest = '{\
 
 describe('server/start', function () {
 
-  before(function(){
+  before(function () {
 
     this.originalVcapServices = process.env.VCAP_SERVICES;
 
@@ -56,13 +56,22 @@ describe('server/start', function () {
 
   });
 
-  after(function(){
-    process.env.VCAP_SERVICES = this.originalVcapServices;
+  after(function () {
+    if (this.originalVcapServices) {
+      process.env.VCAP_SERVICES = this.originalVcapServices;
+    }
   });
 
   beforeEach(function () {
+    this.appMock = {
+      get : sinon.spy()
+    }
+    this.appMock['@noCallThru'] = true;
+
     this.httpMock = new mocks.HttpMock();
+    this.logMock = new mocks.LogMock();
     this.storeMock = new mocks.StoreMock();
+    this.websocketMock = new mocks.WebSocketMock();
   });
 
   it('should default to development environment', function (done) {
@@ -75,6 +84,9 @@ describe('server/start', function () {
 
     app = proxyquire('./start', {
       'http' : this.httpMock,
+      'socket.io' : this.websocketMock,
+      './app' : this.appMock,
+      './config/log' : this.logMock,
       './config/db/store' : this.storeMock,
       'watson-developer-cloud' : new mocks.WDCMock()
     });
@@ -97,6 +109,9 @@ describe('server/start', function () {
 
       app = proxyquire('./start', {
         'http' : this.httpMock,
+        'socket.io' : this.websocketMock,
+        './app' : this.appMock,
+        './config/log' : this.logMock,
         './config/db/store' : this.storeMock
       });
 
@@ -160,6 +175,9 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
+          'socket.io' : this.websocketMock,
+          './app' : this.appMock,
+          './config/log' : this.logMock,
           './config/db/store' : this.storeMock
         });
       } catch(e) {
@@ -189,6 +207,9 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
+          'socket.io' : this.websocketMock,
+          './app' : this.appMock,
+          './config/log' : this.logMock,
           './config/db/store' : this.storeMock
         });
       } catch(e) {

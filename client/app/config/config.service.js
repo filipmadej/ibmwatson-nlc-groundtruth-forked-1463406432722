@@ -21,6 +21,7 @@ angular.module('config', [])
     'classes': '/api',
     'import': '/api',
     'classifier': '/api',
+    'content': '/api',
     'versions': 'https://ibmwatson-nlc-status.mybluemix.net/api/v1/versions'
   })
   .constant('versionInfo', {

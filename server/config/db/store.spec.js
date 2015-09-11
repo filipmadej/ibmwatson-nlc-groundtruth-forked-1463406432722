@@ -75,7 +75,8 @@ describe('/server/config/db/store', function () {
       getClassByName : sinon.stub(),
       countClasses : sinon.stub(),
       getTextByValue : sinon.stub(),
-      countTexts : sinon.stub()
+      countTexts : sinon.stub(),
+      lookupClassesByName : sinon.stub()
     };
 
     this.fetchMock = {
@@ -1284,6 +1285,415 @@ describe('/server/config/db/store', function () {
 
       this.store.deleteTenant(TENANT, function () {
         this.deleteMock.should.have.been.calledWith(this.dbMock, TENANT, sinon.match.func);
+        done();
+      }.bind(this));
+
+    });
+
+  });
+
+  describe('#processImportEntry()', function () {
+
+    function validateResult (result, textExpectation, classExpectations, textClassExpectations) {
+      result.should.not.have.property('error');
+
+      result.should.have.property('classes').that.is.an('array').with.length(classExpectations.length);
+      classExpectations.forEach(function (expectation, index) {
+
+        result.classes[index].should.have.property('name', expectation.name);
+        result.classes[index].should.have.property('created', expectation.created);
+        if (expectation.error) {
+          result.classes[index].should.not.have.property('id')
+          result.classes[index].should.have.property('error', this.error);
+        } else {
+          result.classes[index].should.have.property('id').that.is.a('string');
+          result.classes[index].should.not.have.property('error');
+        }
+      }, this);
+
+      result.should.have.property('text').that.is.an('object');
+      result.text.should.have.property('id').that.is.a('string');
+      result.text.should.have.property('value', textExpectation.value);
+      result.text.should.have.property('created', textExpectation.created);
+      result.text.should.not.have.property('error');
+
+      result.text.should.have.property('classes').that.is.an('array').with.length(textClassExpectations.length);
+      textClassExpectations.forEach(function (expectation, index) {
+        result.text.classes[index].should.have.property('name', expectation.name);
+        result.text.classes[index].should.have.property('created', expectation.created);
+        if (expectation.error) {
+          result.text.classes[index].should.not.have.property('id').that.is.a('string');
+          result.text.classes[index].should.have.property('error', this.error);
+        } else {
+          result.text.classes[index].should.have.property('id').that.is.a('string');
+          result.text.classes[index].should.not.have.property('error');
+        }
+      }, this);
+    }
+
+    beforeEach( function (done) {
+      this.entry = {
+        text : 'test-text',
+        classes : ['test-class-1', 'test-class-2']
+      };
+
+      this.store.start(done);
+    });
+
+    it('should create text and all associated classes', function (done) {
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(1+this.entry.classes.length);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[0]}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[1]}), sinon.match.func);
+
+        var classExpectations = [{
+          name : this.entry.classes[0],
+          created : true
+        }, {
+          name : this.entry.classes[1],
+          created : true
+        }];
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : true},
+                            classExpectations,
+                            classExpectations);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should handle creating text with no associated classes', function (done) {
+
+      delete this.entry.classes;
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.not.have.been.called;
+        this.dbMock.insert.callCount.should.equal(1);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : true},
+                            [],
+                            []);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should handle creating text with all associated classes already existing', function (done) {
+
+      var existingClasses = this.entry.classes.map(function (elem) {
+        var id = uuid.v1();
+        return {
+          id : id,
+          key : [TENANT, elem],
+          value : id
+        };
+      });
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, existingClasses);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(1);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+
+        var textClassExpectations = [{
+          name : this.entry.classes[0],
+          created : false
+        }, {
+          name : this.entry.classes[1],
+          created : false
+        }];
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : true},
+                            [],
+                            textClassExpectations);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should handle creating text with subset of associated classes existing', function (done) {
+
+      var existingClasses = this.entry.classes.map(function (elem) {
+        var id = uuid.v1();
+        return {
+          id : id,
+          key : [TENANT, elem],
+          value : id
+        };
+      });
+      existingClasses.splice(0, 1);
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, existingClasses);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(1 + (this.entry.classes.length - existingClasses.length));
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[0]}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({value : this.entry.text}), sinon.match.func);
+
+        var classExpectations = [{
+          name : this.entry.classes[0],
+          created : true
+        }];
+
+        var textClassExpectations = [{
+          name : this.entry.classes[1],
+          created : false
+        }].concat(classExpectations);
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : true},
+                            classExpectations,
+                            textClassExpectations);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should update existing text with no classes with all new classes', function (done) {
+
+      var id = uuid.v1();
+      var textLookup = {
+        id : id,
+        key : [TENANT, this.entry.text],
+        value : id
+      };
+      var existingText = {
+        _id : id,
+        _rev : uuid.v1(),
+        schema : 'text',
+        tenant : TENANT,
+        value : this.entry.text,
+        classes : []
+      };
+
+      this.viewMock.getTextByValue.callsArgWith(3, null, textLookup);
+      this.fetchMock.getText.callsArgWith(3, null, existingText);
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+      this.handlerMock.addClassesToText.callsArg(4);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal(this.entry.classes.length);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[0]}), sinon.match.func);
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[1]}), sinon.match.func);
+
+        var classIdArray = [this.dbMock.insert.firstCall.args[0]._id, this.dbMock.insert.secondCall.args[0]._id];
+        this.handlerMock.addClassesToText.should.have.been.calledWith(this.dbMock, TENANT, id, classIdArray, sinon.match.func);
+
+        var classExpectations = [{
+          name : this.entry.classes[0],
+          created : true
+        }, {
+          name : this.entry.classes[1],
+          created : true
+        }];
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : false},
+                            classExpectations,
+                            classExpectations);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should update existing text with prior classes with some new classes', function (done) {
+
+      var id = uuid.v1();
+      var textLookup = {
+        id : id,
+        key : [TENANT, this.entry.text],
+        value : id
+      };
+
+      var existingClasses = this.entry.classes.map(function (elem) {
+        var id = uuid.v1();
+        return {
+          id : id,
+          key : [TENANT, elem],
+          value : id
+        };
+      });
+      existingClasses.splice(0, 1);
+
+      var existingText = {
+        _id : id,
+        _rev : uuid.v1(),
+        schema : 'text',
+        tenant : TENANT,
+        value : this.entry.text,
+        classes : [existingClasses[0].id]
+      };
+
+      this.viewMock.getTextByValue.callsArgWith(3, null, textLookup);
+      this.fetchMock.getText.callsArgWith(3, null, existingText);
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, existingClasses);
+      this.handlerMock.addClassesToText.callsArg(4);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.callCount.should.equal((this.entry.classes.length - existingClasses.length));
+        this.dbMock.insert.should.have.been.calledWith(sinon.match({name : this.entry.classes[0]}), sinon.match.func);
+
+        var classIdArray = [this.dbMock.insert.firstCall.args[0]._id];
+        this.handlerMock.addClassesToText.should.have.been.calledWith(this.dbMock, TENANT, id, classIdArray, sinon.match.func);
+
+        var classExpectations = [{
+          name : this.entry.classes[0],
+          created : true
+        }];
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : false},
+                            classExpectations,
+                            classExpectations);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should set result.error attribute on error during init work', function (done) {
+
+      this.viewMock.getTextByValue.callsArgWith(3, this.error);
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        this.viewMock.getTextByValue.should.have.been.calledWith(this.dbMock, TENANT, this.entry.text, sinon.match.func);
+        this.viewMock.lookupClassesByName.should.have.been.calledWith(this.dbMock, TENANT, this.entry.classes, sinon.match.func);
+        this.dbMock.insert.should.not.have.been.called;
+        this.handlerMock.addClassesToText.should.not.have.been.called;
+
+        should.not.exist(err);
+        result.should.have.property('error', this.error);
+
+        done();
+      }.bind(this));
+
+    });
+
+    it('should set error attribute of result.text on text creation error', function (done) {
+
+      delete this.entry.classes;
+
+      this.viewMock.getTextByValue.callsArgWith(3, dberrors.notfound());
+      this.dbMock.insert.callsArgWith(1, this.error);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        should.not.exist(err);
+        result.should.have.property('text').that.is.an('object');
+        result.text.should.have.property('error', this.error);
+        result.text.should.have.not.property('id');
+        result.text.should.have.property('value', this.entry.text);
+        result.text.should.have.property('created', true);
+        done();
+      }.bind(this));
+
+    });
+
+    it('should set error attribute of result.text on text update error', function (done) {
+
+      var id = uuid.v1();
+      var textLookup = {
+        id : id,
+        key : [TENANT, this.entry.text],
+        value : id
+      };
+      var existingText = {
+        _id : id,
+        _rev : uuid.v1(),
+        schema : 'text',
+        tenant : TENANT,
+        value : this.entry.text,
+        classes : []
+      };
+
+      this.viewMock.getTextByValue.callsArgWith(3, null, textLookup);
+      this.fetchMock.getText.callsArgWith(3, null, existingText);
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+      this.handlerMock.addClassesToText.callsArgWith(4, this.error);
+      this.dbMock.insert.callsArg(1);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        should.not.exist(err);
+        result.should.have.property('text').that.is.an('object');
+        result.text.should.have.property('error', this.error);
+        result.text.should.have.property('id');
+        result.text.should.have.property('value', this.entry.text);
+        result.text.should.have.property('created', false);
+
+        done();
+      }.bind(this));
+
+    });
+
+    it('should set error attribute of result.classes for any class unable to be created', function (done) {
+
+      var id = uuid.v1();
+      var textLookup = {
+        id : id,
+        key : [TENANT, this.entry.text],
+        value : id
+      };
+      var existingText = {
+        _id : id,
+        _rev : uuid.v1(),
+        schema : 'text',
+        tenant : TENANT,
+        value : this.entry.text,
+        classes : []
+      };
+
+      this.viewMock.getTextByValue.callsArgWith(3, null, textLookup);
+      this.fetchMock.getText.callsArgWith(3, null, existingText);
+      this.viewMock.lookupClassesByName.callsArgWith(3, null, []);
+      this.handlerMock.addClassesToText.callsArg(4);
+      this.dbMock.insert.callsArgWith(1, this.error);
+
+      this.store.processImportEntry(TENANT, this.entry, function (err, result) {
+        should.not.exist(err);
+
+        var classExpectations = [{
+          name : this.entry.classes[0],
+          created : true,
+          error : this.error
+        },{
+          name : this.entry.classes[1],
+          created : true,
+          error : this.error
+        }];
+
+        validateResult.call(this, result,
+                            {value : this.entry.text, created : false},
+                            classExpectations,
+                            classExpectations);
+
         done();
       }.bind(this));
 

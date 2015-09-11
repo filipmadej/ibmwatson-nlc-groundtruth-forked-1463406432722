@@ -92,6 +92,7 @@ function StoreMock () {
   this.countTexts = sinon.stub();
   this.getText = sinon.stub();
   this.deleteTenant = sinon.stub();
+  this.processImportEntry = sinon.stub();
   this['@noCallThru'] = true;
 
   this.reset = function () {
@@ -128,6 +129,11 @@ function StoreMock () {
     this.getText.callsArgWith(2, null, {});
     this.deleteTenant.reset();
     this.deleteTenant.callsArgWith(2, null, {});
+    this.processImportEntry.reset();
+    this.processImportEntry.callsArgWith(2, null, {
+      classes : [],
+      text : { id : uuid.v1(), value : uuid.v1(), classes : [] }
+    });
   };
 
   this.reset();
@@ -187,6 +193,50 @@ function WDCMock () {
   this.natural_language_classifier.returns(this.nlcMock);
 }
 
+function WebSocketMock () {
+
+  this.listen = sinon.stub();
+  this['@noCallThru'] = true;
+
+  this.listen.returns({
+    sockets : {
+      on : sinon.stub()
+    }
+  });
+}
+
+function SocketUtilMock () {
+
+  this.setSocket = sinon.spy();
+  this.getSocket = sinon.spy();
+  this.send = sinon.spy();
+
+  this.reset = function () {
+    this.setSocket.reset();
+    this.getSocket.reset();
+    this.send.reset();
+  };
+
+}
+
+function CacheMock () {
+
+  this.get = sinon.stub();
+  this.put = sinon.spy();
+  this.entry = sinon.stub();
+
+  this.reset = function () {
+    this.get.reset();
+    this.get.returns({});
+    this.put.reset();
+    this.entry.reset();
+    this.entry.returns(uuid.v1());
+  };
+
+  this.reset();
+
+}
+
 module.exports.LogMock = LogMock;
 
 module.exports.DBMock = DBMock;
@@ -196,3 +246,9 @@ module.exports.StoreMock = StoreMock;
 module.exports.HttpMock = HttpMock;
 
 module.exports.WDCMock = WDCMock;
+
+module.exports.WebSocketMock = WebSocketMock;
+
+module.exports.SocketUtilMock = SocketUtilMock;
+
+module.exports.CacheMock = CacheMock;

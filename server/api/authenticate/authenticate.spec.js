@@ -22,10 +22,14 @@ var util = require('util');
 
 // external dependencies
 var async = require('async');
+var bodyParser = require('body-parser');
 var chai = require('chai');
+var cookieParser = require('cookie-parser');
+var express = require('express');
 var httpstatus = require('http-status');
 var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
+var session = require('express-session');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 
@@ -35,62 +39,71 @@ var mocks = require('../../test/mocks');
 var should = chai.should();
 chai.use(sinonChai);
 
-var passport = require('passport');
-passport['@global'] = true;
-
-var app, nlc;
-
-var vcapTest = '{\
-    "natural_language_classifier": [ \
-        { \
-        "name": "ibmwatson-nlc-classifier", \
-        "label": "natural_language_classifier", \
-        "plan": "standard", \
-        "credentials": { \
-          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
-          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
-          "password": "wgGb9arQWnqw" \
-        } \
-      } \
-     ] \
-  }';
-
 describe('/server/api/authenticate', function () {
 
-  // proxyquire of app takes longer than the default 2000ms
+  var ENDPOINTBASE = '/api/authenticate';
+
   this.timeout(5000);
 
-  before(function(){
+  before(function () {
 
-    this.originalVcapServices = process.env.VCAP_SERVICES;
+    this.nlc = {
+      id : 'test-id',
+      url : 'https://test.com',
+      username : 'username',
+      password : 'password',
+      version : 'v1',
+      '@noCallThru' : true
+    }
 
-    process.env.VCAP_SERVICES = vcapTest;
-
-    nlc = proxyquire('../../config/nlc',{});
-
-    app = proxyquire('../../app', {
-      './config/db/store' : new mocks.StoreMock(),
-      'watson-developer-cloud' : new mocks.WDCMock(),
-      'passport' : passport
-    });
+    this.error = {
+      error : 'test-generated',
+      statusCode : httpstatus.INTERNAL_SERVER_ERROR
+    };
 
   });
 
-  after(function(){
-    process.env.VCAP_SERVICES = this.originalVcapServices;
+  beforeEach(function () {
+
+    this.app = express();
+
+    this.app.use(bodyParser.json());
+    this.app.use(cookieParser());
+    this.app.use(session({secret : 'testing'}));
+
+    this.passportLib = proxyquire('passport', {});
+
+    proxyquire('../../config/passport', {
+      'passport' : this.passportLib,
+      './nlc' : this.nlc
+    })(this.app);
+
+
+    this.controllerOverrides = {
+      'passport' : this.passportLib
+    };
+
+    this.controller = proxyquire('./authenticate.controller', this.controllerOverrides);
+
+    this.appOverrides = {
+      'passport' : this.passportLib,
+      './authenticate.controller' : this.controller
+    }
+
+    this.app.use('/api/authenticate', proxyquire('./index', this.appOverrides));
   });
 
   describe('GET /api/authenticate', function () {
 
     it('should respond with a 401 response if the user is not authenticated', function (done) {
-      request(app)
-        .get('/api/authenticate')
+      request(this.app)
+        .get(ENDPOINTBASE)
         .expect(httpstatus.UNAUTHORIZED, done);
     });
 
     it('should respond with a 401 response if the session cookie is invalid', function (done) {
-      request(app)
-        .get('/api/authenticate')
+      request(this.app)
+        .get(ENDPOINTBASE)
         .set('Cookie', ['connect.sid=s:AWWn3-T1GJ1N5fpXVh0OYTnbSVcEVeG5.7skWD6cJUPyNIyd/Tk+/+P7wK3L31Tys70Z3zDiKAbI'])
         .expect(httpstatus.UNAUTHORIZED, done);
     });
@@ -99,21 +112,21 @@ describe('/server/api/authenticate', function () {
       var sessionCookie;
       async.series([
         function (next) {
-          request(app)
-            .post('/api/authenticate')
-            .send({username : nlc.username, password : nlc.password})
+          request(this.app)
+            .post(ENDPOINTBASE)
+            .send({username : this.nlc.username, password : this.nlc.password})
             .expect(httpstatus.OK)
             .end(function (err, res) {
             sessionCookie = res.headers['set-cookie'][0];
             next(err);
           });
-        },
+        }.bind(this),
         function (next) {
-          request(app)
-            .get('/api/authenticate')
+          request(this.app)
+            .get(ENDPOINTBASE)
             .set('Cookie', [sessionCookie])
             .expect(httpstatus.OK, next);
-        }
+        }.bind(this)
       ], done);
     });
   });
@@ -122,11 +135,9 @@ describe('/server/api/authenticate', function () {
 
     it('should respond with a 200 response if the user provides the correct credentials', function (done) {
 
-      console.log('username',nlc.username);
-
-      request(app)
-        .post('/api/authenticate')
-        .send({username : nlc.username, password : nlc.password})
+      request(this.app)
+        .post(ENDPOINTBASE)
+        .send({username : this.nlc.username, password : this.nlc.password})
         .expect(httpstatus.OK)
         .end(function (err, res) {
           should.exist(res.headers['set-cookie'][0]);
@@ -136,40 +147,40 @@ describe('/server/api/authenticate', function () {
     });
 
     it('should respond with a 400 response if the user provides the incorrect credentials', function (done) {
-      request(app)
-        .post('/api/authenticate')
-        .send({username : nlc.username, password : 'wrongpasswordfool'})
+      request(this.app)
+        .post(ENDPOINTBASE)
+        .send({username : this.nlc.username, password : 'wrongpasswordfool'})
         .expect(httpstatus.BAD_REQUEST, done);
     });
 
     it('should respond with a 400 response if the user provides the credentials in header', function (done) {
-      request(app)
-        .post('/api/authenticate')
-        .auth(nlc.username, nlc.password)
+      request(this.app)
+        .post(ENDPOINTBASE)
+        .auth(this.nlc.username, this.nlc.password)
         .expect(httpstatus.BAD_REQUEST, done);
     });
 
     it('should return error from passport strategy', function (done) {
 
-      var passportStub = sinon.stub(passport, 'authenticate', function (strategy, callback) {
+      var passportStub = sinon.stub(this.passportLib, 'authenticate', function (strategy, callback) {
         return function (req, res, next) {
           callback({error : 'test-generated'});
         }
       });
 
-      request(app)
-        .post('/api/authenticate')
-        .auth(nlc.username, nlc.password)
+      request(this.app)
+        .post(ENDPOINTBASE)
+        .auth(this.nlc.username, this.nlc.password)
         .expect(httpstatus.INTERNAL_SERVER_ERROR)
         .end(function (err, resp) {
-          passport.authenticate.restore();
+          this.passportLib.authenticate.restore();
           done(err);
-        });
+        }.bind(this));
     });
 
     it('should return error from request login', function (done) {
 
-      var passportStub = sinon.stub(passport, 'authenticate', function (strategy, callback) {
+      var passportStub = sinon.stub(this.passportLib, 'authenticate', function (strategy, callback) {
         return function (req, res, next) {
           var loginStub = sinon.stub(req, 'logIn');
           loginStub.callsArgWith(1, {error : 'test-generated'});
@@ -177,22 +188,25 @@ describe('/server/api/authenticate', function () {
         }
       });
 
-      request(app)
-        .post('/api/authenticate')
-        .auth(nlc.username, nlc.password)
+      request(this.app)
+        .post(ENDPOINTBASE)
+        .auth(this.nlc.username, this.nlc.password)
         .expect(httpstatus.INTERNAL_SERVER_ERROR)
         .end(function (err, resp) {
-          passport.authenticate.restore();
+          this.passportLib.authenticate.restore();
           done(err);
-        });
+        }.bind(this));
     });
   });
 
   describe('POST /api/authenticate/logout', function (done) {
+
+    var LOGOUT_LOCATION = ENDPOINTBASE + '/logout';
+
     it('should respond with a 400 if user not logged in', function (done) {
 
-      request(app)
-        .post('/api/authenticate/logout')
+      request(this.app)
+        .post(LOGOUT_LOCATION)
         .expect(httpstatus.BAD_REQUEST, done);
 
     });
@@ -203,36 +217,36 @@ describe('/server/api/authenticate', function () {
 
       async.series([
         function (next) {
-          request(app)
-            .post('/api/authenticate')
-            .send({username : nlc.username, password : nlc.password})
+          request(this.app)
+            .post(ENDPOINTBASE)
+            .send({username : this.nlc.username, password : this.nlc.password})
             .expect(httpstatus.OK)
             .end(function (err, res) {
-            sessionCookie = res.headers['set-cookie'][0];
-            next(err);
-          });
-        },
+              sessionCookie = res.headers['set-cookie'][0];
+              next(err);
+            });
+        }.bind(this),
         function (next) {
-          request(app)
-            .get('/api/authenticate')
+          request(this.app)
+            .get(ENDPOINTBASE)
             .set('Cookie', [sessionCookie])
             .expect(httpstatus.OK, next);
-        },
+        }.bind(this),
         function (next) {
-          request(app)
-            .post('/api/authenticate/logout')
+          request(this.app)
+            .post(LOGOUT_LOCATION)
             .set('Cookie', [sessionCookie])
             .expect(httpstatus.OK)
             .end(function (err, res) {
-            next(err);
-          });
-        },
+              next(err);
+            });
+        }.bind(this),
         function (next) {
-          request(app)
-            .get('/api/authenticate')
+          request(this.app)
+            .get(ENDPOINTBASE)
             .set('Cookie', [sessionCookie])
             .expect(httpstatus.UNAUTHORIZED, next);
-        }
+        }.bind(this)
       ], done);
 
     });

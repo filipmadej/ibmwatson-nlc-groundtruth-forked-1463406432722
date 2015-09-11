@@ -22,18 +22,18 @@ angular.module('ibmwatson-nlc-groundtruth-app')
       .state('training', {
         url: '/training',
         templateUrl: 'app/training/training.html',
-        controller: 'TrainingCtrl',
+        controller: 'TrainingController',
         reloadOnSearch: false,
         resolve: {
           access: function access(authentication) {
             return authentication.getCurrentUser();
           }
         },
-        onEnter: ['versions', 'alerts',
-          function onEnter(versions, alerts) {
+        onEnter: ['versions', 'watsonAlerts',
+          function onEnter(versions, watsonAlerts) {
             versions.isCurrent().then(function(isCurrent) {
               if (!versions.informed && !isCurrent) {
-                alerts.add({
+                watsonAlerts.add({
                   level: 'info',
                   title: 'Pssst!',
                   text: 'A new version of this tool is available',

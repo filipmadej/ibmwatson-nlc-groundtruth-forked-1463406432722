@@ -41,5 +41,6 @@ router.get(ENDPOINTS.text, controller.getText);
 router.post(ENDPOINTS.texts, controller.createText);
 router.patch(ENDPOINTS.text, controller.editText);
 router.delete(ENDPOINTS.text, controller.deleteText);
+router.delete(ENDPOINTS.texts, controller.deleteTexts);
 
 module.exports = router;

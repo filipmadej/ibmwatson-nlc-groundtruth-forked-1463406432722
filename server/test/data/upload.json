@@ -1,0 +1,14 @@
+{
+  "language" : "en",
+  "name" : "test",
+  "training_data" : [
+    {
+      "text" : "example text 1",
+      "classes" : ["class 1"]
+    },
+    {
+      "text" : "example text 2",
+      "classes" : ["class 1"]
+    }
+  ]
+}

@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
- 
-.container-alerts{
-	padding-left:0px;
-	padding-right:0px;
-}
+
+'use strict';
+
+angular.module('ibmwatson-common-ui-components.watsonAlerts', []);
