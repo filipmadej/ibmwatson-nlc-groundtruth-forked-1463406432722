@@ -64,6 +64,9 @@ Log in to your toolkit app with the service credentials of the Natural Language 
 
 Submit comments or ask questions in the [Watson forum](https://developer.ibm.com/answers/smartspace/watson/). If [Stack Overflow](http://stackoverflow.com/questions/tagged/ibm-watson) is your preference, we're happy to chat there.
 
+## Using your own service instance
+
+While these instructions describe the process of creating a new Natural Language Classifier service instance to use with the tooling, you can also use a pre-existing service instance. Please see the file `Using-Your-Own-Service.md` for more information.
 
 ## Upgrading your app
 
