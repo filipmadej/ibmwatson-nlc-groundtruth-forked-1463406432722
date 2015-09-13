@@ -51,11 +51,32 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         });
       }
 
+      function getStatus () {
+        return $q(function status (resolve, reject) {
+          getCurrent().then(function checkCurrent (/*Object*/currentVersion) {
+            if (currentVersion.version) {
+              if (currentVersion.version > versionInfo.version) {
+                return resolve('old');
+              } else if (currentVersion.version === versionInfo.version) {
+                return resolve('current');
+              } else {
+                return resolve('development');
+              }
+            } else {
+              reject('Current Version unknown');
+            }
+          },function(err){
+            reject(err.message);
+          });
+        });
+      }
+
       // Public API here
       return {
         'informed': false,
         'getCurrent': getCurrent,
-        'isCurrent': isCurrent
+        'isCurrent': isCurrent,
+        'getStatus': getStatus
       };
 
     }

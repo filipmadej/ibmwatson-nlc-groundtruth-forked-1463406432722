@@ -18,6 +18,17 @@
 
 describe('Service: versions', function() {
 
+  var CURRENT = 'current';
+  var DEVELOPMENT = 'development';
+  var OLD = 'old';
+
+  var testOldVersion = {
+    'version': '0.0.0',
+    'state': 'alpha',
+    'scope': 'Initial Alpha',
+    'download': 'https://hub.jazz.net/project/wdctools/ibmwatson-nlc-groundtruth'
+  };
+
   var testCurrentVersion = {
     'version': '0.0.1',
     'state': 'beta',
@@ -219,6 +230,114 @@ describe('Service: versions', function() {
 
       runs(function() {
         versions.isCurrent().then(function() {
+          serviceError = false;
+        }, function(err) {
+          serviceError = true;
+        });
+
+        $httpBackend.flush();
+      });
+
+      waitsFor(function() {
+        return serviceError != null;
+      }, runs(function() {
+        expect(serviceError).toEqual(true);
+
+      }));
+
+    });
+  });
+
+  describe('getStatus', function() {
+
+    it('should return \'current\' if this is the current version', function() {
+      var status = null;
+
+      $httpBackend.when('GET',endpoints.versions).respond(200, [testCurrentVersion]);
+
+      runs(function() {
+        versions.getStatus().then(function(result) {
+          status = result;
+        });
+        $httpBackend.flush();
+      });
+
+      waitsFor(function() {
+        return status !== null;
+      }, runs(function() {
+        expect(status).toBe(CURRENT);
+      }));
+    });
+
+    it('should return \'old\' if there is a newer version', function() {
+      var status = null;
+
+      $httpBackend.when('GET',endpoints.versions).respond(200, [testNewVersion]);
+
+      runs(function() {
+        versions.getStatus().then(function(result) {
+          status = result;
+        });
+        $httpBackend.flush();
+      });
+
+      waitsFor(function() {
+        return status !== null;
+      }, runs(function() {
+        expect(status).toBe(OLD);
+      }));
+    });
+
+    it('should return \'development\' if the \'current\' version is older than this version', function() {
+      var status = null;
+
+      $httpBackend.when('GET',endpoints.versions).respond(200, [testOldVersion]);
+
+      runs(function() {
+        versions.getStatus().then(function(result) {
+          status = result;
+        });
+        $httpBackend.flush();
+      });
+
+      waitsFor(function() {
+        return status !== null;
+      }, runs(function() {
+        expect(status).toBe(DEVELOPMENT);
+      }));
+    });
+
+    it('should throw an error if no versions are returned', function() {
+
+      var serviceError = null;
+
+      $httpBackend.when('GET',endpoints.versions).respond(200, []);
+
+      runs(function() {
+        versions.getStatus().then(function() {
+          serviceError = false;
+        }, function(err) {
+          serviceError = true;
+        });
+
+        $httpBackend.flush();
+      });
+
+      waitsFor(function() {
+        return serviceError !== null;
+      }, runs(function() {
+        expect(serviceError).toEqual(true);
+      }));
+    });
+
+    it('should throw an error if the service response with an error', function(done) {
+
+      var serviceError = null;
+
+      $httpBackend.when('GET',endpoints.versions).respond(500);
+
+      runs(function() {
+        versions.getStatus().then(function() {
           serviceError = false;
         }, function(err) {
           serviceError = true;
