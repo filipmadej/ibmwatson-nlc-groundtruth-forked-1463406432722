@@ -28,34 +28,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             return authentication.getCurrentUser();
           }
         },
-        onEnter: ['versions', 'watsonAlerts',
-          function onEnter(versions, watsonAlerts) {
-            versions.getStatus().then(function(status) {
-              if (!versions.informed) {
-                switch (status) {
-                  case 'old':
-                    watsonAlerts.add({
-                      level: 'info',
-                      title: 'Pssst!',
-                      text: 'A new version of this tool is available',
-                      dismissable: true
-                    });
-                    versions.informed = true;
-                    break;
-                  case 'current':
-                    break;
-                  case 'development':
-                    watsonAlerts.add({
-                      level: 'info',
-                      title: 'Pssst!',
-                      text: 'You\'re using a development version of this tool.',
-                      dismissable: true
-                    });
-                    versions.informed = true;
-                    break;
-                }
-              }
-            });
+        onEnter: ['versions',
+          function onEnter (versions) {
+            versions.alert();
           }
         ]
       });

@@ -65,7 +65,7 @@ angular.module('ibmwatson-common-ui-components.watsonAlerts')
     * Remove an alert from the list of alerts
     */
     function remove( /*Object*/ alert) {
-      $log.debug(remove, alert);
+      $log.debug('remove', alert);
       var index = alerts.indexOf(alert);
       if (index >= 0) {
         alerts.splice(index, 1);
