@@ -101,6 +101,13 @@ angular.module('ibmwatson-nlc-groundtruth-app')
                 break;
             }
           }
+        }, function error (err) {
+          watsonAlerts.add({
+            level: 'error',
+            text: 'Error retrieving version information. Error message: ' + JSON.stringify(err.message),
+            dismissable: true
+          });
+          informed = true;
         });
       }
 

@@ -265,7 +265,7 @@ describe('Service: versions', function() {
       waitsFor(function() {
         return status !== null;
       }, runs(function() {
-        expect(status).toBe(CURRENT);
+        expect(status.status).toBe(CURRENT);
       }));
     });
 
@@ -284,7 +284,7 @@ describe('Service: versions', function() {
       waitsFor(function() {
         return status !== null;
       }, runs(function() {
-        expect(status).toBe(OLD);
+        expect(status.status).toBe(OLD);
       }));
     });
 
@@ -303,7 +303,7 @@ describe('Service: versions', function() {
       waitsFor(function() {
         return status !== null;
       }, runs(function() {
-        expect(status).toBe(DEVELOPMENT);
+        expect(status.status).toBe(DEVELOPMENT);
       }));
     });
 
