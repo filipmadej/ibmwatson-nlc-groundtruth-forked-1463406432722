@@ -24,8 +24,22 @@
 // add hot keys
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .controller('TrainingController', ['$scope', '$state', '$http', '$q', '$log', 'ngDialog', 'classes', 'texts', 'nlc', 'watsonAlerts', 'socket', 'content',
-    function init ($scope, $state, $http, $q, $log, ngDialog, classes, texts, nlc, watsonAlerts, socket, content) {
+  .controller('TrainingController', ['$scope', '$state', '$http', '$q', '$log', '$window', 'ngDialog', 'classes', 'texts', 'nlc', 'watsonAlerts', 'socket', 'content',
+    function init ($scope, $state, $http, $q, $log, $window, ngDialog, classes, texts, nlc, watsonAlerts, socket, content) {
+
+      // -------------------------------------------------------------------------
+      // Window functions
+      // -------------------------------------------------------------------------
+
+      $scope.initializeWindow = function() {
+          angular.element($window).bind('resize', $scope.setTableHeights);
+          $scope.setTableHeights();
+      };
+
+      $scope.setTableHeights = function() {
+          var contentHeight = $(window).height() - 350;
+          $('.trainingList').css('height', contentHeight);
+      };
 
       // -------------------------------------------------------------------------
       // Socket functions

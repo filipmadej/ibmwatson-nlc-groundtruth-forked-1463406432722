@@ -8,7 +8,7 @@
       <p>You have no classifiers for this instance of the Natural Language Classifier service.<br>Create a classifier on the <b ui-sref="training" style="cursor:pointer">Training</b> page.</p>
     </div>
       <div class="row ibm-row ibm-nlc-classifier-row" ng-repeat="classifier in classifiers | orderBy : 'created' : true" ng-class="classifier.status">
-      <div class="col-sm-5 col-md-6">
+      <div class="col-sm-10 col-md-12">
         <div class="inline ibm-nlc-classifier-name">
           <span>
             {{ classifier.name }} ({{ classifier.status }})
@@ -26,8 +26,8 @@
           </div>
         </div>
       </div>
-      <div class="col-sm-7 col-md-6">
-        <div class="inline pad col-xs-12">
+      <div class="col-sm-14 col-md-12">
+        <div class="inline pad col-xs-24">
           <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
             <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
             <span class="input-group-btn">

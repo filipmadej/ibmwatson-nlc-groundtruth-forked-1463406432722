@@ -126,6 +126,10 @@ module.exports = function(grunt) {
         tasks: ['newer:jshint:all', 'karma']
       },
       injectSass: {
+        ignorePath: [
+          '<%= yeoman.client %>/css/bootstrap-override/*',
+          '<%= yeoman.client %>/css/bootstrap-override.scss'
+        ],
         files: [
           '<%= yeoman.client %>/{app,components,css}/**/*.{scss,sass}'
         ],
@@ -560,7 +564,9 @@ module.exports = function(grunt) {
         files: {
           '<%= yeoman.client %>/app/app.scss': [
             '<%= yeoman.client %>/{app,components,css}/**/*.{scss,sass}',
-            '!<%= yeoman.client %>/app/app.{scss,sass}'
+            '!<%= yeoman.client %>/app/app.{scss,sass}',
+            '!<%= yeoman.client %>/css/bootstrap-override/*.scss',
+            '!<%= yeoman.client %>/css/bootstrap-override.scss'
           ]
         }
       },

@@ -53,11 +53,6 @@
     visibility: hidden;
   }
 }
-.ibm-nlc-data-row > div {
-  vertical-align: middle;
-  padding: 10px 8px 8px;
-  height: 100%;
-}
 .ibm-icon-delete {
   height: 16px;
   width: 16px;
@@ -92,6 +87,7 @@
   font-family: HelvNeueBoldForIBM;
   .check {
     border-color: #396A9F;
+    border-left: 4px solid #396A9F;
   }
 }
 .ibm-nlc-list-controls {
@@ -119,16 +115,9 @@
   width: 100%;
   display: inline-block;
   padding-bottom: 0px;
-  /*border-width: 0px 0px 2px 0px !important;
-  border-color: rgb(57, 106, 159) !important;
-  border-radius: 0px;
-  padding-left: 0px;
-  background-color: transparent;
-  box-shadow: none !important;*/
 }
 .ibm-nlc-entry-field {
   position: relative;
-  //top: 10px;
   font-size: 0.8em;
   padding-bottom: 2px;
 }
@@ -140,15 +129,11 @@
 .ibm-nlc-table tr {
   border-bottom: 2px solid white;
   .ibm-icon-delete {
-    /*height: 16px;
-    width: 16px;*/
     background-image: url(https://ibmwatson-assets-nlc.mybluemix.net/images/remove-trash_32.png) !important;
     visibility: hidden;
     cursor: pointer;
   }
   .ibm-icon-edit {
-    /*height: 16px;
-    width: 16px;*/
     background-image: url(https://ibmwatson-assets-nlc.mybluemix.net/images/edit_32.png) !important;
     visibility: hidden;
     cursor: pointer;
@@ -186,7 +171,7 @@
   font-size: small;
   background-color: #F1F1F1;
   position: relative;
-  margin: 3px 0px 3px 5px;
+  margin: 0 .1875em 0 0;
   padding: 6px 0px 3px 5px;
   cursor: default;
   border: 1px solid #C7C7C7;
@@ -212,13 +197,11 @@
   font-size: 0.7em;
 }
 .ibm-nlc-add-field {
-  background: url(add-new_32.png) scroll 6px 3px;
   background-size: 16px 16px;
   background-repeat: no-repeat;
   padding-left: 30px;
 }
 .ibm-nlc-search-field {
-  background: url(search_32.png) scroll 6px 2px;
   background-size: 16px 16px;
   background-repeat: no-repeat;
   padding-left: 30px;
@@ -293,7 +276,34 @@
 .ico-span { color: rgb(70, 70, 70);}
 .ico-span:hover [class^="ibm-icon--"], [class*=" ibm-icon--"] { color: #5596E6; }
 .ico-span:hover { color: #5596E6; cursor: pointer; }
+.ico-span:active { color: blue; cursor: pointer; }
+
 .ibm-nlc-table {
   [class^="ibm-icon--"], [class*=" ibm-icon--"] { visibility: hidden; }
-  .ico-span { font-size: 18px; line-height: 2em; }
+}
+
+.col-xs-1, .col-sm-1 {
+  text-align: center;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.single {
+  background-color:#dddddd;
+  color: rgb(70,70,70);
+  padding-bottom: 0;
+  padding-top: .6em;
+}
+
+.class-label {
+  line-height: 1.9em;
+}
+.row {
+  margin: .3125em 0 !important;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+  background-color: white;
 }
