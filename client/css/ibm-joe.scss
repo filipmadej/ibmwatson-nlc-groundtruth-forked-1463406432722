@@ -21,17 +21,6 @@ b {
 .ibm-footer {
   margin-top: 0px !important;
 }
-/*.ibm-panel-group-cluster-answer .ibm-panel-answer:hover {
-border-color: #e0e0e0;
-cursor: default;
-}
-.ibm-panel-group-cluster-answer .ibm-panel-group:hover {
-background-color: white;
-border: 0 !important;
-cursor: default !important;
-}*/
-/* Class that (assuming default line-height of 1.43) limits a div's height to 4 lines of text.*/
-
 .ibm-panel .limit-lines {
   font-size: 1em;
   /* line-height: 1em; */
@@ -40,14 +29,10 @@ cursor: default !important;
   overflow: hidden;
   transition: max-height 2s;
 }
-/*.ibm-panel-group-cluster-answer .limit-lines,*/
 .ibm-panel-expanded .limit-lines {
   max-height: 600px;
   overflow-y: auto;
 }
-/*.ibm-panel-group-cluster-answer .ibm-panel-footer-toggle {
-display: none;
-}*/
 .ibm-panel-answer h1 {
   font-size: 1.4em;
   margin-top: 0px;
@@ -75,9 +60,6 @@ display: none;
 .ibm-collapse .ibm-arrow-up3 {
   left: 85%;
 }
-/*.ibm-list-group-item-disabled {
-opacity: 0.5;
-}*/
 .navbar-default .navbar-nav > li > a:hover,
 .navbar-default .navbar-nav > li > a:focus {
   color: #ddd;
