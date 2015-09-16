@@ -107,6 +107,9 @@
       </div>
 
       <!-- Classes list -->
+      <datalist id="classNameList">
+        <option ng-repeat="clazz in classes" value="{{ clazz.label }}" />
+      </datalist>
       <div id="classList" ng-show="classes.length || loading.classes" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
         <div class="ibm-nlc-table" ng-repeat="clazz in filteredClasses() | orderBy:classOrder">
@@ -243,7 +246,7 @@
                   <input type="text" id="newTagField{{ text.$$hashKey }}" class="ibm-nlc-add-tag-field"
                          placeholder="class name..." ng-model="newTagStrings[text.$$hashKey]"
                          ng-blur="tagText(newTagStrings[text.$$hashKey], text);"
-                         ng-keyup="newTagFieldKeyUp($event, text)" list="classList" ng-show="text.beingTagged"
+                         ng-keyup="newTagFieldKeyUp($event, text)" list="classNameList" ng-show="text.beingTagged"
                          show-focus="text.beingTagged">
                   <input type="button" value="+" class="ibm-nlc-add-class-button" ng-hide="text.beingTagged"
                          ng-click="beginTaggingText(text)"/>
