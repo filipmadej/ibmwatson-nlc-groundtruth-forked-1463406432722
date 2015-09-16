@@ -32,8 +32,8 @@
                       id="languageDropdown" aria-haspopup="true" aria-expanded="false">{{ languageOption.label }}<span
                   style="margin-left:5px" class="caret"></span>
               </button>
-              <ul style="margin-top:0; border-radius:0; padding:0; margin-left: 1px;"
-                  class="dropdown-menu ibm-dropdown-menu" aria-labelledby="languageDropdown">
+              <ul style="margin-top:0; border-radius:0; margin-left: 1px;"
+                  class="dropdown-menu ibm-dropdown-menu p0" aria-labelledby="languageDropdown">
                 <li ng-repeat="option in languageOptions">
                   <a style="color:#444" ng-click="setLanguageOption(option);">{{ option.label }}</a>
                 </li>
@@ -117,11 +117,11 @@
               <input type="checkbox" ng-model="checkAllClassesChecked"
                      ng-click="checkAll(filteredClasses(),checkAllClassesChecked);" multi-check>
             </div>
-            <div class="col-xs-13 col-sm-17 col-md-12 col-lg-13 class-label"
+            <div class="col-xs-13 col-sm-15 col-md-12 col-lg-13 class-label"
                  ng-show="!clazz.edit" title="{{ clazz.label || 'empty' }}">
               {{ clazz.label || 'empty' }}
             </div>
-            <div class="col-xs-13 col-sm-17 col-md-12 col-lg-13 class-label"
+            <div class="col-xs-13 col-sm-15 col-md-12 col-lg-13 class-label"
                  ng-show="clazz.edit">
               <form ng-submit="changeLabel('class', clazz);">
                 <span>
@@ -132,14 +132,10 @@
                 </span>
               </form>
             </div>
-            <div class="col-xs-2 col-sm-1 col-md-2 col-lg-2 taRight" ng-click="editField(clazz)">
-              <span class="ico-span ibm-icon--edit"></span>
-            </div>
-            <div class="col-xs-2 col-md-2 col-sm-1 col-lg-2 taRight" ng-click="selectClass(clazz)">
-              <span class="ico-span ibm-icon--filter"></span>
-            </div>
-            <div class="col-xs-2 col-sm-1 col-md-2 col-lg-2 taRight" ng-click="deleteClass(clazz)">
-              <span class="ico-span ibm-icon--remove-trash"></span>
+            <div class="col-xs-6 col-sm-5 col-md-6 col-lg-6 taRight p0">
+              <span class="ico-span ibm-icon--edit" ng-click="editField(clazz)"></span>
+              <span class="ico-span ibm-icon--filter" ng-click="selectClass(clazz)"></span>
+              <span class="ico-span ibm-icon--remove-trash" ng-click="deleteClass(clazz)"></span>
             </div>
             <div class="col-xs-2 col-sm-2 col-md-2 col-lg-3 taRight">
               <span class="badge ibm-badge">{{numberTextsInClass(clazz)}}</span>

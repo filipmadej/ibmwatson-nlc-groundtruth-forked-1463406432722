@@ -27,6 +27,8 @@
 .in4 { margin-left: 4px; }
 .up3 { margin-top: -3px; }
 
+.p0 { padding: 0; }
+
 .ibm-nlc-data-row {
   min-height: 44px;
   background-color: rgb(221, 221, 221);
@@ -286,7 +288,7 @@
 .ico-span {
   color: rgb(70, 70, 70);
   vertical-align: text-bottom;
-  text-align: right;
+  padding: 0 3px;
 }
 .ico-span:hover [class^="ibm-icon--"], [class*=" ibm-icon--"] { color: #5596E6; }
 .ico-span:hover { color: #5596E6; cursor: pointer; }
