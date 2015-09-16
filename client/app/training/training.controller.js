@@ -38,7 +38,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       $scope.setTableHeights = function() {
           var contentHeight = $(window).height() - 350;
-          $('#trainingList').css('height', contentHeight);
+          $('#textList').css('height', contentHeight);
           $('#classList').css('height', contentHeight);
       };
 
