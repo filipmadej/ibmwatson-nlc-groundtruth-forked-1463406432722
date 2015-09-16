@@ -107,9 +107,9 @@
       </div>
 
       <!-- Classes list -->
-      <div id="classList" ng-show="classes.length" multi-check-group>
+      <div id="classList" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
-        <div class="ibm-nlc-table" ng-repeat="clazz in filteredClasses() | orderBy:classOrder">
+        <div class="ibm-nlc-table" ng-repeat="clazz in filteredClasses() | orderBy:classOrder" ng-show="classes.length">
           <div class="single ibm-nlc-data-row check" ng-class="clazz.selected ? 'ibm-nlc-class-selected' : ''"
                ng-show="classes.length">
             <div class="col-xs-1 col-sm-1 col-lg-1"></div>
@@ -214,9 +214,9 @@
       </div>
 
       <!-- Texts list -->
-      <div id="trainingList" ng-show="texts.length" multi-check-group>
+      <div id="textList" multi-check-group>
         <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
-        <div class="ibm-nlc-table" ng-repeat="text in filteredTexts() | orderBy:textOrder">
+        <div class="ibm-nlc-table" ng-repeat="text in filteredTexts() | orderBy:textOrder" ng-show="texts.length">
           <div class="row ibm-nlc-data-row single">
             <div class="col-xs-1 col-sm-1"></div>
             <div class="col-xs-1 col-sm-1">
@@ -267,7 +267,7 @@
       </div>
     </div>
   </div>
-  <div ng-if="classes.length + texts.length === 0 && (!loading.classes || !loading.texts)"
+  <div ng-if="classes.length + texts.length === 0 && !loading.classes && !loading.texts"
        class="ibm-nlc-nodata-message row">
     <h2>Watson needs your data.</h2>
 

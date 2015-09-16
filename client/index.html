@@ -78,76 +78,71 @@
   <div ui-view=""></div>
 
   <!-- Footer -->
-  <footer class="footer ibm-footer">
-    <ul class="list-inline ibm-list-inline">
-      <li>&#169; 2015 International Business Machines</li>
-    </ul>
-  </footer>
   <watson-footer></watson-footer>
 
-<!--[if lt IE 9]>
-<script src="bower_components/es5-shim/es5-shim.js"></script>
-<script src="bower_components/json3/lib/json3.min.js"></script>
-<script src="bower_components/ng-file-upload-shim/ng-file-upload-shim.js"></script>
-<![endif]-->
-<!-- build:js({client,node_modules}) app/vendor.js -->
-<!-- bower:js -->
-<script src="bower_components/jquery/dist/jquery.js"></script>
-<script src="bower_components/angular/angular.js"></script>
-<script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-<script src="bower_components/angular-resource/angular-resource.js"></script>
-<script src="bower_components/angular-cookies/angular-cookies.js"></script>
-<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
-<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-<script src="bower_components/angular-multi-check/angular-multi-check.js"></script>
-<script src="bower_components/lodash/lodash.js"></script>
-<script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
-<script src="bower_components/angular-animate/angular-animate.js"></script>
-<script src="bower_components/content-range/index.js"></script>
-<script src="bower_components/d3/d3.js"></script>
-<script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
-<script src="bower_components/ngDialog/js/ngDialog.js"></script>
-<script src="bower_components/ng-file-upload/ng-file-upload.js"></script>
-<script src="bower_components/angular-socket-io/socket.js"></script>
-<!-- endbower -->
-<!-- endbuild -->
-<script src="/socket.io/socket.io.js"></script>
+  <!--[if lt IE 9]>
+  <script src="bower_components/es5-shim/es5-shim.js"></script>
+  <script src="bower_components/json3/lib/json3.min.js"></script>
+  <script src="bower_components/ng-file-upload-shim/ng-file-upload-shim.js"></script>
+  <![endif]-->
+  <!-- build:js({client,node_modules}) app/vendor.js -->
+  <!-- bower:js -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+  <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="bower_components/angular-multi-check/angular-multi-check.js"></script>
+  <script src="bower_components/lodash/lodash.js"></script>
+  <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script src="bower_components/angular-animate/angular-animate.js"></script>
+  <script src="bower_components/content-range/index.js"></script>
+  <script src="bower_components/d3/d3.js"></script>
+  <script src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+  <script src="bower_components/ngDialog/js/ngDialog.js"></script>
+  <script src="bower_components/ng-file-upload/ng-file-upload.js"></script>
+  <script src="bower_components/angular-socket-io/socket.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+  <script src="/socket.io/socket.io.js"></script>
 
-<!-- build:js({.tmp,client}) app/app.js -->
-<script src="app/app.js"></script>
-<!-- injector:js -->
-<script src="app/authentication/authentication.service.js"></script>
-<script src="app/classes/classes.service.js"></script>
-<script src="app/classifiers/classifiers.controller.js"></script>
-<script src="app/classifiers/classifiers.js"></script>
-<script src="app/config/config.service.js"></script>
-<script src="app/content/content.service.js"></script>
-<script src="app/focusOnShow/focusOnShow.directive.js"></script>
-<script src="app/login/login.controller.js"></script>
-<script src="app/login/login.js"></script>
-<script src="app/navigation/navigation.controller.js"></script>
-<script src="app/nlc/nlc.service.js"></script>
-<script src="app/session/session.js"></script>
-<script src="app/slice/slice.filter.js"></script>
-<script src="app/socket/socket.service.js"></script>
-<script src="app/texts/texts.service.js"></script>
-<script src="app/training/training.controller.js"></script>
-<script src="app/training/training.js"></script>
-<script src="app/versions/versions.service.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/angular-watson-templates.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/angular-watson.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.service.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.directive.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.html.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.html.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.html.js"></script>
-<script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.js"></script>
-<script src="components/modal/modal.service.js"></script>
-<script src="components/navbar/navbar.controller.js"></script>
-<!-- endinjector -->
-<!-- endbuild -->
+  <!-- build:js({.tmp,client}) app/app.js -->
+  <script src="app/app.js"></script>
+  <!-- injector:js -->
+  <script src="app/authentication/authentication.service.js"></script>
+  <script src="app/classes/classes.service.js"></script>
+  <script src="app/classifiers/classifiers.controller.js"></script>
+  <script src="app/classifiers/classifiers.js"></script>
+  <script src="app/config/config.service.js"></script>
+  <script src="app/content/content.service.js"></script>
+  <script src="app/focusOnShow/focusOnShow.directive.js"></script>
+  <script src="app/login/login.controller.js"></script>
+  <script src="app/login/login.js"></script>
+  <script src="app/navigation/navigation.controller.js"></script>
+  <script src="app/nlc/nlc.service.js"></script>
+  <script src="app/session/session.js"></script>
+  <script src="app/slice/slice.filter.js"></script>
+  <script src="app/socket/socket.service.js"></script>
+  <script src="app/texts/texts.service.js"></script>
+  <script src="app/training/training.controller.js"></script>
+  <script src="app/training/training.js"></script>
+  <script src="app/versions/versions.service.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/angular-watson-templates.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/angular-watson.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlerts.service.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.directive.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonAlerts/watsonAlertsBar.html.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.html.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonFooter/watsonFooter.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.html.js"></script>
+  <script src="components/ibmwatson-common-ui-components/src/watsonLoading/watsonLoading.js"></script>
+  <script src="components/modal/modal.service.js"></script>
+  <script src="components/navbar/navbar.controller.js"></script>
+  <!-- endinjector -->
+  <!-- endbuild -->
 </body>
 
 </html>
