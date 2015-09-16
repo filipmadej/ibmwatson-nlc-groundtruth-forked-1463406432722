@@ -314,6 +314,9 @@
 .class-label {
   line-height: 1.9em;
   text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .row {
   margin: .3125em 0 !important;
