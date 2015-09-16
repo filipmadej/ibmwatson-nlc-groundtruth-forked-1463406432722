@@ -107,15 +107,14 @@
       </div>
 
       <!-- Classes list -->
-      <div id="classList" multi-check-group>
+      <div id="classList" ng-show="classes.length || loading.classes" multi-check-group>
         <watson-loading ng-show="loading.classes" loading-message="'Loading Classes...'"></watson-loading>
-        <div class="ibm-nlc-table" ng-repeat="clazz in filteredClasses() | orderBy:classOrder" ng-show="classes.length">
+        <div class="ibm-nlc-table" ng-repeat="clazz in filteredClasses() | orderBy:classOrder">
           <div class="single ibm-nlc-data-row check" ng-class="clazz.selected ? 'ibm-nlc-class-selected' : ''"
                ng-show="classes.length">
             <div class="col-xs-1 col-sm-1 col-lg-1"></div>
             <div class="col-xs-1 col-sm-1 col-lg-1">
-              <input type="checkbox" ng-model="checkAllClassesChecked"
-                     ng-click="checkAll(filteredClasses(),checkAllClassesChecked);" multi-check>
+              <input type="checkbox" ng-model="clazz.checked" multi-check/>
             </div>
             <div class="col-xs-13 col-sm-15 col-md-12 col-lg-13 class-label"
                  ng-show="!clazz.edit" title="{{ clazz.label || 'empty' }}">
@@ -210,14 +209,13 @@
       </div>
 
       <!-- Texts list -->
-      <div id="textList" multi-check-group>
+      <div id="textList" ng-show="texts.length || loading.texts" multi-check-group>
         <watson-loading ng-show="loading.texts" loading-message="'Loading Texts...'"></watson-loading>
-        <div class="ibm-nlc-table" ng-repeat="text in filteredTexts() | orderBy:textOrder" ng-show="texts.length">
+        <div class="ibm-nlc-table" ng-repeat="text in filteredTexts() | orderBy:textOrder">
           <div class="row ibm-nlc-data-row single">
             <div class="col-xs-1 col-sm-1"></div>
             <div class="col-xs-1 col-sm-1">
-              <input type="checkbox" ng-model="checkAllTextsChecked"
-                     ng-click="checkAll(filteredTexts(),checkAllTextsChecked);" multi-check>
+              <input type="checkbox" ng-model="text.checked" multi-check/>
             </div>
             <div class="col-xs-17 col-sm-19">
               <div class="row" ng-show="!text.edit">
@@ -264,8 +262,8 @@
     </div>
   </div>
   <div ng-if="classes.length + texts.length === 0 && !loading.classes && !loading.texts"
-       class="ibm-nlc-nodata-message row">
-    <h2>Watson needs your data.</h2>
+       class="ibm-nlc-nodata-message">
+    <h2 class="header">Watson needs your data.</h2>
 
     <p>The Natural Language Classifier service is trained from your example data.</p>
 
