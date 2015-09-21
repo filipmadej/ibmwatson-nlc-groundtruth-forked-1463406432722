@@ -13,7 +13,7 @@ stages:
     build_type: shell
     script: |-
       #!/bin/bash
-      npm install npm -g
+      npm install npm@2.14.4 -g
       npm install
       grunt
 - name: Deploy
