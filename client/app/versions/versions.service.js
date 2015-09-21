@@ -17,8 +17,10 @@
 'use strict';
 
 angular.module('ibmwatson-nlc-groundtruth-app')
-  .factory('versions', ['$http', '$q', '$log', 'endpoints', 'versionInfo',
-    function init($http, $q, $log, endpoints, versionInfo) {
+  .factory('versions', ['$http', '$q', '$log', 'endpoints', 'versionInfo', 'watsonAlerts',
+    function init($http, $q, $log, endpoints, versionInfo, watsonAlerts) {
+
+      var informed = false;
 
       function getCurrent() {
         return $http.get(endpoints.versions,{
@@ -28,34 +30,94 @@ angular.module('ibmwatson-nlc-groundtruth-app')
             $log.debug('Got versions', response.data);
             return response.data[0] || {};
           }, function getVersionError(response) {
-            $log.debug('Got current Version Error', response);
+            $log.debug('Got current version Error', response);
             return $q.reject('Unable to get current version:' + response.data);
           });
       }
 
       function isCurrent() {
-        return $q(function(resolve, reject) {
-          getCurrent().then(function checkCurrent(/*Object*/currentVersion) {
+        return $q(function current (resolve, reject) {
+          getCurrent().then(function checkCurrent (/*Object*/currentVersion) {
             if (currentVersion.version){
               if(currentVersion.version === versionInfo.version) {
-                return resolve(true);
-              }else{
-                return resolve(false);
+                resolve(true);
+              } else {
+                resolve(false);
               }
-            }else{
-              reject('Current Version unknown');
+            } else {
+              reject('Current version unknown');
             }
-          },function(err){
+          }, function error (err) {
             reject(err.message);
           });
         });
       }
 
+      function getStatus () {
+        return $q(function status (resolve, reject) {
+          getCurrent().then(function checkCurrent (/*Object*/currentVersion) {
+            if (currentVersion.version) {
+              var response = currentVersion;
+              if (currentVersion.version > versionInfo.version) {
+                response.status = 'old';
+              } else if (currentVersion.version === versionInfo.version) {
+                response.status = 'current';
+              } else {
+                response.status = 'development';
+              }
+              resolve(response);
+            } else {
+              reject('Current Version unknown');
+            }
+          }, function error (err) {
+            reject(err.message);
+          });
+        });
+      }
+
+      function alert () {
+        getStatus().then(function alert (status) {
+          if (!informed) {
+            switch (status.status) {
+              case 'old':
+                watsonAlerts.add({
+                  level: 'info',
+                  title: 'Pssst!',
+                  text: 'A new version of this tool is available. Get it from ' + status.download,
+                  dismissable: true
+                });
+                informed = true;
+                break;
+              case 'current':
+                break;
+              case 'development':
+                watsonAlerts.add({
+                  level: 'info',
+                  title: 'Pssst!',
+                  text: 'You\'re using a development version of this tool.',
+                  dismissable: true
+                });
+                informed = true;
+                break;
+            }
+          }
+        }, function error (err) {
+          watsonAlerts.add({
+            level: 'error',
+            text: 'Error retrieving version information. Error message: ' + JSON.stringify(err.message),
+            dismissable: true
+          });
+          informed = true;
+        });
+      }
+
       // Public API here
       return {
-        'informed': false,
+        'informed': informed,
         'getCurrent': getCurrent,
-        'isCurrent': isCurrent
+        'isCurrent': isCurrent,
+        'getStatus': getStatus,
+        'alert': alert
       };
 
     }

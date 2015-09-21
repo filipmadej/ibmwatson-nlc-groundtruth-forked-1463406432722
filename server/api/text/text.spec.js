@@ -519,6 +519,13 @@ describe('/server/api/text', function () {
                 [patch[0].value[0].id, patch[0].value[1].id, patch[0].value[2].id],
                 sinon.match.func);
 
+              var socketResponse = {
+                id : VALID_ID,
+                classes : classesToAdd
+              };
+
+              this.socketMock.send.should.have.been.calledWith('text:update:classes:add', sinon.match(socketResponse));
+
               result.should.have.property('error', 0);
               result.should.have.property('success', 1);
             };
@@ -539,6 +546,13 @@ describe('/server/api/text', function () {
                 VALID_ID,
                 [patch[0].value[0].id, patch[0].value[1].id],
                 sinon.match.func);
+
+              var socketResponse = {
+                id : VALID_ID,
+                classes : classesToRemove
+              };
+
+              this.socketMock.send.should.have.been.calledWith('text:update:classes:remove', sinon.match(socketResponse));
 
               result.should.have.property('error', 0);
               result.should.have.property('success', 1);
@@ -599,6 +613,19 @@ describe('/server/api/text', function () {
                 VALID_ID,
                 [patch[0].value[0].id],
                 sinon.match.func);
+
+              var addResponse = {
+                id : VALID_ID,
+                classes : changeAdd
+              };
+
+              var removeResponse = {
+                id : VALID_ID,
+                classes : changeRemove
+              };
+
+              this.socketMock.send.should.have.been.calledWith('text:update:classes:add', sinon.match(addResponse));
+              this.socketMock.send.should.have.been.calledWith('text:update:classes:remove', sinon.match(removeResponse));
 
               result.should.have.property('error', 0);
               result.should.have.property('success', 2);

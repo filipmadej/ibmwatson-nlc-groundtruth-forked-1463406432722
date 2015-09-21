@@ -137,9 +137,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var errorClasses = [];
         data.classes.forEach(function forEach (clazz) {
           if (clazz.err) {
-            errorClasses.push(clazz);
+            errorClasses.push(clazz.id);
           } else {
-            successClasses.push($scope.getFromId($scope.classes, clazz).label);
+            successClasses.push($scope.getFromId($scope.classes, clazz.id).label);
           }
         });
         if (errorClasses.length > 0) {
@@ -159,9 +159,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
         var errorClasses = [];
         data.classes.forEach(function forEach (clazz) {
           if (clazz.err) {
-            errorClasses.push(clazz);
+            errorClasses.push(clazz.id);
           } else {
-            successClasses.push($scope.getFromId($scope.classes, clazz).label);
+            successClasses.push($scope.getFromId($scope.classes, clazz.id).label);
           }
         });
         if (errorClasses.length > 0) {
