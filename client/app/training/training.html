@@ -88,7 +88,7 @@
         </div>
 
         <div ng-show="getChecked(classes).length && filteredClasses().length" class="left">
-          <span class="ico-span" ng-click="deleteCheckedClasses()">
+          <span class="ico-span" ng-click="deleteCheckedClasses(); checkAllClassesChecked=false;">
             <span class="ibm-icon--remove-trash"></span>Delete
           </span>
         </div>
@@ -193,7 +193,7 @@
           <span class="ico-span" ng-click="tagCheckedTexts()" ng-show="getChecked(classes).length">
             <span class="ibm-icon--tag"></span>Assign
           </span>
-          <span class="ico-span" ng-click="deleteCheckedTexts()">
+          <span class="ico-span" ng-click="deleteCheckedTexts(); checkAllTextsChecked=false;">
             <span class="ibm-icon--remove-trash"></span>Delete
           </span>
         </div>
@@ -245,11 +245,10 @@
                   </div>
                   <input type="text" id="newTagField{{ text.$$hashKey }}" class="ibm-nlc-add-tag-field"
                          placeholder="class name..." ng-model="newTagStrings[text.$$hashKey]"
-                         ng-blur="tagText(newTagStrings[text.$$hashKey], text);"
                          ng-keyup="newTagFieldKeyUp($event, text)" list="classNameList" ng-show="text.beingTagged"
                          show-focus="text.beingTagged">
                   <input type="button" value="+" class="ibm-nlc-add-class-button" ng-hide="text.beingTagged"
-                         ng-click="beginTaggingText(text)"/>
+                         ng-click="beginTaggingText(text)">
                 </div>
               </div>
             </div>
