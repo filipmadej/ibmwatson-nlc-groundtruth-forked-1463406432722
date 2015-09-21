@@ -260,7 +260,9 @@ function socketResponseBuilder (textid, data) {
       response.classes = data.operation.value;
     }
   } else if (data.classes && data.classes.length) {
-    response.classes = data.classes;
+    response.classes = data.classes.map(function map (id) {
+      return { id: id };
+    });
   } else if (_.has(data, 'metadata.value')) {
     response.value = data.metadata.value;
   } else {
