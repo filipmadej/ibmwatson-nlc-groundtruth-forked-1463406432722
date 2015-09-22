@@ -222,9 +222,9 @@
             </div>
             <div class="col-xs-17 col-sm-19">
               <div class="row" ng-show="!text.edit">
-                <div>{{ text.label || 'empty' }}</div>
+                <div class="text-label">{{ text.label || 'empty' }}</div>
               </div>
-              <div class="row" ng-show="text.edit">
+              <div class="row text-label" ng-show="text.edit">
                 <form ng-submit="changeLabel('text', text);">
                   <span>
                     <input id="{{ text.$$hashKey }}" type="text"
