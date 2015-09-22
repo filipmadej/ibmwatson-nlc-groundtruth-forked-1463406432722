@@ -172,12 +172,11 @@
       <div class="row" ng-show="getSelectedClasses().length">
         <span class="ibm-nlc-showing-tagged-results">Tagged with:</span>
         <span ng-repeat="clazz in getSelectedClasses()">
-          <span class="ibm-nlc-tag ibm-nlc-filter-tag">
-            {{ clazz.label }}
-            <a ng-click="selectClass(clazz)">
-              <span class="ibm-nlc-tag-x">x</span>
-            </a>
-          </span>
+          <div class="ibm-nlc-tag ibm-nlc-filter-tag">
+            <span class="ibm-nlc-tag-x">
+              <a ng-click="selectClass(clazz)">x</a>
+            </span>{{ clazz.label }}
+          </div>
         </span>
       </div>
 
@@ -240,8 +239,10 @@
                 </div>
                 <div class="col-sm-21">
                   <div ng-repeat="clazz in text.classes" class="ibm-nlc-tag">
+                    <span class="ibm-nlc-tag-x">
+                      <a ng-click="removeTag(text, clazz)">x</a>
+                    </span>
                     <span>{{ clazz }}</span>
-                    <a ng-click="removeTag(text, clazz)"><span class="ibm-nlc-tag-x">x</span></a>
                   </div>
                   <input type="text" id="newTagField{{ text.$$hashKey }}" class="ibm-nlc-add-tag-field"
                          placeholder="class name..." ng-model="newTagStrings[text.$$hashKey]"
