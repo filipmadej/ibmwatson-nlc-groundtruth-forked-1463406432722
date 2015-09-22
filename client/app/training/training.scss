@@ -145,25 +145,44 @@
   font-size: small;
   background-color: #F1F1F1;
   position: relative;
-  margin: 0 .1875em 0 0;
-  padding: 6px 0px 3px 5px;
+  margin: 3px 0px 3px 5px;
+  padding: 6px 20px 3px 5px;
   cursor: default;
   border: 1px solid #C7C7C7;
   display: inline-block;
   word-wrap: break-word;
+  max-width:100%;
+  .ibm-nlc-tag-x {
+    float:right;
+    margin-right:-20px;
+  }
 }
-.ibm-nlc-tag a:hover {
-  color: orange;
-  text-decoration: none;
+.ibm-nlc-tag-x {
+  padding-left: .2em;
+  padding-right: .4em;
+  margin-left: 5px;
+  a {
+    color: #525151;  
+  }
+  a:hover {
+    color: #396A9F;
+    text-decoration: none;
+  }
 }
 .ibm-nlc-add-class-button {
-  position: relative;
-  height: 1.7em;
-  width: 1.7em;
-  font-size:1.1em;
-  vertical-align: bottom;
+  font-size: small;
+  vertical-align: middle;
   border: 1px solid rgb(191,191,191);
   background-color:rgb(241,241,241);
+  padding: 6px 10px 3px;
+
+/*  height: 1.7em;
+  width: 1.7em;
+  font-size:1.1em;
+  border: 1px solid rgb(191,191,191);
+  background-color:rgb(241,241,241);
+  margin: 3px 0 3px 0px;
+  */
 }
 .ibm-nlc-add-tag-field {
   position: relative;
@@ -202,15 +221,6 @@
 .ibm-nlc-filter-tag {
   position: relative;
   top: -2px;
-}
-.ibm-nlc-tag-x {
-  padding-left: .2em;
-  padding-right: .4em;
-  color: #525151;
-  margin-left: 5px;
-}
-.ibm-nlc-tag-x:hover{
-  color: #396A9F;
 }
 .ibm-nlc-sortbydropdown {
   float: right;
