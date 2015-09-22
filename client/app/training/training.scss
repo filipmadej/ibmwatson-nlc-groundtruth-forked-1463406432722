@@ -126,53 +126,20 @@
   position: relative;
   font-size: 0.8em;
   padding-bottom: 2px;
+  border: 1px solid gray;
 }
 .ibm-nlc-scrolling-table {
   width: 100%;
   overflow: auto;
   /* div height is set in setTableHeights() and is based on integral number of class rows that fit in window's current innerHeight */
 }
-.ibm-nlc-table tr {
-  border-bottom: 2px solid white;
-  .ibm-icon-delete {
-    background-image: url(https://ibmwatson-assets-nlc.mybluemix.net/images/remove-trash_32.png) !important;
-    visibility: hidden;
-    cursor: pointer;
-  }
-  .ibm-icon-edit {
-    background-image: url(https://ibmwatson-assets-nlc.mybluemix.net/images/edit_32.png) !important;
-    visibility: hidden;
-    cursor: pointer;
-  }
-}
 .ibm-nlc-class-row {
   height: 44px;
   /* keep this the same as classRowHeight in controller to keep class table dynamically sized without clipping */
 }
-.ibm-nlc-class-selected td {
-  background-color: #FFF !important;
-  font-family: HelvNeueBoldForIBM;
-}
 .ibm-nlc-label-edit-field {
   width: 100%;
   height: 1.9em;
-}
-.ibm-nlc-table tr:hover td {
-  color: black;
-  background-color: #ccc;
-}
-.ibm-nlc-table tr:hover .ibm-icon-delete,
-.ibm-nlc-table tr:hover .ibm-icon--remove-trash {
-  visibility: visible;
-}
-.ibm-nlc-table tr:hover .ibm-icon-edit,
-.ibm-nlc-table tr:hover .ibm-icon--edit {
-  visibility: visible;
-}
-.ibm-nlc-table td {
-  background-color: #ddd;
-  padding-top: 10px;
-  cursor: default;
 }
 .ibm-nlc-tag {
   font-size: small;
@@ -184,7 +151,6 @@
   border: 1px solid #C7C7C7;
   display: inline-block;
   word-wrap: break-word;
-  word-break: break-all;
 }
 .ibm-nlc-tag a:hover {
   color: orange;
@@ -195,7 +161,6 @@
   height: 1.7em;
   width: 1.7em;
   font-size:1.1em;
-  margin-left: -3px;
   vertical-align: bottom;
   border: 1px solid rgb(191,191,191);
   background-color:rgb(241,241,241);
@@ -278,17 +243,6 @@
   vertical-align: middle;
 }
 
-/* quick hack until text layout is changed */
-.table > tbody > tr > td.ibm-left-icon {
-  padding: 10px 0 0 0;
-  font-size:20px;
-}
-.table > tbody > tr > td.ibm-right-icon {
-  padding: 10px 10px 0 6px;
-  text-align: left;
-  font-size:20px;
-}
-
 .ico-span {
   color: rgb(70, 70, 70);
   vertical-align: text-bottom;
@@ -323,6 +277,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.text-label {
+  line-height: 1.9em;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .row {
   margin: .3125em 0 !important;
