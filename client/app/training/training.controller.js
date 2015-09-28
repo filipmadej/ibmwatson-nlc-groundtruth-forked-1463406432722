@@ -774,6 +774,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
       // mark text <text> as being tagged or dismiss tag field if already being tagged
       $scope.beginTaggingText = function beginTaggingText (text) {
+        console.log('beginTaggingText',text.beingTagged);
         if (!text.beingTagged) {
           $scope.newTagStrings[text.$$hashKey] = '';
           text.beingTagged = true;

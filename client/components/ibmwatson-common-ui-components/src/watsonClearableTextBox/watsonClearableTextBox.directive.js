@@ -16,10 +16,3 @@
 
 'use strict';
 
-angular.module('ibmwatson-common-ui-components', [
-  'ibmwatson-common-ui-components.watsonAlerts',
-  'ibmwatson-common-ui-components.watsonFooter',
-  'ibmwatson-common-ui-components.watsonLoading',
-  'ibmwatson-common-ui-components.watsonClearableTextBox',
-  'ibmwatson-common-ui-components.templates'
-]);
