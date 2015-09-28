@@ -175,20 +175,14 @@
   border: 1px solid rgb(191,191,191);
   background-color:rgb(241,241,241);
   padding: 6px 10px 3px;
-
-/*  height: 1.7em;
-  width: 1.7em;
-  font-size:1.1em;
-  border: 1px solid rgb(191,191,191);
-  background-color:rgb(241,241,241);
-  margin: 3px 0 3px 0px;
-  */
 }
 .ibm-nlc-add-tag-field {
   position: relative;
   top: -0.2em;
   left: 0.4em;
   font-size: 0.7em;
+  background-color:#fff;
+  border:1px solid #C7C7C7;
 }
 .ibm-nlc-add-field {
   background-size: 16px 16px;
@@ -311,4 +305,33 @@
 
 #textList .row {
   margin: 0 0 3px 0 !important;
+}
+
+/* Styles for watsonClearableTextBox */
+.ibm-clearable-textbox {
+  display:inline-block;
+
+}
+
+.ibm-clearable-textbox input {
+  border-width:0;
+  outline: none;
+}
+
+.ibm-clearable-textbox .ibm-alert__close {
+    font-size: 1em;
+    color: #5A5A5A;
+    opacity: 1;
+    text-shadow: none;
+    
+    .ibm-icon--close-cancel-error {
+      position:relative;
+      top:0.3em;
+      visibility: visible;
+      
+    }
+}
+
+.ibm-clearable-textbox-link {
+  
 }

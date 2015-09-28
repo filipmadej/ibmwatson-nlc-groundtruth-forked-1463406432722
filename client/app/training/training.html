@@ -244,10 +244,13 @@
                     </span>
                     <span>{{ clazz }}</span>
                   </div>
-                  <input type="text" id="newTagField{{ text.$$hashKey }}" class="ibm-nlc-add-tag-field"
-                         placeholder="class name..." ng-model="newTagStrings[text.$$hashKey]"
-                         ng-keyup="newTagFieldKeyUp($event, text)" list="classNameList" ng-show="text.beingTagged"
-                         show-focus="text.beingTagged">
+                  <watson-clearable-text-box 
+                      class="ibm-nlc-add-tag-field"
+                      id="newTagField{{ text.$$hashKey }}" ng-show="text.beingTagged"
+                      ng-model="newTagStrings[text.$$hashKey]"
+                         show-focus="text.beingTagged" ng-keyup="newTagFieldKeyUp($event, text)"
+                         watson-clear="beginTaggingText(text)"
+                         list="classNameList"></watson-clearable-text-box>
                   <input type="button" value="+" class="ibm-nlc-add-class-button" ng-hide="text.beingTagged"
                          ng-click="beginTaggingText(text)">
                 </div>
