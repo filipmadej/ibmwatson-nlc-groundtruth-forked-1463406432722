@@ -911,7 +911,7 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           }, function error (err) {
             $scope.loading.savingClassifier = false;
             $scope.showTrainConfirm = false;
-            watsonAlerts.add({ level: 'error', text: err.message });
+            watsonAlerts.add({ level: 'error', title: 'Training Error', text: err.statusText });
           });
         }
 

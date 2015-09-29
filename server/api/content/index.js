@@ -30,6 +30,7 @@ var ENDPOINTS = {
 };
 
 router.use(ENDPOINTS.content, rest.ensureAuthenticated);
+
 router.post(ENDPOINTS.content, multer(controller.uploadOptions), controller.handleFileImport);
 router.get(ENDPOINTS.content, controller.handleFileDownload);
 

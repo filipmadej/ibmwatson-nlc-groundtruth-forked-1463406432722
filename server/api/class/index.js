@@ -30,7 +30,6 @@ var ENDPOINTS = {
 };
 
 router.use(ENDPOINTS.classes, rest.ensureAuthenticated);
-
 router.use(ENDPOINTS.class, rest.ensureAuthenticated);
 
 router.get(ENDPOINTS.classes, controller.getClasses);

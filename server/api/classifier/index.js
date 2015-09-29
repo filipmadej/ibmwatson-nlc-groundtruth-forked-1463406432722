@@ -17,9 +17,9 @@
 'use strict';
 
 var express = require('express');
-var controller = require('./classifier.controller');
 var bodyParser = require('body-parser');
 
+var controller = require('./classifier.controller');
 var rest = require('../../config/rest');
 
 var ENDPOINTS = {
@@ -30,12 +30,14 @@ var ENDPOINTS = {
 
 var router = express.Router();
 
-router.use(bodyParser.json());
+router.use(ENDPOINTS.classifiers, rest.ensureAuthenticated);
+router.use(ENDPOINTS.classifier, rest.ensureAuthenticated);
+router.use(ENDPOINTS.classify, rest.ensureAuthenticated);
 
-router.post(ENDPOINTS.classifiers, rest.ensureAuthenticated, controller.train);
-router.post(ENDPOINTS.classify, rest.ensureAuthenticated, controller.classify);
-router.get(ENDPOINTS.classifier, rest.ensureAuthenticated, controller.status);
-router.get(ENDPOINTS.classifiers, rest.ensureAuthenticated, controller.list);
-router.delete(ENDPOINTS.classifier, rest.ensureAuthenticated, controller.remove);
+router.post(ENDPOINTS.classifiers, controller.train);
+router.post(ENDPOINTS.classify, controller.classify);
+router.get(ENDPOINTS.classifier, controller.status);
+router.get(ENDPOINTS.classifiers, controller.list);
+router.delete(ENDPOINTS.classifier, controller.remove);
 
 module.exports = router;
