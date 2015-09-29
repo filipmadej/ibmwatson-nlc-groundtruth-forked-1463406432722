@@ -1,5 +1,10 @@
 # IBM Watson&trade; Natural Language Classifier Toolkit - ChangeLog
 
+## Beta 0.0.4 - Tuesday, September 29th, 2015
+
+* Fixed finding a Natural Language Classifier instance when the name doesn't match the expected value.
+* Fixed the upload limit when trying to train a classifier and the error handling from the service.
+
 ## Beta 0.0.3 - Monday, September 21st, 2015
 
 * Improved the alert service for notifying users when they are on an old or development version of the tool including a download link for the latest version.
