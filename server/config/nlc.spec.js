@@ -142,4 +142,27 @@ describe('/server/config/nlc', function () {
     nlc.should.deep.equal({});
     process.env.VCAP_SERVICES = oldVCAP;
   });
+
+  it('should present the first credentials when multiple classifiers are present', function vcapFirst() {
+    var oldVCAP = process.env.VCAP_SERVICES;
+    var credentials = { "natural_language_classifier": [ { "name": "burrito_classifier", "label": "natural_language_classifier", "plan": "standard", "credentials": { "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", "username": "burrito-3de5-474d-8f66-41c5db7cc84d", "password": "guacamole" } }, { "name": "taco_classifier", "label": "natural_language_classifier", "plan": "standard", "credentials": { "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", "username": "taco-3de5-474d-8f66-41c5db7cc84d", "password": "picodegallo" } } ], "cloudantNoSQLDB": [ { "name": "ibmwatson-nlc-cloudant", "label": "cloudantNoSQLDB", "plan": "Shared", "credentials": { "username": "9009cd8d-TACO-451b-b2c7-641452c58db0-bluemix", "password": "burrito", "host": "9009cd8d-TACO-451b-b2c7-641452c58db0-bluemix.cloudant.com", "port": 443, "url": "https://9009cd8d-TACO-451b-b2c7-641452c58db0-bluemix:burrito@9009cd8d-TACO-451b-b2c7-641452c58db0-bluemix.cloudant.com" } } ]};
+    process.env.VCAP_SERVICES = JSON.stringify(credentials);
+
+    delete this.serviceConfig;
+    delete this.getService;
+    delete this.overrides.cfenv;
+    var services = JSON.parse(process.env.VCAP_SERVICES);
+    if (services.natural_language_classifier instanceof Array &&
+      services.natural_language_classifier.length > 0 &&
+      services.natural_language_classifier[0].name) {
+      console.log("foo");
+    }
+    var nlc = proxyquire('./nlc', this.overrides);
+    nlc.id.should.equal(credentials.natural_language_classifier[0].name);
+    nlc.url.should.equal(credentials.natural_language_classifier[0].credentials.url);
+    nlc.username.should.equal(credentials.natural_language_classifier[0].credentials.username);
+    nlc.password.should.equal(credentials.natural_language_classifier[0].credentials.password);
+    nlc.version.should.equal('v1');
+    process.env.VCAP_SERVICES = oldVCAP;
+  });
 });
