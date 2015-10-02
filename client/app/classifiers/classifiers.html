@@ -36,8 +36,8 @@
           </form>
         </div>
       </div>
-      <div ng-show="classifier.logs.length" class="col-xs-12" style="border-top:1px solid #CCC"></div>
-      <div ng-show="classifier.logs.length" class="col-xs-12 collapse" style="background-color: rgb(244, 242, 242);  border-bottom: 1px solid rgb(204, 204, 204);" id="{{ classifier.classifier_id }}">
+      <div ng-show="classifier.logs.length" class="col-xs-24" style="border-top:1px solid #CCC"></div>
+      <div ng-show="classifier.logs.length" class="col-xs-24 collapse" style="background-color: rgb(244, 242, 242);  border-bottom: 1px solid rgb(204, 204, 204);" id="{{ classifier.classifier_id }}">
         <div class="logs-title">Responses</div>
         <div class="logs">
           <div ng-repeat="entry in classifier.logs">
@@ -52,7 +52,7 @@
           </div>
         </div>
       </div>
-      <div ng-show="classifier.logs.length" class="col-xs-12 expand-logs" role="button" data-toggle="collapse" data-target="{{ '#' + classifier.classifier_id }}" aria-expanded="true" aria-controls="{{ classifier.classifier_id }}" ng-click="toggleArrowDown(classifier)">
+      <div ng-show="classifier.logs.length" class="col-xs-24 expand-logs" role="button" data-toggle="collapse" data-target="{{ '#' + classifier.classifier_id }}" aria-expanded="true" aria-controls="{{ classifier.classifier_id }}" ng-click="toggleArrowDown(classifier)">
         <span class="ibm-icon" ng-class="{'ibm-icon-down' : classifier.showArrowDown, 'ibm-icon-up' : !classifier.showArrowDown }"></span>
       </div>
     </div>
