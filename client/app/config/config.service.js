@@ -25,8 +25,8 @@ angular.module('config', [])
     'versions': 'https://ibmwatson-nlc-status.mybluemix.net/api/v1/versions'
   })
   .constant('versionInfo', {
-    'version': '0.0.4',
+    'version': '0.0.5-dev',
     'state': 'beta',
-    'scope': 'Beta update 3',
+    'scope': 'Beta update 4 dev',
     'download': 'https://hub.jazz.net/project/wdctools/ibmwatson-nlc-groundtruth'
   });
