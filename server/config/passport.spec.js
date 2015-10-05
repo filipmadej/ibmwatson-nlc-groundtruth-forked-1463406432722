@@ -48,7 +48,16 @@ describe('/server/config/passport', function () {
       password : 'password',
       version : 'v1',
       '@noCallThru' : true
-    }
+    };
+
+    this.cryptoMock = {
+      encrypt:function(string){
+        return string + "encryptedhonest"
+      },
+      decrypt:function(string){
+        return string.slice(0,string.length-15);
+      }
+    };
   });
 
   describe('de/serializeUser', function () {
@@ -70,15 +79,6 @@ describe('/server/config/passport', function () {
         session : sinon.spy()
       };
 
-      this.cryptoMock = {
-        encrypt:function(string){
-          return string + "encryptedhonest"
-        },
-        decrypt:function(string){
-          return string.slice(0,string.length-15);
-        }
-      }
-
       this.appMock = {
         use : sinon.spy()
       };
@@ -86,7 +86,7 @@ describe('/server/config/passport', function () {
       proxyquire('./passport', {
         'passport' : this.passportMock,
         '../components/crypto' : this.cryptoMock,
-        'request' : sinon.stub.callsArgWith(1,null,{statusCode:200})
+        'request' : sinon.stub().callsArgWith(1,null,{statusCode:200})
       })(this.appMock);
 
       this.serializeFn = this.passportMock.serializeUser.lastCall.args[0];
@@ -140,10 +140,17 @@ describe('/server/config/passport', function () {
 
       this.passportLib = proxyquire('passport', {});
 
+      var requestMock = sinon.stub();
+      requestMock.onCall(0).callsArgWithAsync(1,null,{statusCode:200});
+      requestMock.onCall(1).callsArgWithAsync(1,null,{statusCode:401});
+      requestMock.onCall(2).callsArgWithAsync(1,null,{statusCode:200});
+      requestMock.onCall(3).callsArgWithAsync(1,null,{statusCode:401});
+
+
       this.overrides = {
         'passport' : this.passportLib,
         '../components/crypto' : this.cryptoMock,
-        'request' : sinon.stub.callsArgWith(1,null,{statusCode:200})
+        'request' : requestMock
       };
 
       proxyquire('./passport', this.overrides)(this.app);

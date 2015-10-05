@@ -45,7 +45,7 @@ module.exports = function init(app) {
     function authenticate(username, password, callback) {
         // do a get to the nlc endpoint
         request({
-            uri: env.endpoints.classifier + '/classifiers',
+            uri: env.endpoints.classifier + '/v1/classifiers',
             auth: {
                 username: username,
                 password: password,

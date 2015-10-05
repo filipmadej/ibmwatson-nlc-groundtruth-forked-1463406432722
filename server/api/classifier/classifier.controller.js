@@ -18,13 +18,27 @@
 
 var watson = require('watson-developer-cloud');
 var async = require('async');
-var credentials = require('../../config/nlc');
+var env = require('../../config/environment');
 
-// Create the service wrapper
-var nlClassifier = watson.natural_language_classifier(credentials);
+function getCredentials (req) {
+  var credentials = {}
+
+  if(!req.user){
+    throw new Error('User is not authenticated');
+  }
+
+  credentials.url = env.endpoints.classifier;
+  credentials.username = req.user.username;
+  credentials.password = req.user.password;
+  credentials.version = 'v1';
+  return credentials;
+}
 
 // Trains a new NL Classifier
 exports.train = function train (req, res) {
+  var credentials = getCredentials(req),
+    nlClassifier = watson.natural_language_classifier(credentials);
+
   nlClassifier.create(req.body, function create (err, result) {
     if (err) {
       res.status(err.code).send(err);
@@ -37,6 +51,10 @@ exports.train = function train (req, res) {
 // Call the pre-trained classifier with body.text
 // Responses are json
 exports.classify = function classify (req, res) {
+
+  var credentials = getCredentials(req),
+    nlClassifier = watson.natural_language_classifier(credentials);
+
   var params = {
     classifier : req.params.id, // pre-trained classifier
     text : req.body.text
@@ -53,6 +71,10 @@ exports.classify = function classify (req, res) {
 
 // Checks the status of the current classifier
 exports.status = function status (req, res) {
+
+  var credentials = getCredentials(req),
+    nlClassifier = watson.natural_language_classifier(credentials);
+
   var params = {
     classifier : req.params.id
   };
@@ -68,6 +90,12 @@ exports.status = function status (req, res) {
 
 // Lists the current classifiers that are a part of the service
 exports.list = function list (req, res) {
+
+  var credentials = getCredentials(req),
+    nlClassifier = watson.natural_language_classifier(credentials);
+
+  console.log('CREDENTIALS',credentials);
+
   nlClassifier.list(null, function handleResult (err, results) {
     if (err) {
       res.status(err.code).send(err);
@@ -79,6 +107,10 @@ exports.list = function list (req, res) {
 
 // Removes an existing classifier
 exports.remove = function remove (req, res) {
+
+  var credentials = getCredentials(req),
+    nlClassifier = watson.natural_language_classifier(credentials);
+
   var params = {
     classifier : req.params.id
   }

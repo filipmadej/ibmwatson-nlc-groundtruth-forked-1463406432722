@@ -36,7 +36,6 @@ describe('server/config/environment', function () {
     this.originalNodeEnv = process.env.NODE_ENV;
     this.originalCookieSecret = process.env.COOKIE_SECRET;
     this.originalSessionSecret = process.env.SESSION_SECRET;
-    this.originalServiceName = process.env.CLASSIFIER_SERVICE_NAME;
   });
 
   after(function () {
@@ -49,9 +48,6 @@ describe('server/config/environment', function () {
     if (this.originalSessionSecret) {
       process.env.SESSION_SECRET = this.originalSessionSecret;
     }
-    if (this.originalServiceName) {
-      process.env.CLASSIFIER_SERVICE_NAME = this.originalServiceName;
-    }
   });
 
   beforeEach(function () {
@@ -62,7 +58,6 @@ describe('server/config/environment', function () {
 
     process.env.COOKIE_SECRET = 'cookie-secret';
     process.env.SESSION_SECRET = 'session-secret';
-    process.env.CLASSIFIER_SERVICE_NAME = 'classifier-service-name';
 
     this.cfenvMock = {
       getAppEnv : sinon.stub()
@@ -80,7 +75,6 @@ describe('server/config/environment', function () {
     delete process.env.NODE_ENV;
     delete process.env.COOKIE_SECRET;
     delete process.env.SESSION_SECRET;
-    delete process.env.CLASSIFIER_SERVICE_NAME;
   });
 
   it('should load development environment file when NODE_ENV unspecified', function () {
@@ -131,14 +125,12 @@ describe('server/config/environment', function () {
 
     delete process.env.COOKIE_SECRET;
     delete process.env.SESSION_SECRET;
-    delete process.env.CLASSIFIER_SERVICE_NAME;
 
     // env will pick up the defaults
 
     this.runTest( function () {
       customEnv.should.have.deep.property('secrets.cookie').that.not.equals(env.secrets.cookie);
       customEnv.should.have.deep.property('secrets.session').that.not.equals(env.secrets.session);
-      customEnv.should.have.property('classifierServiceName').that.not.equals(env.classifierServiceName);
     });
   });
 

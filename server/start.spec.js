@@ -31,36 +31,7 @@ chai.use(sinonChai);
 
 var app;
 
-var vcapTest = '{\
-    "natural_language_classifier": [ \
-        { \
-        "name": "ibmwatson-nlc-classifier", \
-        "label": "natural_language_classifier", \
-        "plan": "standard", \
-        "credentials": { \
-          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
-          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
-          "password": "wgGb9arQWnqw" \
-        } \
-      } \
-     ] \
-  }';
-
 describe('server/start', function () {
-
-  before(function () {
-
-    this.originalVcapServices = process.env.VCAP_SERVICES;
-
-    process.env.VCAP_SERVICES = vcapTest;
-
-  });
-
-  after(function () {
-    if (this.originalVcapServices) {
-      process.env.VCAP_SERVICES = this.originalVcapServices;
-    }
-  });
 
   beforeEach(function () {
     this.appMock = {

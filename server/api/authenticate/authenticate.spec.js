@@ -32,12 +32,30 @@ var request = require('supertest');
 var session = require('express-session');
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
+var BasicStrategy = require('passport-http').BasicStrategy,
+    LocalStrategy = require('passport-local').Strategy;
 
 // test dependencies
 var mocks = require('../../test/mocks');
 
 var should = chai.should();
 chai.use(sinonChai);
+
+
+// dummy authenticate function
+function authenticate(username, password, callback) {
+
+  if(username === 'username' && password === 'password') {
+    return callback(null, {
+        username: username,
+        password: password
+    });
+  }
+
+  return callback(null, false, {
+      'message': 'Username and password not recognised.'
+    });
+}
 
 describe('/server/api/authenticate', function () {
 
@@ -56,6 +74,15 @@ describe('/server/api/authenticate', function () {
       '@noCallThru' : true
     }
 
+    this.cryptoMock = {
+      encrypt:function(string){
+        return string + "encryptedhonest"
+      },
+      decrypt:function(string){
+        return string.slice(0,string.length-15);
+      }
+    };
+
     this.error = {
       error : 'test-generated',
       statusCode : httpstatus.INTERNAL_SERVER_ERROR
@@ -73,11 +100,19 @@ describe('/server/api/authenticate', function () {
 
     this.passportLib = proxyquire('passport', {});
 
-    proxyquire('../../config/passport', {
-      'passport' : this.passportLib,
-      './nlc' : this.nlc
-    })(this.app);
+    // Dummy Passport Configuration
+    this.passportLib.serializeUser(function serializeUser(user, callback) {
+        callback(null, user);
+    });
 
+    this.passportLib.deserializeUser(function deserializeUser(user, callback) {
+      callback(null, user);
+    });
+
+    this.passportLib.use(new LocalStrategy(authenticate));
+    this.passportLib.use(new BasicStrategy(authenticate));
+    this.app.use(this.passportLib.initialize());
+    this.app.use(this.passportLib.session());
 
     this.controllerOverrides = {
       'passport' : this.passportLib
@@ -102,6 +137,7 @@ describe('/server/api/authenticate', function () {
     });
 
     it('should respond with a 401 response if the session cookie is invalid', function (done) {
+
       request(this.app)
         .get(ENDPOINTBASE)
         .set('Cookie', ['connect.sid=s:AWWn3-T1GJ1N5fpXVh0OYTnbSVcEVeG5.7skWD6cJUPyNIyd/Tk+/+P7wK3L31Tys70Z3zDiKAbI'])

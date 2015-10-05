@@ -48,12 +48,10 @@ var all = {
       auth : 'https://ibmwatson-nlc-tools.mybluemix.net/auth',
       cloudfoundry : 'https://api.ng.bluemix.net',
       bluemix : 'https://console.ng.bluemix.net',
-      classifier: 'https://gateway.watsonplatform.net/natural-language-classifier/api/v1'
+      classifier: 'https://gateway.watsonplatform.net/natural-language-classifier/api'
   },
 
-  cryptoKey: process.env.CRYPTO_KEY || 'ibmwatson-nlc-groundtruth-cryptkey',
-
-  classifierServiceName : process.env.CLASSIFIER_SERVICE_NAME || 'ibmwatson-nlc-classifier'
+  cryptoKey: process.env.CRYPTO_KEY || 'ibmwatson-nlc-groundtruth-cryptkey'
 
 };
 

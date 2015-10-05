@@ -22,7 +22,9 @@ var util = require('util');
 
 // external dependencies
 var async = require('async');
+var bodyParser = require('body-parser');
 var chai = require('chai');
+var express = require('express');
 var httpstatus = require('http-status');
 var proxyquire = require('proxyquire').noPreserveCache();
 var request = require('supertest');
@@ -42,21 +44,6 @@ var nlcMock = wdcMock.nlcMock;
 
 var app, nlccreds;
 
-var vcapTest = '{\
-    "natural_language_classifier": [ \
-        { \
-        "name": "ibmwatson-nlc-classifier", \
-        "label": "natural_language_classifier", \
-        "plan": "standard", \
-        "credentials": { \
-          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
-          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
-          "password": "wgGb9arQWnqw" \
-        } \
-      } \
-     ] \
-  }';
-
 describe('/server/api/classifier', function () {
 
   var TENANT = 'test-tenant';
@@ -71,31 +58,39 @@ describe('/server/api/classifier', function () {
 
   this.timeout(5000);
 
-  before(function (done) {
+  before(function () {
 
-    this.originalVcapServices = process.env.VCAP_SERVICES;
-
-    process.env.VCAP_SERVICES = vcapTest;
-
-    nlccreds = proxyquire('../../config/nlc',{});
-
-    app = proxyquire('../../app', {
-      './config/db/store' : new mocks.StoreMock(),
+    // Setup Controller
+    this.controllerOverrides = {
       'watson-developer-cloud' : wdcMock
-    });
+    };
 
-    request(app)
-      .post('/api/authenticate')
-      .send({username : nlccreds.username, password : nlccreds.password})
-      .expect(httpstatus.OK)
-      .end(function (err, res) {
-      this.sessionCookie = res.headers['set-cookie'][0];
-      done(err);
-    }.bind(this));
-  });
+    this.controller = proxyquire('./classifier.controller', this.controllerOverrides);
 
-  after(function () {
-    process.env.VCAP_SERVICES = this.originalVcapServices;
+    // Setup App
+    this.app = express();
+
+    // This mock adds NLC credentials to the request
+    this.restMock = {
+      ensureAuthenticated : function (req, res, next) {
+
+        req.user = {
+          username: '85f2085e-9ff4-49b2-9d90-93f68b61b135',
+          password: 'wgGb9arQWnqw'
+        };
+        next();
+      }
+    };
+
+    this.routeOverrides = {
+      './classifier.controller' : this.controller,
+      '../../config/rest' : this.restMock
+    };
+
+    this.app.use(bodyParser.json());
+    this.app.use('/api', proxyquire('./index', this.routeOverrides));
+
+    this.agent = request.agent(this.app);
   });
 
   beforeEach(function () {
@@ -105,7 +100,7 @@ describe('/server/api/classifier', function () {
   describe('GET /api/:tenantid/classifiers', function () {
 
     it('should return a 200 response', function (done) {
-      request(app)
+      this.agent
         .get(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
@@ -118,7 +113,7 @@ describe('/server/api/classifier', function () {
 
     it('should respond a 400 response on error', function (done) {
       nlcMock.list.callsArgWith(1, error);
-      request(app)
+      this.agent
         .get(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
@@ -140,7 +135,7 @@ describe('/server/api/classifier', function () {
     };
 
     it('should return a 200 response', function (done) {
-      request(app)
+      this.agent
         .post(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .send(data)
@@ -154,7 +149,7 @@ describe('/server/api/classifier', function () {
 
     it('should respond a 400 response on error', function (done) {
       nlcMock.create.callsArgWith(1, error);
-      request(app)
+      this.agent
         .post(ENDPOINTBASE)
         .set('Cookie', [this.sessionCookie])
         .send(data)
@@ -171,7 +166,7 @@ describe('/server/api/classifier', function () {
   describe('GET /api/:tenantid/classifiers/:id', function () {
 
     it('should return a 200 response', function (done) {
-      request(app)
+      this.agent
         .get(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
@@ -184,7 +179,7 @@ describe('/server/api/classifier', function () {
 
     it('should respond a 400 response on error', function (done) {
       nlcMock.status.callsArgWith(1, error);
-      request(app)
+      this.agent
         .get(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
@@ -200,7 +195,7 @@ describe('/server/api/classifier', function () {
   describe('DELETE /api/:tenantid/classifiers/:id', function () {
 
     it('should return a 200 response', function (done) {
-      request(app)
+      this.agent
         .delete(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.OK)
@@ -213,7 +208,7 @@ describe('/server/api/classifier', function () {
 
     it('should respond a 400 response on error', function (done) {
       nlcMock.remove.callsArgWith(1, error);
-      request(app)
+      this.agent
         .delete(LOCATION)
         .set('Cookie', [this.sessionCookie])
         .expect(httpstatus.BAD_REQUEST)
@@ -231,7 +226,7 @@ describe('/server/api/classifier', function () {
     var body = {text : 'example text'};
 
     it('should return a 200 response', function (done) {
-      request(app)
+      this.agent
         .post(LOCATION + '/classify')
         .set('Cookie', [this.sessionCookie])
         .send(body)
@@ -247,7 +242,7 @@ describe('/server/api/classifier', function () {
 
     it('should respond a 400 response on error', function (done) {
       nlcMock.classify.callsArgWith(1, error);
-      request(app)
+      this.agent
         .post(LOCATION + '/classify')
         .set('Cookie', [this.sessionCookie])
         .send(body)
