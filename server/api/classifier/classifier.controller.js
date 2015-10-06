@@ -94,8 +94,6 @@ exports.list = function list (req, res) {
   var credentials = getCredentials(req),
     nlClassifier = watson.natural_language_classifier(credentials);
 
-  console.log('CREDENTIALS',credentials);
-
   nlClassifier.list(null, function handleResult (err, results) {
     if (err) {
       res.status(err.code).send(err);

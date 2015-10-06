@@ -23,9 +23,9 @@
 
 module.exports = {
 
-  SESSION_SECRET: 'ibmwatsonqagroundtruthui-secret',
+  SESSION_SECRET: 'ibmwatson-nlc-groundtruth-secret',
 
-  COOKIE_SECRET: 'ibmwatsonqagroundtruthui-cookie',
+  COOKIE_SECRET: 'ibmwatson-nlc-groundtruth-cookie',
 
   // Control debug level for modules using visionmedia/debug
   DEBUG: '',
@@ -47,5 +47,9 @@ module.exports = {
               "url": "https://cloudantuser:cloudantpassword@1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com" \
             } \
         } \
-     ]'
+     ]',
+
+  CRYPTO_KEY: 'ibmwatson-nlc-groundtruth-cryptkey',
+
+  SESSION_TIMEOUT: 86400
 };
