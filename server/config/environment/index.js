@@ -51,7 +51,11 @@ var all = {
       classifier: 'https://gateway.watsonplatform.net/natural-language-classifier/api'
   },
 
-  cryptoKey: process.env.CRYPTO_KEY || 'ibmwatson-nlc-groundtruth-cryptkey'
+  // Cypher key used to encrypt sensitive values in session
+  cryptoKey: process.env.CRYPTO_KEY || 'ibmwatson-nlc-groundtruth-cryptkey',
+
+  // Session timeout. Default 24 hours.
+  sessionTimeout: process.env.SESSION_TIMEOUT || 86400
 
 };
 
