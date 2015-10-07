@@ -23,3 +23,5 @@ applications:
     SESSION_SECRET: ibmwatson-nlc-groundtruth-session
     COOKIE_SECRET: ibmwatson-nlc-groundtruth-cookie
     CLASSIFIER_SERVICE_NAME: ibmwatson-nlc-classifier
+    SESSION_TIMEOUT: 86400
+    CRYPTO_KEY: CRYPTO_KEY_VALUE
