@@ -42,7 +42,7 @@ describe('server/start', function () {
     this.httpMock = new mocks.HttpMock();
     this.logMock = new mocks.LogMock();
     this.storeMock = new mocks.StoreMock();
-    this.websocketMock = new mocks.WebSocketMock();
+    this.socketIoMock = new mocks.SocketIoMock();
   });
 
   it('should default to development environment', function (done) {
@@ -55,10 +55,10 @@ describe('server/start', function () {
 
     app = proxyquire('./start', {
       'http' : this.httpMock,
-      'socket.io' : this.websocketMock,
       './app' : this.appMock,
       './config/log' : this.logMock,
       './config/db/store' : this.storeMock,
+      './config/socket' : this.socketIoMock,
       'watson-developer-cloud' : new mocks.WDCMock()
     });
 
@@ -80,10 +80,10 @@ describe('server/start', function () {
 
       app = proxyquire('./start', {
         'http' : this.httpMock,
-        'socket.io' : this.websocketMock,
         './app' : this.appMock,
         './config/log' : this.logMock,
-        './config/db/store' : this.storeMock
+        './config/db/store' : this.storeMock,
+        './config/socket' : this.socketIoMock,
       });
 
       // Need to pause momentarily to let the async function complete
@@ -146,10 +146,10 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
-          'socket.io' : this.websocketMock,
           './app' : this.appMock,
           './config/log' : this.logMock,
-          './config/db/store' : this.storeMock
+          './config/db/store' : this.storeMock,
+          './config/socket' : this.socketIoMock
         });
       } catch(e) {
         verify();
@@ -178,10 +178,10 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
-          'socket.io' : this.websocketMock,
           './app' : this.appMock,
           './config/log' : this.logMock,
-          './config/db/store' : this.storeMock
+          './config/db/store' : this.storeMock,
+          './config/socket' : this.socketIoMock
         });
       } catch(e) {
         // This is just a safeguard in case a race condition

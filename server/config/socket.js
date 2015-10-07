@@ -16,16 +16,31 @@
 
 'use strict';
 
-var io;
+var io = require('socket.io')();
 
-module.exports.setSocket = function setSocket (conn) {
-  io = conn;
-}
+// local dependencies
+var log = require('./log');
 
-module.exports.getSocket = function getSocket () {
-  return io;
-}
+var EVENTS = {
+  connection: 'connection',
+  subscribe: 'subscribe',
+  unsubscribe: 'unsubscribe'
+};
 
-module.exports.send = function send (name, value) {
-  io.sockets.emit(name, value);
-}
+io.on(EVENTS.connection, function onConnection(socket) {
+
+  // When a client subscribes to a tenant, add them to that tenants room  
+  socket.on(EVENTS.subscribe, function (tenant) {
+    log.debug({tenant:tenant}, 'onSubscribe');
+    socket.join(tenant);
+  });
+
+  // When a client unsubscribes from a tenant, remove them from the room
+  socket.on(EVENTS.unsubscribe, function (tenant) {
+      log.debug({tenant:tenant}, 'onUnsubscribe');
+      socket.leave(tenant);
+    });
+
+});
+
+exports = module.exports = io;

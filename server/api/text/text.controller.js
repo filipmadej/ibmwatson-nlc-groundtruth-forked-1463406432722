@@ -32,7 +32,7 @@ var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
-var socketUtil = require('../../config/socket');
+var io = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
@@ -188,7 +188,7 @@ module.exports.createText = function createText (req, res) {
 
   db.createText(tenantid, textattrs, function returnNewTest (err, text) {
     if (err) {
-      socketUtil.send('text:create', { attributes : textattrs, err : err });
+      io.to(tenantid).emit('text:create', { attributes : textattrs, err : err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create text.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -198,7 +198,7 @@ module.exports.createText = function createText (req, res) {
     delete text._id;
     log.debug({ text : text }, 'Created text');
 
-    socketUtil.send('text:create', { attributes : text });
+    io.to(tenantid).emit('text:create', { attributes : text });
     responses.newitem(
       text,
       req.baseUrl + req.route.path, {
@@ -318,7 +318,7 @@ module.exports.editText = function editText (req, res) {
     data.forEach(function forEach (result) {
       var response = socketResponseBuilder(textid, result);
       if (response !== null) {
-        socketUtil.send('text:update:' + socketMessageNameBuilder(result.operation), response);
+        io.to(tenantid).emit('text:update:' + socketMessageNameBuilder(result.operation), response);
       }
     });
   });
@@ -345,14 +345,14 @@ module.exports.deleteText = function deleteText (req, res) {
 
   db.deleteText(tenantid, textid, etag, function deletedText (err) {
     if (err) {
-      socketUtil.send('text:delete', { id : textid, err : err });
+      io.to(tenantid).emit('text:delete', { id : textid, err : err });
       return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete text.', function returnResponse () {
         return responses.error(res, err);
       });
     }
 
     log.debug({text : textid}, 'Deleted text');
-    socketUtil.send('text:delete', { id : textid });
+    io.to(tenantid).emit('text:delete', { id : textid });
     responses.del(res);
   });
 };
@@ -385,11 +385,11 @@ module.exports.deleteTexts = function deleteTexts (req, res) {
           log.error({ err : err }, message);
         }
         details.error++;
-        socketUtil.send('text:delete', { id : id, err : err });
+        io.to(tenantid).emit('text:delete', { id : id, err : err });
       } else {
         log.debug({text : id}, 'Deleted text');
         details.success++;
-        socketUtil.send('text:delete', { id : id });
+        io.to(tenantid).emit('text:delete', { id : id });
       }
 
       next();

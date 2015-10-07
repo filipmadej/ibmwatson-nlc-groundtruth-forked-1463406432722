@@ -26,7 +26,7 @@ var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
-var socketUtil = require('../../config/socket');
+var io = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
@@ -91,7 +91,7 @@ module.exports.createClass = function createClass (req, res) {
 
   db.createClass(tenantid, classattrs, function returnNewClass (err, classification) {
     if (err) {
-      socketUtil.send('class:create', { attributes : classattrs, err : err });
+      io.to(tenantid).emit('class:create', { attributes : classattrs, err : err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to create class.', function returnResponse () {
         return responses.error(res, err);
       });
@@ -101,7 +101,7 @@ module.exports.createClass = function createClass (req, res) {
     delete classification._id;
     log.debug({ class : classification }, 'Created class');
 
-    socketUtil.send('class:create', { attributes : classification });
+    io.to(tenantid).emit('class:create', { attributes : classification });
     responses.newitem(
       classification,
       req.baseUrl + req.route.path, {
@@ -135,13 +135,13 @@ module.exports.replaceClass = function replaceClass (req, res) {
 
   db.replaceClass(tenantid, classattrs, etag, function replacedClass (err, replaced) {
     if (err) {
-      socketUtil.send('class:update', { id : classid, name : classattrs.name, err : err });
+      io.to(tenantid).emit('class:update', { id : classid, name : classattrs.name, err : err });
       return dberrors.handle(err, [httpstatus.BAD_REQUEST], 'Error occurred while attempting to replace class.', function returnResponse () {
         return responses.error(res, err);
       });
     }
     log.debug({class : classid}, 'Replaced class');
-    socketUtil.send('class:update', { id : replaced._id, name : replaced.name });
+    io.to(tenantid).emit('class:update', { id : replaced._id, name : replaced.name });
     responses.edited(res, replaced);
   });
 };
@@ -159,13 +159,13 @@ module.exports.deleteClass = function deleteClass (req, res) {
 
   db.deleteClass(tenantid, classid, etag, function deletedClass (err) {
     if (err) {
-      socketUtil.send('class:delete', { id : classid, err : err });
+      io.to(tenantid).emit('class:delete', { id : classid, err : err });
       return dberrors.handle(err, [httpstatus.NOT_FOUND], 'Error occurred while attempting to delete class.', function returnResponse () {
         return responses.error(res, err);
       });
     }
     log.debug({class : classid}, 'Deleted class');
-    socketUtil.send('class:delete', { id : classid });
+    io.to(tenantid).emit('class:delete', { id : classid });
     responses.del(res);
   });
 };
@@ -198,11 +198,11 @@ module.exports.deleteClasses = function deleteClasses (req, res) {
           log.error({ err : err }, message);
         }
         details.error++;
-        socketUtil.send('class:delete', { id : id, err : err });
+        io.to(tenantid).emit('class:delete', { id : id, err : err });
       } else {
         log.debug({class : id}, 'Deleted class');
         details.success++;
-        socketUtil.send('class:delete', { id : id });
+        io.to(tenantid).emit('class:delete', { id : id });
       }
 
       next();

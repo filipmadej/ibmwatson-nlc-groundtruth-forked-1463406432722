@@ -62,7 +62,7 @@ describe('/server/api/text', function () {
   beforeEach(function () {
 
     this.storeMock = new mocks.StoreMock();
-    this.socketMock = new mocks.SocketUtilMock();
+    this.socketMock = new mocks.SocketIoMock();
     this.cacheMock = new mocks.CacheMock();
     this.logMock = new mocks.LogMock();
 
@@ -115,7 +115,7 @@ describe('/server/api/text', function () {
           .expect(this.error.statusCode)
           .end(function (err, resp) {
             this.storeMock.createText.should.have.been.called;
-            this.socketMock.send.should.have.been.called;
+            this.socketMock.emit.should.have.been.called;
             done(err);
           }.bind(this));
       });
@@ -524,7 +524,8 @@ describe('/server/api/text', function () {
                 classes : classesToAdd
               };
 
-              this.socketMock.send.should.have.been.calledWith('text:update:classes:add', sinon.match(socketResponse));
+              this.socketMock.to.should.have.been.calledWith(TENANT);
+              this.socketMock.emit.should.have.been.calledWith('text:update:classes:add', sinon.match(socketResponse));
 
               result.should.have.property('error', 0);
               result.should.have.property('success', 1);
@@ -551,8 +552,9 @@ describe('/server/api/text', function () {
                 id : VALID_ID,
                 classes : classesToRemove
               };
+              this.socketMock.to.should.have.been.calledWith(TENANT);
 
-              this.socketMock.send.should.have.been.calledWith('text:update:classes:remove', sinon.match(socketResponse));
+              this.socketMock.emit.should.have.been.calledWith('text:update:classes:remove', sinon.match(socketResponse));
 
               result.should.have.property('error', 0);
               result.should.have.property('success', 1);
@@ -624,8 +626,9 @@ describe('/server/api/text', function () {
                 classes : changeRemove
               };
 
-              this.socketMock.send.should.have.been.calledWith('text:update:classes:add', sinon.match(addResponse));
-              this.socketMock.send.should.have.been.calledWith('text:update:classes:remove', sinon.match(removeResponse));
+              this.socketMock.to.should.have.been.calledWith(TENANT);
+              this.socketMock.emit.should.have.been.calledWith('text:update:classes:add', sinon.match(addResponse));
+              this.socketMock.emit.should.have.been.calledWith('text:update:classes:remove', sinon.match(removeResponse));
 
               result.should.have.property('error', 0);
               result.should.have.property('success', 2);
