@@ -162,7 +162,7 @@
   padding-right: .4em;
   margin-left: 5px;
   a {
-    color: #525151;  
+    color: #525151;
   }
   a:hover {
     color: #396A9F;
@@ -196,7 +196,7 @@
 }
 .ibm-nlc-classes-label {
   font-size: small;
-  color: grey;
+  color: #555;
   font-family: HelvNeueLightForIBM;
   margin-right: -5px;
   line-height:2.6em;
@@ -323,15 +323,15 @@
     color: #5A5A5A;
     opacity: 1;
     text-shadow: none;
-    
+
     .ibm-icon--close-cancel-error {
       position:relative;
       top:0.3em;
       visibility: visible;
-      
+
     }
 }
 
 .ibm-clearable-textbox-link {
-  
+
 }

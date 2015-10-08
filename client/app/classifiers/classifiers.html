@@ -14,10 +14,10 @@
             {{ classifier.name }} ({{ classifier.status }})
           </span>
           <div class="inline" style="margin-left:10px" ng-click="deleteClassifier(classifier)">
-            <span class="ibm-icon ibm-icon-delete"></span>
+            <span class="ibm-icon ibm-icon-delete"><span class="screen-reader-text">Delete classifier</span></span>
           </div>
           <div class="ibm-nlc-classifier-id">
-            <label>Classifier ID:</label><span class="ibm-badge">{{ classifier.classifier_id }}</span>
+            <div>Classifier ID:<span aria-label="Classifier ID" class="ibm-badge">{{ classifier.classifier_id }}</span></div>
           </div>
           <div class="error-text" ng-show="classifier.status=='Failed' || classifier.status=='Unavailable'">
             <span>
@@ -29,7 +29,7 @@
       <div class="col-sm-14 col-md-12">
         <div class="inline pad col-xs-24">
           <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
-            <input style="width:100%; padding: 3px 5px 0px;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
+            <input style="width:100%; padding: 3px 5px 0;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" aria-labelledby="Enter text to classify" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
             <span class="input-group-btn">
               <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available' || !classifier.textToClassify">Classify</button>
             </span>

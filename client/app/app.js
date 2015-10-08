@@ -28,7 +28,8 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     'config',
     'angular-multi-check',
     'btford.socket-io',
-    'ibmwatson-common-ui-components'
+    'ibmwatson-common-ui-components',
+    'ngAria'
   ])
   .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider',
     function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {

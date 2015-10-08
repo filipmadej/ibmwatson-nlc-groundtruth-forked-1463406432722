@@ -70,7 +70,7 @@
         <form class="form-group ibm-form-group input-group"
               ng-submit="add('class', newClassString);">
           <input type="text" id="newClassField" class="form-control ibm-form-control ibm-nlc-entry-field"
-                 placeholder="Enter a class to add or filter" ng-model="newClassString">
+                 placeholder="Enter a class to add or filter" aria-labelledby="Enter a class to add or filter" ng-model="newClassString">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit"
                     ng-show="!getFromLabel(classes, newClassString)" ng-disabled="newClassString.length==0">Add
@@ -83,7 +83,7 @@
       <div class="row actionrow" ng-show="classes.length">
         <div class="col-xs-1 col-sm-1 col-lg-1"></div>
         <div class="col-xs-1 col-sm-1 ibm-nlc-checkall" ng-show="filteredClasses().length">
-          <input type="checkbox" ng-model="checkAllClassesChecked"
+          <input type="checkbox" ng-model="checkAllClassesChecked" aria-labelledby="Check to select all classes"
                  ng-click="checkAll(filteredClasses(),checkAllClassesChecked);">
         </div>
 
@@ -117,7 +117,7 @@
                ng-show="classes.length">
             <div class="col-xs-1 col-sm-1 col-lg-1"></div>
             <div class="col-xs-1 col-sm-1 col-lg-1">
-              <input type="checkbox" ng-model="clazz.checked" multi-check/>
+              <input type="checkbox" ng-model="clazz.checked" aria-labelledby="Check to select this class" multi-check/>
             </div>
             <div class="col-xs-13 col-sm-15 col-md-12 col-lg-13 class-label"
                  ng-show="!clazz.edit" title="{{ clazz.label || 'empty' }}">
@@ -160,7 +160,7 @@
         <form class="form-group ibm-form-group input-group"
               ng-submit="add('text', newTextString);">
           <input type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field"
-                 placeholder="Enter a text to add or filter" ng-model="newTextString">
+                 placeholder="Enter a text to add or filter" aria-labelledby="Enter a text to add or filter" ng-model="newTextString">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit"
                     ng-show="!getFromLabel(texts, newTextString)" ng-disabled="newTextString.length==0">Add
@@ -184,7 +184,7 @@
       <div class="row actionrow" ng-show="texts.length" class="row">
         <div class="col-xs-1 col-sm-1 col-lg-1"></div>
         <div class="col-xs-1 col-sm-1 ibm-nlc-checkall" ng-show="filteredTexts().length">
-          <input type="checkbox" ng-model="checkAllTextsChecked"
+          <input type="checkbox" ng-model="checkAllTextsChecked" aria-labelledby="Check to select all texts"
                  ng-click="checkAll(filteredTexts(),checkAllTextsChecked);">
         </div>
 
@@ -217,7 +217,7 @@
           <div class="row ibm-nlc-data-row single">
             <div class="col-xs-1 col-sm-1"></div>
             <div class="col-xs-1 col-sm-1">
-              <input type="checkbox" ng-model="text.checked" multi-check/>
+              <input type="checkbox" ng-model="text.checked" aria-labelledby="Check to select this text" multi-check/>
             </div>
             <div class="col-xs-17 col-sm-19">
               <div class="row" ng-show="!text.edit">
@@ -244,7 +244,7 @@
                     </span>
                     <span>{{ clazz }}</span>
                   </div>
-                  <watson-clearable-text-box 
+                  <watson-clearable-text-box
                       class="ibm-nlc-add-tag-field"
                       id="newTagField{{ text.$$hashKey }}" ng-show="text.beingTagged"
                       ng-model="newTagStrings[text.$$hashKey]"
