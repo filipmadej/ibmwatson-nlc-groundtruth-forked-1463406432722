@@ -21,11 +21,18 @@
 //
 // You will need to set these on the server you deploy to.
 
+var CLOUDANT_USER = '';
+var CLOUDANT_PASSWORD = '';
+var NLC_USER = '';
+var NLC_PASSWORD = '';
+
+var CLOUDANT_HOST = CLOUDANT_USER + '.cloudant.com';
+var CLOUDANT_URL = 'https://' + CLOUDANT_USER + ':' + CLOUDANT_PASSWORD + '@' + CLOUDANT_HOST;
+
 module.exports = {
 
-  SESSION_SECRET: 'ibmwatson-nlc-groundtruth-secret',
-
-  COOKIE_SECRET: 'ibmwatson-nlc-groundtruth-cookie',
+  SESSION_SECRET: 'ibmwatson-nlc-groundtruth-session-secret',
+  COOKIE_SECRET: 'ibmwatson-nlc-groundtruth-cookie-secret',
 
   // Control debug level for modules using visionmedia/debug
   DEBUG: '',
@@ -34,22 +41,35 @@ module.exports = {
   // for a cloudantNoSQLDB called ibmwatson-qa-cloudant
   // and a natural_language_classifier called ibmwatson-nlc-classifier
   VCAP_SERVICES: '{ \
-     "cloudantNoSQLDB": [ \
-        { \
-           "name": "ibmwatson-qa-cloudant", \
-           "label": "cloudantNoSQLDB", \
-           "plan": "Shared", \
-           "credentials": { \
-              "username": "cloudantuser", \
-              "password": "cloudantpassword", \
-              "host": "1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com", \
-              "port": 443, \
-              "url": "https://cloudantuser:cloudantpassword@1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com" \
-            } \
+    "cloudantNoSQLDB": [ \
+      { \
+        "name": "ibmwatson-nlc-cloudant", \
+        "label": "cloudantNoSQLDB", \
+        "plan": "Shared", \
+        "credentials": { \
+          "username": "' + CLOUDANT_USER + '", \
+          "password": "' + CLOUDANT_PASSWORD + '", \
+          "host": "' + CLOUDANT_HOST + '", \
+          "port": 443, \
+          "url": "' + CLOUDANT_URL + '" \
         } \
-     ]',
+      } \
+    ],"natural_language_classifier": [ \
+      { \
+        "name": "ibmwatson-nlc-classifier", \
+        "label": "natural_language_classifier", \
+        "plan": "standard", \
+        "credentials": { \
+          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
+          "username": "' + NLC_USER + '", \
+          "password": "' + NLC_PASSWORD + '" \
+        } \
+      } \
+    ] \
+  }',
 
   CRYPTO_KEY: 'ibmwatson-nlc-groundtruth-cryptkey',
 
   SESSION_TIMEOUT: 86400
+
 };
