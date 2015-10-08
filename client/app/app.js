@@ -62,20 +62,18 @@ var app = angular.module('ibmwatson-nlc-groundtruth-app', [
     }
   ]);
 
-app.controller('AppController', ['$rootScope', '$scope',
-  function($rootScope, $scope) {
-    // Currently logged in user
-    $scope.currentUser = null;
+app.controller('AppController', ['$rootScope', '$scope', 'socket', 'session',
+  function($rootScope, $scope, socket, session) {
 
-    // Current tenant (service instance)
-    $scope.currentTenant = null;
+    function subscribeToTenant(){
+      if(_.isString(session.tenant)){
+        socket.emit('subscribe',session.tenant);
+      }
+    }
 
-    $scope.setCurrentUser = function setCurrentUser(user){
-      $scope.currentUser = user;
-    };
+    socket.on('connect',subscribeToTenant);
 
-    $scope.setCurrentTenant = function setCurrentTenant(tenant){
-      $scope.currentTenant = tenant;
-    };
+    socket.on('reconnect',subscribeToTenant);
+
   }
 ]);

@@ -2,7 +2,6 @@
 applications:
 - services:
   - @CLOUDANT_SERVICE@
-  - @NLC_SERVICE@
   name: @appBaseName@-@environment.name@-@BUILD_NUMBER@
   instances: 1
   buildpack: sdk-for-nodejs
@@ -17,6 +16,5 @@ applications:
   env:
     SESSION_SECRET: ibmwatson-nlc-groundtruth-session
     COOKIE_SECRET: ibmwatson-nlc-groundtruth-cookie
-    CLASSIFIER_SERVICE_NAME: @NLC_SERVICE@
     SESSION_TIMEOUT: @SESSION_TIMEOUT@
     CRYPTO_KEY: @CRYPTO_KEY@
