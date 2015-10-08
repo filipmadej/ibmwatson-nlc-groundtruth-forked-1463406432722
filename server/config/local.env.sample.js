@@ -23,9 +23,9 @@
 
 module.exports = {
 
-  SESSION_SECRET: 'ibmwatsonqagroundtruthui-secret',
+  SESSION_SECRET: 'ibmwatson-nlc-groundtruth-secret',
 
-  COOKIE_SECRET: 'ibmwatsonqagroundtruthui-cookie',
+  COOKIE_SECRET: 'ibmwatson-nlc-groundtruth-cookie',
 
   // Control debug level for modules using visionmedia/debug
   DEBUG: '',
@@ -47,17 +47,9 @@ module.exports = {
               "url": "https://cloudantuser:cloudantpassword@1e07238a-f8f4-4f11-8d81-99931f9c9213-bluemix.cloudant.com" \
             } \
         } \
-     ],"natural_language_classifier": [ \
-        { \
-           "name": "ibmwatson-nlc-classifier", \
-           "label": "natural_language_classifier", \
-           "plan": "beta", \
-           "credentials": { \
-              "url": "https://gateway.watsonplatform.net/natural-language-classifier-beta/api", \
-              "username": "b1acf55a-ae19-49af-939a-9ed3d5bda6ab", \
-              "password": "EYRqGOthx1Id" \
-           } \
-        } \
-     ] \
-   }'
+     ]',
+
+  CRYPTO_KEY: 'ibmwatson-nlc-groundtruth-cryptkey',
+
+  SESSION_TIMEOUT: 86400
 };

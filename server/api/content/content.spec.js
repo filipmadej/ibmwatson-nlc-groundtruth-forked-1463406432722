@@ -58,7 +58,7 @@ describe('/server/api/content', function () {
   beforeEach(function () {
 
     this.storeMock = new mocks.StoreMock();
-    this.socketMock = new mocks.SocketUtilMock();
+    this.socketMock = new mocks.SocketIoMock();
     this.logMock = new mocks.LogMock();
 
     this.asyncLib = {

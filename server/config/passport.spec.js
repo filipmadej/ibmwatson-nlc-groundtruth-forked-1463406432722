@@ -48,7 +48,16 @@ describe('/server/config/passport', function () {
       password : 'password',
       version : 'v1',
       '@noCallThru' : true
-    }
+    };
+
+    this.cryptoMock = {
+      encrypt:function(string){
+        return string + "encryptedhonest"
+      },
+      decrypt:function(string){
+        return string.slice(0,string.length-15);
+      }
+    };
   });
 
   describe('de/serializeUser', function () {
@@ -76,7 +85,8 @@ describe('/server/config/passport', function () {
 
       proxyquire('./passport', {
         'passport' : this.passportMock,
-        './nlc' : this.nlc
+        '../components/crypto' : this.cryptoMock,
+        'request' : sinon.stub().callsArgWith(1,null,{statusCode:200})
       })(this.appMock);
 
       this.serializeFn = this.passportMock.serializeUser.lastCall.args[0];
@@ -89,10 +99,10 @@ describe('/server/config/passport', function () {
 
     it('should serialize user', function () {
       var callbackSpy = sinon.spy();
-      var user = {username : 'test'};
+      var user = {username : 'test',password:'password'};
 
       this.serializeFn(user, callbackSpy);
-      callbackSpy.should.have.been.calledWith(null, user.username);
+      callbackSpy.should.have.been.calledWith(null, {username: user.username, password: 'passwordencryptedhonest'});
     });
 
     it('should error if user not defined during serialization', function () {
@@ -105,15 +115,16 @@ describe('/server/config/passport', function () {
 
     it('should deserialize valid user', function () {
       var callbackSpy = sinon.spy();
+      var encryptedUser = {username: 'test', password: 'passwordencryptedhonest'}
 
-      this.deserializeFn(this.nlc.username, callbackSpy);
-      callbackSpy.should.have.been.calledWith(null, this.nlc);
+      this.deserializeFn(encryptedUser, callbackSpy);
+      callbackSpy.should.have.been.calledWith(null, {username: 'test', password: 'password'});
     });
 
     it('should error if unknown user found', function () {
       var callbackSpy = sinon.spy();
 
-      this.deserializeFn('test', callbackSpy);
+      this.deserializeFn(null, callbackSpy);
       callbackSpy.should.have.been.calledWith(sinon.match.instanceOf(Error));
     });
 
@@ -129,9 +140,17 @@ describe('/server/config/passport', function () {
 
       this.passportLib = proxyquire('passport', {});
 
+      var requestMock = sinon.stub();
+      requestMock.onCall(0).callsArgWithAsync(1,null,{statusCode:200});
+      requestMock.onCall(1).callsArgWithAsync(1,null,{statusCode:401});
+      requestMock.onCall(2).callsArgWithAsync(1,null,{statusCode:200});
+      requestMock.onCall(3).callsArgWithAsync(1,null,{statusCode:401});
+
+
       this.overrides = {
-        './nlc' : this.nlc,
-        'passport' : this.passportLib
+        'passport' : this.passportLib,
+        '../components/crypto' : this.cryptoMock,
+        'request' : requestMock
       };
 
       proxyquire('./passport', this.overrides)(this.app);

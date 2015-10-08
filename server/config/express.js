@@ -55,7 +55,10 @@ module.exports = function init (app) {
     var RedisStore = require('connect-redis')(session);
     app.use(session({
       secret : config.secrets.session,
-      store : new RedisStore({client : redisClient})
+      store : new RedisStore({
+        client : redisClient,
+        ttl: config.sessionTimeout
+      })
     }));
   } else {
     // Otherwise, use local sessions

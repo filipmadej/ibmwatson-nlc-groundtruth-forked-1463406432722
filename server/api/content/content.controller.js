@@ -32,7 +32,7 @@ var restutils = require('../../components/restutils');
 var db = require('../../config/db/store');
 var dberrors = require('../../config/db/errors');
 var log = require('../../config/log');
-var socketUtil = require('../../config/socket');
+var io = require('../../config/socket');
 
 var responses = restutils.res;
 var requests = restutils.req;
@@ -67,7 +67,7 @@ function processFileContent (tenantid, data, file, jobid, done) {
       var hasError = false;
       if (err || result.error) {
         details.error++;
-        socketUtil.send('import', { file : file, err : err || result.error });
+        io.to(tenantid).emit('import', { file : file, err : err || result.error });
         return callback();
       }
 
@@ -76,18 +76,18 @@ function processFileContent (tenantid, data, file, jobid, done) {
       result.classes.forEach(function forEach (clazz) {
         if (clazz.error) {
           hasError = true;
-          socketUtil.send('class:create', { attributes : clazz, err : clazz.error });
+          io.to(tenantid).emit('class:create', { attributes : clazz, err : clazz.error });
         } else {
-          socketUtil.send('class:create', { attributes : clazz });
+          io.to(tenantid).emit('class:create', { attributes : clazz });
         }
       });
 
       if (result.text.created) {
         if (result.text.error) {
           hasError = true;
-          socketUtil.send('text:create', { attributes : result.text, err : result.text.error });
+          io.to(tenantid).emit('text:create', { attributes : result.text, err : result.text.error });
         } else {
-          socketUtil.send('text:create', { attributes : result.text });
+          io.to(tenantid).emit('text:create', { attributes : result.text });
         }
       } else if (result.text.classes && result.text.classes.length) {
         var addClassError;
@@ -97,9 +97,9 @@ function processFileContent (tenantid, data, file, jobid, done) {
         });
         if (addClassError) {
           hasError = true;
-          socketUtil.send('text:update:classes:add', { id : result.text.id, classes : result.text.classes, err : addClassError });
+          io.to(tenantid).emit('text:update:classes:add', { id : result.text.id, classes : result.text.classes, err : addClassError });
         } else {
-          socketUtil.send('text:update:classes:add', { id : result.text.id, classes : result.text.classes });
+          io.to(tenantid).emit('text:update:classes:add', { id : result.text.id, classes : result.text.classes });
         }
       }
 

@@ -31,36 +31,7 @@ chai.use(sinonChai);
 
 var app;
 
-var vcapTest = '{\
-    "natural_language_classifier": [ \
-        { \
-        "name": "ibmwatson-nlc-classifier", \
-        "label": "natural_language_classifier", \
-        "plan": "standard", \
-        "credentials": { \
-          "url": "https://gateway.watsonplatform.net/natural-language-classifier/api", \
-          "username": "85f2085e-9ff4-49b2-9d90-93f68b61b135", \
-          "password": "wgGb9arQWnqw" \
-        } \
-      } \
-     ] \
-  }';
-
 describe('server/start', function () {
-
-  before(function () {
-
-    this.originalVcapServices = process.env.VCAP_SERVICES;
-
-    process.env.VCAP_SERVICES = vcapTest;
-
-  });
-
-  after(function () {
-    if (this.originalVcapServices) {
-      process.env.VCAP_SERVICES = this.originalVcapServices;
-    }
-  });
 
   beforeEach(function () {
     this.appMock = {
@@ -71,7 +42,7 @@ describe('server/start', function () {
     this.httpMock = new mocks.HttpMock();
     this.logMock = new mocks.LogMock();
     this.storeMock = new mocks.StoreMock();
-    this.websocketMock = new mocks.WebSocketMock();
+    this.socketIoMock = new mocks.SocketIoMock();
   });
 
   it('should default to development environment', function (done) {
@@ -84,10 +55,10 @@ describe('server/start', function () {
 
     app = proxyquire('./start', {
       'http' : this.httpMock,
-      'socket.io' : this.websocketMock,
       './app' : this.appMock,
       './config/log' : this.logMock,
       './config/db/store' : this.storeMock,
+      './config/socket' : this.socketIoMock,
       'watson-developer-cloud' : new mocks.WDCMock()
     });
 
@@ -109,10 +80,10 @@ describe('server/start', function () {
 
       app = proxyquire('./start', {
         'http' : this.httpMock,
-        'socket.io' : this.websocketMock,
         './app' : this.appMock,
         './config/log' : this.logMock,
-        './config/db/store' : this.storeMock
+        './config/db/store' : this.storeMock,
+        './config/socket' : this.socketIoMock,
       });
 
       // Need to pause momentarily to let the async function complete
@@ -175,10 +146,10 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
-          'socket.io' : this.websocketMock,
           './app' : this.appMock,
           './config/log' : this.logMock,
-          './config/db/store' : this.storeMock
+          './config/db/store' : this.storeMock,
+          './config/socket' : this.socketIoMock
         });
       } catch(e) {
         verify();
@@ -207,10 +178,10 @@ describe('server/start', function () {
       try {
         app = proxyquire('./start', {
           'http' : this.httpMock,
-          'socket.io' : this.websocketMock,
           './app' : this.appMock,
           './config/log' : this.logMock,
-          './config/db/store' : this.storeMock
+          './config/db/store' : this.storeMock,
+          './config/socket' : this.socketIoMock
         });
       } catch(e) {
         // This is just a safeguard in case a race condition

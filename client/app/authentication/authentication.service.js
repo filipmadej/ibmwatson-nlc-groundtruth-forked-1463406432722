@@ -18,8 +18,8 @@
 
 angular.module('ibmwatson-nlc-groundtruth-app')
   .factory('authentication',
-    ['$http', '$q', 'session','endpoints',
-      function init ($http, $q, session, endpoints) {
+    ['$http', '$q', 'session','endpoints', 'socket',
+      function init ($http, $q, session, endpoints, socket) {
 
         function createSession (user) {
             // Store the current user and tenant for other services
@@ -61,6 +61,9 @@ angular.module('ibmwatson-nlc-groundtruth-app')
 
               session.create(res.data.username,tenant);
 
+              // join the channel for the current tenant
+              socket.emit('subscribe',tenant);
+
               return res.data;
 
             }, function handleLoginError (res) {
@@ -76,6 +79,11 @@ angular.module('ibmwatson-nlc-groundtruth-app')
           return $http.post(endpoints.auth + '/logout', null, {
             withCredentials: true
           }).then(function onLogout () {
+
+            // leave the channel for the tenant
+            socket.emit('unsubscribe',session.tenant);
+
+            // Destroy the session
             session.destroy();
           });
         }

@@ -30,15 +30,13 @@ var log = require('./config/log');
 
 var app = require('./app');
 var db = require('./config/db/store');
-var socketUtil = require('./config/socket');
+var io = require('./config/socket');
 
 // Setup server
 var server = require('http').createServer(app);
 
-var io = require('socket.io').listen(server);
-io.sockets.on('connection', function connect (socket) {
-  socketUtil.setSocket(io);
-});
+// Attach the socket.io listener
+io.attach(server);
 
 // start db then start the server
 async.series([
