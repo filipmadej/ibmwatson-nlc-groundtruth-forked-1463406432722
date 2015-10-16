@@ -1,5 +1,11 @@
 # IBM Watson&trade; Natural Language Classifier Toolkit - ChangeLog
 
+## Beta 0.0.5 - Thursday, October 15, 2015
+
+* Improved support for multiple users
+* Improved Redis implementation for multiple instance support
+* Encrypted the session information within the server before sending to Redis
+
 ## Beta 0.0.4 - Tuesday, September 29th, 2015
 
 * Fixed finding a Natural Language Classifier instance when the name doesn't match the expected value.
