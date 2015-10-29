@@ -1,6 +1,10 @@
 # IBM Watson&trade; Natural Language Classifier Toolkit - ChangeLog
 
-## Beta 0.0.5 - Thursday, October 15, 2015
+## Beta 0.0.6 - Thursday, October 29th, 2015
+
+* Enabled bidirectional text support in training and testing.
+
+## Beta 0.0.5 - Thursday, October 15th, 2015
 
 * Improved support for multiple users
 * Improved Redis implementation for multiple instance support
