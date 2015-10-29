@@ -29,7 +29,7 @@
       <div class="col-sm-14 col-md-12">
         <div class="inline pad col-xs-24">
           <form ng-submit="classify(classifier, classifier.textToClassify)" class="input-group">
-            <input style="width:100%; padding: 3px 5px 0;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" aria-labelledby="Enter text to classify" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
+            <input dir="auto" style="width:100%; padding: 3px 5px 0;" class="form-control" type="text" placeholder="{{ (classifier.status=='Available') && 'Test this classifier' || classifier.status}}" aria-labelledby="Enter text to classify" ng-model="classifier.textToClassify" ng-disabled="classifier.status!='Available'">
             <span class="input-group-btn">
               <button type="submit" class="btn btn-primary ibm-btn-primary" ng-disabled="classifier.status!='Available' || !classifier.textToClassify">Classify</button>
             </span>
@@ -41,7 +41,7 @@
         <div class="logs-title">Responses</div>
         <div class="logs">
           <div ng-repeat="entry in classifier.logs">
-            <div class="text" ng-if="entry.text">
+            <div dir="auto" class="text" ng-if="entry.text">
               {{ entry.text }}
             </div>
             <div class="classes" ng-if="entry.classes">

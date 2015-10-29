@@ -159,7 +159,7 @@
       <div class="row">
         <form class="form-group ibm-form-group input-group"
               ng-submit="add('text', newTextString);">
-          <input type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field"
+          <input dir="auto" type="text" id="newTextField" class="form-control ibm-form-control ibm-nlc-entry-field"
                  placeholder="Enter a text to add or filter" aria-labelledby="Enter a text to add or filter" ng-model="newTextString">
           <span class="input-group-btn">
             <button class="btn btn-primary ibm-btn-primary ibm-nlc-inline-btn" type="submit"
@@ -221,12 +221,12 @@
             </div>
             <div class="col-xs-17 col-sm-19">
               <div class="row" ng-show="!text.edit">
-                <div class="text-label">{{ text.label || 'empty' }}</div>
+                <div class="text-label" dir="auto">{{ text.label || 'empty' }}</div>
               </div>
               <div class="row text-label" ng-show="text.edit">
                 <form ng-submit="changeLabel('text', text);">
                   <span>
-                    <input id="{{ text.$$hashKey }}" type="text"
+                    <input dir="auto" id="{{ text.$$hashKey }}" type="text"
                            class="form-control ibm-form-control ibm-nlc-label-edit-field" value="{{ text.label }}"
                            ng-keyup="keyUpCancelEditing(text, $event)" ng-blur="changeLabel('text', text)"
                            show-focus="text.edit">
