@@ -1,5 +1,9 @@
 # IBM Watson&trade; Natural Language Classifier Toolkit - ChangeLog
 
+## Beta 0.0.7 - Monday, November 16th, 2015
+
+* Enabled training classifiers in Portuguese and Spanish in the training UI.
+
 ## Beta 0.0.6 - Thursday, October 29th, 2015
 
 * Enabled bidirectional text support in training and testing.
