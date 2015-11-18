@@ -9,6 +9,7 @@ declared-services:
 applications:
 - services:
   - ibmwatson-nlc-cloudant
+  - ibmwatson-nlc-classifier
   name: ibmwatson-nlc-groundtruth
   instances: 1
   framework: node
