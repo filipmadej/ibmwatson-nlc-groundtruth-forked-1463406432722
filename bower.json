@@ -1,6 +1,6 @@
 {
   "name": "ibmwatson-nlc-groundtruth",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "dependencies": {
     "angular": ">=1.2.*",
