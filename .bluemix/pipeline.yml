@@ -13,6 +13,12 @@ stages:
     build_type: shell
     script: |-
       #!/bin/bash
+      export NPM_PACKAGES=~/.npm_packages
+      echo prefix=$NPM_PACKAGES >> ~/.npmrc
+      mkdir $NPM_PACKAGES
+
+      export PATH=$NPM_PACKAGES/bin:$PATH
+
       npm install npm@2.14.4 -g
       npm install
       grunt
