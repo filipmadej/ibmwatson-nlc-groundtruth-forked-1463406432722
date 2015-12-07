@@ -1,5 +1,10 @@
 # IBM Watson&trade; Natural Language Classifier Toolkit - ChangeLog
 
+## Beta 0.0.9 - Monday, December 7th, 2015
+
+* Fixed automatic deploying of the Natural Language Classifier Toolkit to Bluemix after updates to Bluemix's environment changed how Node modules needed to be installed.
+* Enabled training classifiers in Arabic, French, Italian, and Japanese.
+
 ## Beta 0.0.8 - Monday, November 18th, 2015
 
 * Fixed automatic binding of a Natural Language Classifier service to the application.
