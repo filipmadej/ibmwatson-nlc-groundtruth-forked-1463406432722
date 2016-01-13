@@ -20,7 +20,7 @@ stages:
       export PATH=$NPM_PACKAGES/bin:$PATH
 
       npm install npm@2.14.4 -g
-      npm install
+      $NPM_PACKAGES/bin/npm install
       grunt
 - name: Deploy
   inputs:
